@@ -6,7 +6,7 @@ Written by: anz7re (André)
 ----------------------------------------------------------------------
 Latest Revision:
 
-4/25/2022
+4/26/2022
 
 ----------------------------------------------------------------------
 Developer(s): 
@@ -132,7 +132,7 @@ Method2:
 '     Method 2
 '
 'Set file containing xlAppScript to a variable
-xFile = Dr & Env & "\documents\demo.txt"
+xFile = Environ("USERPROFILE") & "\documents\demo.txt"
 
 Open xFile For Input As #1 'open file
 Do Until EOF(1) 'search until the end
