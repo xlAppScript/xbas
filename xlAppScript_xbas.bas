@@ -14,7 +14,7 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     xbas (basic) Library
-'//        Version: 1.0.8
+'//        Version: 1.1.0
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     License Information:
@@ -45,7 +45,7 @@ Public Function runLib$(xArt)
 '//                             (previous versions not tested &/or unsupported)
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Latest Revision: 4/23/2022
+'//     Latest Revision: 5/11/2022
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     Developer(s): anz7re
@@ -54,20 +54,20 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
         
         '//Library variable declarations
-        Dim oFSO As Object: Dim oDrv As Object: Dim oFile As Object: Dim oSubFldr As Object
+        Dim oFSO As Object: Dim oDrv As Object: Dim oFile As Object: Dim oSubFldr As Object: Dim xWin As Object
         Dim appEnv As String: Dim appBlk As String: Dim xCell As String: Dim FX As String: Dim HX As String
-        Dim sysShell As String: Dim wbMacro As String: Dim xArtArr() As String: Dim xArtCl As String: Dim xArtArrCl() As String
+        Dim sysShell As String: Dim wbMacro As String: Dim xArtArr() As String: Dim xArtH As String: Dim xArtArrH() As String
         Dim xExt As String: Dim xExtArr() As String: Dim xRGBArr() As String: Dim xMod As String: Dim xWb As String: Dim xVar As String
         Dim BX As Long: Dim EX As Long: Dim CX As Long: Dim PX As Long: Dim SX As Long: Dim TX As Long: Dim x1 As Long: Dim y1 As Long: Dim x2 As Long: Dim y2 As Long
-        Dim C As Byte: Dim E As Byte: Dim K As Byte: Dim S As Byte: Dim T As Byte: Dim errLvl As Byte
-        Dim X As Variant
+        Dim K As Byte: Dim M As Byte: Dim S As Byte: Dim P As Byte: Dim T As Byte: Dim errLvl As Byte
+        Dim X As Variant: Dim Y As Variant
         
         '//Pre-cleanup
-        x1 = 0: x2 = 0: y1 = 0: y2 = 0: BX = 0: CX = 0: PX = 0: SX = 0: TX = 0: C = 0: E = 0: K = 0: S = 0: T = 0: X = 0: X = CByte(X)
+        x1 = 0: x2 = 0: y1 = 0: y2 = 0: BX = 0: CX = 0: PX = 0: SX = 0: TX = 0: K = 0: M = 0: S = 0: P = 0: T = 0: X = 0: X = CByte(X): Y = 0: Y = CByte(Y)
         Call modArtQ(xArt)
         
         '//Find application environment & block
-        Call findEnvironment(appEnv, appBlk)
+        Call fndEnvironment(appEnv, appBlk)
         
         '//Find flags
         If InStr(1, xArt, "--") Or InStr(1, xArt, "++") Then _
@@ -75,9 +75,9 @@ Public Function runLib$(xArt)
         Call libSwitch(xArt, errLvl) '//Find switches
         
         '//Set library error level
-        If Range("xlasLibErrLvl").Value = 0 Then On Error GoTo ErrMsg Else _
-        If Range("xlasLibErrLvl").Value = 1 Then On Error Resume Next
-        
+        If Range("xlasLibErrLvl").Value2 = 0 Then On Error GoTo ErrMsg
+        If Range("xlasLibErrLvl").Value2 = 1 Then On Error Resume Next
+
 '/\_____________________________________
 '//
 '//          APPLICATION ARTICLES
@@ -122,11 +122,11 @@ xMod = xArtArr(0) '//extract module
 
 X = 1
 Do Until X > UBound(xArtArr) '//extract argument(s)
-xArt = xArtArr(X) & ",": xArtCl = xArtCl & xArt
+xArt = xArtArr(X) & ",": xArtH = xArtH & xArt
 X = X + 1
 Loop
 
-xArt = xArtCl
+xArt = xArtH
 If Right(xArt, Len(xArt) - Len(xArt) + 1) = "," Then xArt = Left(xArt, Len(xArt) - 1)
 
 X = Application.Run(xMod, (xArt))
@@ -144,7 +144,7 @@ Call modArtQ(xArt)
 
 If InStr(1, xArt, ",") = False Then MsgBox (Application.ActiveCell.Address): Exit Function '//no excerpt provided
 
-'//Check for modifiers...
+'//Check for parameters...
 If InStr(1, xArt, ".") Then
 If InStr(1, xArt, " .") Then xArtArr = Split(xArt, " .")
 If InStr(1, xArt, ").") Then xArtArr = Split(xArt, ").")
@@ -156,12 +156,12 @@ xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(X) = xArt
 '//Extract cell...
 If InStr(1, xArtArr(X), "cell", vbTextCompare) Then
 xArtArr(X) = Replace(xArtArr(X), "cell", vbNullString, , , vbTextCompare)
-If InStr(1, xArtArr(0), "=") Then xArtArrCl = Split(xArtArr(0), "="): _
-xArtArrCl = Split(xArtArrCl(1), ",") Else: _
-xArtArrCl = Split(xArtArr(0), ",")
-xArt = xArtArrCl(0): Call modArtP(xArt): xArtArrCl(0) = xArt
-xArt = xArtArrCl(1): Call modArtP(xArt): xArtArrCl(1) = xArt
-x1 = CInt(xArtArrCl(0)): y1 = CInt(xArtArrCl(1))
+If InStr(1, xArtArr(0), "=") Then xArtArrH = Split(xArtArr(0), "="): _
+xArtArrH = Split(xArtArrH(1), ",") Else: _
+xArtArrH = Split(xArtArr(0), ",")
+xArt = xArtArrH(0): Call modArtP(xArt): xArtArrH(0) = xArt
+xArt = xArtArrH(1): Call modArtP(xArt): xArtArrH(1) = xArt
+x1 = CInt(xArtArrH(0)): y1 = CInt(xArtArrH(1))
 End If
 '//Select cell...
 If InStr(1, xArtArr(X), "sel", vbTextCompare) Then
@@ -177,9 +177,9 @@ Cells(x1, y1).Clear
 End If
 '//Copy cell...
 If InStr(1, xArtArr(X), "copy") Then
-If InStr(1, xArtArr(X), "copy&") Then C = 1
-If InStr(1, xArtArr(X), "copy&!") Then C = 2
-If InStr(1, xArtArr(X), "copy&!!") Then C = 3
+If InStr(1, xArtArr(X), "copy&") Then P = 1
+If InStr(1, xArtArr(X), "copy&!") Then P = 2
+If InStr(1, xArtArr(X), "copy&!!") Then P = 3
 
     xArtArr(X) = Replace(xArtArr(X), "copy", vbNullString, vbTextCompare)
     xArtArr(X) = Replace(xArtArr(X), "!", vbNullString)
@@ -188,21 +188,21 @@ If InStr(1, xArtArr(X), "copy&!!") Then C = 3
     
     ActiveCell.Copy
     
-    If C = vbNullString Then ActiveCell.Copy '//just copy
+    If P = vbNullString Then ActiveCell.Copy '//just copy
      
-    If C = 1 Then '//copy paste cell contents
+    If P = 1 Then '//copy paste cell contents
         ActiveWorkbook.Worksheets(appBlk).Cells(xArtArr(X)).Activate
             ActiveCell.PasteSpecial
                 End If
                 
-    If C = 2 Then '//copy paste clean contents
+    If P = 2 Then '//copy paste clean contents
         xCell = ActiveCell.Address
             ActiveWorkbook.Worksheets(appBlk).Cells(xArtArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Cells(xCell).ClearContents
                         End If
                         
-    If C = 3 Then '//copy paste clear cell contents
+    If P = 3 Then '//copy paste clear cell contents
         xCell = ActiveCell.Address
             ActiveWorkbook.Worksheets(appBlk).Cells(xArtArr(X)).Activate
                 ActiveCell.PasteSpecial
@@ -229,10 +229,18 @@ ActiveWorkbook.Names(xArtArr(X)).Delete
         Cells(x1, y1).name = xArtArr(X)
             End If
                 End If
+'//Set cell value2...
+If InStr(1, xArtArr(X), "value2", vbTextCompare) Then
+xArtArr(X) = Replace(xArtArr(X), "value2 ", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value2(", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value2", vbNullString, , , vbTextCompare)
+Cells(x1, y1).Value2 = xArtArr(X)
+End If
 '//Set cell value...
 If InStr(1, xArtArr(X), "value", vbTextCompare) Then
 xArtArr(X) = Replace(xArtArr(X), "value ", vbNullString, , , vbTextCompare)
 xArtArr(X) = Replace(xArtArr(X), "value(", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value", vbNullString, , , vbTextCompare)
 Cells(x1, y1).Value = xArtArr(X)
 End If
 '//Set cell font color...
@@ -314,7 +322,7 @@ Exit Function
 '//Modify range...
 ElseIf InStr(1, xArt, "rng(", vbTextCompare) Then
 
-'//Check for modifiers...
+'//Check for parameters...
 If InStr(1, xArt, ".") Then
 If InStr(1, xArt, " .") Then xArtArr = Split(xArt, " .")
 If InStr(1, xArt, ").") Then xArtArr = Split(xArt, ").")
@@ -326,8 +334,8 @@ xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(X) = xArt
 '//Extract range...
 If InStr(1, xArtArr(X), "rng", vbTextCompare) Then
 xArtArr(X) = Replace(xArtArr(X), "rng", vbNullString, , , vbTextCompare)
-If InStr(1, xArtArr(0), "=") Then xArtArrCl = Split(xArtArr(0), "="): _
-xArt = xArtArrCl(1): Call modArtP(xArt): xArtArr(0) = xArt Else: _
+If InStr(1, xArtArr(0), "=") Then xArtArrH = Split(xArtArr(0), "="): _
+xArt = xArtArrH(1): Call modArtP(xArt): xArtArr(0) = xArt Else: _
 xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
 End If
 '//Select range...
@@ -344,9 +352,9 @@ Range(xArtArr(0)).Clear
 End If
 '//Copy range...
 If InStr(1, xArtArr(X), "copy") Then
-If InStr(1, xArtArr(X), "copy&") Then C = 1
-If InStr(1, xArtArr(X), "copy&!") Then C = 2
-If InStr(1, xArtArr(X), "copy&!!") Then C = 3
+If InStr(1, xArtArr(X), "copy&") Then P = 1
+If InStr(1, xArtArr(X), "copy&!") Then P = 2
+If InStr(1, xArtArr(X), "copy&!!") Then P = 3
 
     xArtArr(X) = Replace(xArtArr(X), "copy", vbNullString, vbTextCompare)
     xArtArr(X) = Replace(xArtArr(X), "!", vbNullString)
@@ -355,21 +363,21 @@ If InStr(1, xArtArr(X), "copy&!!") Then C = 3
     
     ActiveCell.Copy
     
-    If C = vbNullString Then ActiveCell.Copy '//just copy
+    If P = vbNullString Then ActiveCell.Copy '//just copy
      
-    If C = 1 Then '//copy paste range contents
+    If P = 1 Then '//copy paste range contents
         ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
             ActiveCell.PasteSpecial
                 End If
                 
-    If C = 2 Then '//copy paste clean contents
+    If P = 2 Then '//copy paste clean contents
         xCell = ActiveCell.Address
             ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Range(xCell).ClearContents
                         End If
                         
-    If C = 3 Then '//copy paste clear range contents
+    If P = 3 Then '//copy paste clear range contents
         xCell = ActiveCell.Address
             ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
                 ActiveCell.PasteSpecial
@@ -395,10 +403,18 @@ ActiveWorkbook.Names(xArtArr(X)).Delete
         Range(xArtArr(0)).name = xArtArr(X)
             End If
                 End If
+'//Set range value2...
+If InStr(1, xArtArr(X), "value2", vbTextCompare) Then
+xArtArr(X) = Replace(xArtArr(X), "value2 ", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value2(", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value2", vbNullString, , , vbTextCompare)
+Range(xArtArr(0)).Value2 = xArtArr(X)
+End If
 '//Set range value...
 If InStr(1, xArtArr(X), "value", vbTextCompare) Then
 xArtArr(X) = Replace(xArtArr(X), "value ", vbNullString, , , vbTextCompare)
 xArtArr(X) = Replace(xArtArr(X), "value(", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value", vbNullString, , , vbTextCompare)
 Range(xArtArr(0)).Value = xArtArr(X)
 End If
 '//Set range font color...
@@ -461,9 +477,9 @@ Range(xArtArr(0)).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Read range value into variable...
 If InStr(1, xArtArr(X), "read", vbTextCompare) Then
-If xArtArrCl(0) <> Empty Then
+If xArtArrH(0) <> Empty Then
 xVar = Range(xArtArr(0)).Value
-xArt = appEnv & ",#!" & xArtArrCl(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+xArt = appEnv & ",#!" & xArtArrH(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
 End If
     End If
 
@@ -472,7 +488,7 @@ Loop
 Exit Function
 End If
 
-'//no modifier
+'//no parameter
 xArt = Replace(xArt, "rng(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 '//Activate range...
@@ -483,7 +499,7 @@ Exit Function
 '//Select & modify cell/range...
 ElseIf InStr(1, xArt, "sel(", vbTextCompare) Then
 
-'//Check for modifiers...
+'//Check for parameters...
 If InStr(1, xArt, ".") Then
 If InStr(1, xArt, " .") Then xArtArr = Split(xArt, " .")
 If InStr(1, xArt, ").") Then xArtArr = Split(xArt, ").")
@@ -495,8 +511,8 @@ xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(X) = xArt
 '//Select cell...
 If InStr(1, xArtArr(X), "sel", vbTextCompare) Then
 xArtArr(X) = Replace(xArtArr(X), "sel", vbNullString, , , vbTextCompare)
-If InStr(1, xArtArr(0), "=") Then xArtArrCl = Split(xArtArr(0), "="): _
-xArt = xArtArrCl(1): Call modArtP(xArt): xArtArr(0) = xArt Else: _
+If InStr(1, xArtArr(0), "=") Then xArtArrH = Split(xArtArr(0), "="): _
+xArt = xArtArrH(1): Call modArtP(xArt): xArtArr(0) = xArt Else: _
 xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
 Range(xArtArr(X)).Select
 End If
@@ -510,9 +526,9 @@ Range(xArtArr(0)).Clear
 End If
 '//Copy cell...
 If InStr(1, xArtArr(X), "copy", vbTextCompare) Then
-If InStr(1, xArtArr(X), "copy&", vbTextCompare) Then C = 1
-If InStr(1, xArtArr(X), "copy&!", vbTextCompare) Then C = 2
-If InStr(1, xArtArr(X), "copy&!!", vbTextCompare) Then C = 3
+If InStr(1, xArtArr(X), "copy&", vbTextCompare) Then P = 1
+If InStr(1, xArtArr(X), "copy&!", vbTextCompare) Then P = 2
+If InStr(1, xArtArr(X), "copy&!!", vbTextCompare) Then P = 3
 
     xArtArr(X) = Replace(xArtArr(X), "copy", vbNullString, , , vbTextCompare)
     xArtArr(X) = Replace(xArtArr(X), "!", vbNullString)
@@ -521,21 +537,21 @@ If InStr(1, xArtArr(X), "copy&!!", vbTextCompare) Then C = 3
     
     ActiveCell.Copy
     
-    If C = vbNullString Then ActiveCell.Copy
+    If P = vbNullString Then ActiveCell.Copy
      
-    If C = 1 Then '//copy paste
+    If P = 1 Then '//copy paste
         ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
             ActiveCell.PasteSpecial
                 End If
                 
-    If C = 2 Then '//copy paste clear contents
+    If P = 2 Then '//copy paste clear contents
         xCell = ActiveCell.Address
             ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Range(xCell).ClearContents
                         End If
                         
-        If C = 3 Then '//copy paste clear cell
+        If P = 3 Then '//copy paste clear cell
         xCell = ActiveCell.Address
             ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
                 ActiveCell.PasteSpecial
@@ -560,10 +576,18 @@ ActiveWorkbook.Names(xArtArr(X)).Delete
         Range(xArtArr(0)).name = xArtArr(X)
             End If
                 End If
+'//Set cell value2...
+If InStr(1, xArtArr(X), "value2", vbTextCompare) Then
+xArtArr(X) = Replace(xArtArr(X), "value2 ", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value2(", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value2", vbNullString, , , vbTextCompare)
+Range(xArtArr(0)).Value2 = xArtArr(X)
+End If
 '//Set cell value...
 If InStr(1, xArtArr(X), "value", vbTextCompare) Then
 xArtArr(X) = Replace(xArtArr(X), "value ", vbNullString, , , vbTextCompare)
 xArtArr(X) = Replace(xArtArr(X), "value(", vbNullString, , , vbTextCompare)
+xArtArr(X) = Replace(xArtArr(X), "value", vbNullString, , , vbTextCompare)
 Range(xArtArr(0)).Value = xArtArr(X)
 End If
 '//Set cell font color...
@@ -626,9 +650,9 @@ Range(xArtArr(0)).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Read cell value into variable...
 If InStr(1, xArtArr(X), "read", vbTextCompare) Then
-If xArtArrCl(0) <> Empty Then
+If xArtArrH(0) <> Empty Then
 xVar = Range(xArtArr(0)).Value
-xArt = appEnv & ",#!" & xArtArrCl(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+xArt = appEnv & ",#!" & xArtArrH(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
 End If
     End If
     
@@ -636,7 +660,7 @@ X = X + 1
 Loop
 Exit Function
 End If
-'//no modifier
+'//no parameter
 xArt = Replace(xArt, "sel(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 '//Activate cell...
@@ -716,30 +740,30 @@ If InStr(1, xArt, ").add", vbTextCompare) Then '//add worksheet
 
 Call modArtP(xArt): Call modArtQ(xArt)
 
-If InStr(1, xArt, ").addafter", vbTextCompare) Then C = 1: xArt = Replace(xArt, ".addafter", vbNullString, , , vbTextCompare) '//add after worksheet
-If InStr(1, xArt, ").addbefore", vbTextCompare) Then C = 2: xArt = Replace(xArt, ".addbefore", vbNullString, , , vbTextCompare) '//add before worksheet
+If InStr(1, xArt, ").addafter", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".addafter", vbNullString, , , vbTextCompare) '//add after worksheet
+If InStr(1, xArt, ").addbefore", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".addbefore", vbNullString, , , vbTextCompare) '//add before worksheet
 
 xArt = Replace(xArt, ".add", vbNullString, , , vbTextCompare)
-If xArt = vbNullString Then '//default add no parameters
+If xArt = vbNullString Then '//default add no arguments
 xArt = "Sheet" & ActiveWorkbook.Worksheets.Count + 1
 Worksheets.Add.name = xArt
 Exit Function
 End If
 
 If InStr(1, xArt, ",") = False Then
-'//single parameter... (set count w/ default worksheet name & place before or after first/last sheet)
-If C = 1 Then Worksheets.Add After:=Worksheets(Worksheets.Count), Count:=Int(xArt): Exit Function
-If C = 2 Then Worksheets.Add Before:=Worksheets(Worksheets.Count), Count:=Int(xArt): Exit Function
+'//single argument... (set count w/ default worksheet name & place before or after first/last sheet)
+If P = 1 Then Worksheets.Add After:=Worksheets(Worksheets.Count), Count:=Int(xArt): Exit Function
+If P = 2 Then Worksheets.Add Before:=Worksheets(Worksheets.Count), Count:=Int(xArt): Exit Function
     Else
 xArtArr = Split(xArt, ",")
 If UBound(xArtArr) = 1 Then
-'//two parameters... (set add worksheet name & place before or after assigned sheet
-If C = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0))).name = xArtArr(1): Exit Function
-If C = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0))).name = xArtArr(1): Exit Function
+'//two arguments... (set add worksheet name & place before or after assigned sheet
+If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0))).name = xArtArr(1): Exit Function
+If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0))).name = xArtArr(1): Exit Function
 ElseIf UBound(xArtArr) = 2 Then
-'//three parameters... (set add worksheet name & place before or after assigned  sheet w/ count)
-If C = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).name = xArtArr(1): Exit Function
-If C = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).name = xArtArr(1): Exit Function
+'//three arguments... (set add worksheet name & place before or after assigned  sheet w/ count)
+If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).name = xArtArr(1): Exit Function
+If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).name = xArtArr(1): Exit Function
                     End If
                         End If
         
@@ -775,11 +799,11 @@ xMod = xArtArr(1) '//extract module
 
 X = 2
 Do Until X > UBound(xArtArr) '//extract argument(s)
-xArt = xArtArr(X) & ",": xArtCl = xArtCl & xArt
+xArt = xArtArr(X) & ",": xArtH = xArtH & xArt
 X = X + 1
 Loop
 
-xArt = xArtCl
+xArt = xArtH
 If Right(xArt, Len(xArt) - Len(xArt) + 1) = "," Then xArt = Left(xArt, Len(xArt) - 1)
 
 X = Application.Run("'" & xWb & "'!" & xMod, (xArt))
@@ -824,26 +848,26 @@ ElseIf InStr(1, xArt, "fil(", vbTextCompare) Then
 If InStr(1, xArt, ".fil", vbTextCompare) Then
 xArt = Replace(xArt, "fil(", vbNullString, , , vbTextCompare)
 
-If InStr(1, xArt, "del.", vbTextCompare) Then E = 1: xArt = Replace(xArt, "del.", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "mk.", vbTextCompare) Then E = 2: xArt = Replace(xArt, "mk.", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "del.", vbTextCompare) Then M = 1: xArt = Replace(xArt, "del.", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "mk.", vbTextCompare) Then M = 2: xArt = Replace(xArt, "mk.", vbNullString, , , vbTextCompare)
 If Left(xArt, 1) = " " Then xArt = Right(xArt, Len(xArt) - 1)
-If E = 0 Then errLvl = 1: GoTo ErrMsg
+If M = 0 Then errLvl = 1: GoTo ErrMsg
 
 Call modArtP(xArt): Call modArtQ(xArt)
 Set oFSO = CreateObject("Scripting.FileSystemObject")
-If E = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFile (xArt): Set oFSO = Nothing: Exit Function '//delete file
-If E = 2 Then: _
+If M = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFile (xArt): Set oFSO = Nothing: Exit Function '//delete file
+If M = 2 Then: _
 
 If InStr(1, xArt, ",") Then
-E = E & "1"
+M = M & "1"
 xArtArr = Split(xArt, ",")
 xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = xArt
 xArt = xArtArr(1): Call modArtP(xArt): xArtArr(1) = xArt
 xArtArr(1) = LTrim(xArtArr(1)) '//remove leading space
 End If
 
-If E = 2 Then Open (xArt) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
-If E = 21 Then Open (xArtArr(0)) For Output As #1: Print #1, xArtArr(1): Close #1: Exit Function
+If M = 2 Then Open (xArt) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
+If M = 21 Then Open (xArtArr(0)) For Output As #1: Print #1, xArtArr(1): Close #1: Exit Function
 Exit Function
 
 Else
@@ -856,25 +880,25 @@ ElseIf InStr(1, xArt, "dir(", vbTextCompare) Then
 If InStr(1, xArt, ".dir", vbTextCompare) Then
 xArt = Replace(xArt, "dir(", vbNullString, , , vbTextCompare)
 
-If InStr(1, xArt, "del.", vbTextCompare) Then E = 1: xArt = Replace(xArt, "del.", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "mk.", vbTextCompare) Then E = 2: xArt = Replace(xArt, "mk.", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "del.", vbTextCompare) Then M = 1: xArt = Replace(xArt, "del.", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "mk.", vbTextCompare) Then M = 2: xArt = Replace(xArt, "mk.", vbNullString, , , vbTextCompare)
 If Left(xArt, 1) = " " Then xArt = Right(xArt, Len(xArt) - 1)
-If E = 0 Then errLvl = 1: GoTo ErrMsg
+If M = 0 Then errLvl = 1: GoTo ErrMsg
 
 Call modArtP(xArt): Call modArtQ(xArt)
-If E = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFolder (xArt): Set oFSO = Nothing: Exit Function '//create file
-If E = 2 Then: _
+If M = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFolder (xArt): Set oFSO = Nothing: Exit Function '//create file
+If M = 2 Then: _
 
 If InStr(1, xArt, ",") Then
-E = E & "1"
+M = M & "1"
 xArtArr = Split(xArt, ",")
 xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = xArt
 xArt = xArtArr(1): Call modArtP(xArt): xArtArr(1) = xArt
 xArtArr(1) = LTrim(xArtArr(1)) '//remove leading space
 End If
 
-If E = 2 Then MkDir (xArt): Exit Function
-If E = 21 Then MkDir (xArtArr(0)): MkDir (xArtArr(0) & "/" & xArtArr(1)): Exit Function
+If M = 2 Then MkDir (xArt): Exit Function
+If M = 21 Then MkDir (xArtArr(0)): MkDir (xArtArr(0) & "/" & xArtArr(1)): Exit Function
 Exit Function
 
 Else
@@ -952,7 +976,7 @@ Name xArtArr(0) As xArtArr(1)
 Exit Function
 
 renAll:
-Dim xDate, xName, xTime As String
+Dim getDate, xName, xTime As String
 Dim xNum As Long
 xNum = 1
 
@@ -963,8 +987,8 @@ Set oSubFldr = oFSO.GetFolder(xArtArr(0))
 xExtArr = Split(xArtArr(1), "."): EX = xExtArr(1): xName = xExtArr(0)
 
 If InStr(1, xArtArr(2), "-num", vbTextCompare) Then xNum = 1: GoTo renAllNum
-If InStr(1, xArtArr(2), "-datenum", vbTextCompare) And InStr(1, xArtArr(2), "mtime", vbTextCompare) = False Then xDate = Date: xDate = Replace(xDate, "/", "-"): xNum = 1: GoTo renAllDateNum
-If InStr(1, xArtArr(2), "-datenumtime", vbTextCompare) Then xDate = Date: xDate = Replace(xDate, "/", "-"): xNum = 1: xTime = Time: xTime = Replace(xTime, ":", vbNullString): xTime = Replace(xTime, " ", vbNullString): GoTo renAllDateNumTime
+If InStr(1, xArtArr(2), "-datenum", vbTextCompare) And InStr(1, xArtArr(2), "mtime", vbTextCompare) = False Then getDate = Date: getDate = Replace(getDate, "/", "-"): xNum = 1: GoTo renAllDateNum
+If InStr(1, xArtArr(2), "-datenumtime", vbTextCompare) Then getDate = Date: getDate = Replace(getDate, "/", "-"): xNum = 1: xTime = Time: xTime = Replace(xTime, ":", vbNullString): xTime = Replace(xTime, " ", vbNullString): GoTo renAllDateNumTime
 
 renAllNum:
 For Each oFile In oSubFldr.Files
@@ -980,7 +1004,7 @@ Exit Function
 
 renAllDateNum:
 For Each oFile In oSubFldr.Files
-xArt = "ren " & oFile.Path & " " & xName & "_" & xDate & "_" & xNum & "." & EX
+xArt = "ren " & oFile.Path & " " & xName & "_" & getDate & "_" & xNum & "." & EX
 sysShell = Shell("cmd.exe /s /c" & xArt, 0)
 sysShell = vbNullString
 xNum = xNum + 1
@@ -992,7 +1016,7 @@ Exit Function
 
 renAllDateNumTime:
 For Each oFile In oSubFldr.Files
-xNum = xNum + xArt = "ren " & oFile.Path & " " & xName & "_" & xDate & "_" & xNum & "_" & xTime & "." & EX
+xNum = xNum + xArt = "ren " & oFile.Path & " " & xName & "_" & getDate & "_" & xNum & "_" & xTime & "." & EX
 sysShell = Shell("cmd.exe /s /c" & xArt, 0)
 sysShell = vbNullString
 xNum = xNum + 1
@@ -1017,8 +1041,8 @@ If InStr(1, xArt, "-xline", vbTextCompare) Then S = 7: xArt = Replace(xArt, "-xl
 If InStr(1, xArt, "-nlline", vbTextCompare) Then S = 8: xArt = Replace(xArt, "-nlline", vbNullString, , , vbTextCompare): GoTo SetRead
 
 SetRead:
-'//enhancers(s):
-If InStr(1, xArt, "count.") Then E = 1: xArt = Replace(xArt, "count.", vbNullString, , , vbTextCompare)
+'//modifier(s):
+If InStr(1, xArt, "count.") Then M = 1: xArt = Replace(xArt, "count.", vbNullString, , , vbTextCompare)
 
 xArtArr = Split(xArt, "=")
 xArt = xArtArr(1): Call modArtP(xArt): Call modArtQ(xArt): xArt = Trim(xArt): xArtArr(1) = xArt
@@ -1026,13 +1050,13 @@ xArt = xArtArr(0)
 
 '//read for all
 If S = 1 Then
-Open xArtArr(1) For Input As #1: Do Until EOF(1): Line Input #1, xArtCl: xVar = xVar & xArtCl: Loop: Close #1
+Open xArtArr(1) For Input As #1: Do Until EOF(1): Line Input #1, xArtH: xVar = xVar & xArtH: Loop: Close #1
 GoTo EndRead
 End If
 
 '//read for newline all
 If S = 2 Then
-Open xArtArr(1) For Input As #1: Do Until EOF(1): Line Input #1, xArtCl: xVar = xVar & xArtCl & vbNewLine: Loop: Close #1
+Open xArtArr(1) For Input As #1: Do Until EOF(1): Line Input #1, xArtH: xVar = xVar & xArtH & vbNewLine: Loop: Close #1
 GoTo EndRead
 End If
 
@@ -1040,8 +1064,8 @@ End If
 If S = 3 Then
 xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
 Open xArtArr(1) For Input As #1
-Do Until EOF(1): Line Input #1, xArtCl
-If InStr(1, xArtCl, xArtArr(0)) Then xVar = xArtCl: Close #1: GoTo EndRead
+Do Until EOF(1): Line Input #1, xArtH
+If InStr(1, xArtH, xArtArr(0)) Then xVar = xArtH: Close #1: GoTo EndRead
 Loop: Close #1
 GoTo EndRead
 End If
@@ -1050,8 +1074,8 @@ End If
 If S = 4 Then
 xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
 Open xArtArr(1) For Input As #1
-Do Until EOF(1): Line Input #1, xArtCl
-If InStr(1, xArtCl, xArtArr(0)) Then xVar = xVar & xArtCl
+Do Until EOF(1): Line Input #1, xArtH
+If InStr(1, xArtH, xArtArr(0)) Then xVar = xVar & xArtH
 Loop: Close #1
 GoTo EndRead
 End If
@@ -1060,8 +1084,8 @@ End If
 If S = 5 Then
 xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
 Open xArtArr(1) For Input As #1
-Do Until EOF(1): Line Input #1, xArtCl
-If InStr(1, xArtCl, xArtArr(0)) Then xVar = xVar & xArtCl & vbNewLine
+Do Until EOF(1): Line Input #1, xArtH
+If InStr(1, xArtH, xArtArr(0)) Then xVar = xVar & xArtH & vbNewLine
 Loop: Close #1
 GoTo EndRead
 End If
@@ -1071,8 +1095,8 @@ If S = 6 Then
 xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
 Open xArtArr(1) For Input As #1
 For X = 1 To xArtArr(0)
-Line Input #1, xArtCl
-Next: Close #1: xVar = xArtCl
+Line Input #1, xArtH
+Next: Close #1: xVar = xArtH
 GoTo EndRead
 End If
 
@@ -1081,8 +1105,8 @@ If S = 7 Then
 xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
 Open xArtArr(1) For Input As #1
 For X = 1 To xArtArr(0)
-Line Input #1, xArtCl
-xVar = xVar & xArtCl
+Line Input #1, xArtH
+xVar = xVar & xArtH
 Next: Close #1
 GoTo EndRead
 End If
@@ -1092,15 +1116,15 @@ If S = 8 Then
 xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
 Open xArtArr(1) For Input As #1
 For X = 1 To xArtArr(0)
-Line Input #1, xArtCl
-xVar = xVar & xArtCl & vbNewLine
+Line Input #1, xArtH
+xVar = xVar & xArtH & vbNewLine
 Next: Close #1
 GoTo EndRead
 End If
 
 EndRead:
 '//count
-If E = 1 Then xVar = Len(xVar)
+If M = 1 Then xVar = Len(xVar)
 
 xArt = appEnv & ",#!" & xArt & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
 
@@ -1117,12 +1141,12 @@ ElseIf InStr(1, xArt, "wait(", vbTextCompare) Then
 xArt = Replace(xArt, "wait(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 
-If InStr(1, xArt, "ms", vbTextCompare) Then C = C & "1" '//millisecond
-If InStr(1, xArt, "s", vbTextCompare) Then C = C & "2" '//second
-If InStr(1, xArt, "m", vbTextCompare) Then C = C & "3" '//minute
-If InStr(1, xArt, "h", vbTextCompare) Then C = C & "4" '//hour
+If InStr(1, xArt, "ms", vbTextCompare) Then P = P & "1" '//millisecond
+If InStr(1, xArt, "s", vbTextCompare) Then P = P & "2" '//second
+If InStr(1, xArt, "m", vbTextCompare) Then P = P & "3" '//minute
+If InStr(1, xArt, "h", vbTextCompare) Then P = P & "4" '//hour
 
-If C <> 0 Then
+If P <> 0 Then
 
 Dim xTimeArr(3) As String
 Dim xMil, xSec, xMin, xHr As String
@@ -1136,7 +1160,7 @@ If InStr(1, xArt, "h", vbTextCompare) Then xHrArr = Split(xArt, "h", , vbTextCom
 '//set millisecond
 If xMil = "T" Then
 xArt = xTimeArr(0)
-Call findChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 xArt = -1 * (xArt * -0.00000001)
 Application.Wait (Now + xArt)
 Exit Function
@@ -1145,7 +1169,7 @@ End If
 '//set second
 If xSec = "T" Then
 xArt = xTimeArr(1)
-Call findChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 If Len(xTimeArr(1)) < 2 Then
 xTimeArr(1) = "0" & xTimeArr(1): xSec = xTimeArr(1)
 Else: xSec = xTimeArr(1)
@@ -1156,7 +1180,7 @@ End If
 '//set minute
 If xMin = "T" Then
 xArt = xTimeArr(2)
-Call findChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 If Len(xTimeArr(2)) < 2 Then
 xTimeArr(2) = "0" & xTimeArr(2): xMin = xTimeArr(2)
 Else: xMin = xTimeArr(2)
@@ -1167,7 +1191,7 @@ End If
 '//set hour
 If xHr = "T" Then
 xArt = xTimeArr(3)
-Call findChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 If Len(xTimeArr(3)) < 2 Then
 xTimeArr(3) = "0" & xTimeArr(3): xHr = xTimeArr(3)
 Else: xHr = xTimeArr(3)
@@ -1331,11 +1355,11 @@ setKey:
     '//Key using VBS...
 shKey:
     Print #K, "On Error Resume Next"
-    Print #K, "Dim Wshell"
-    Print #K, "Set Wshell = Wscript.CreateObject(" & """" & "WScript.Shell""" & ")"
-    Print #K, "Wshell.SendKeys " & """" & xArt & """"
-    Print #K, "Set Wshell = Nothing"
-    Print #K, "Wscript.Quit"
+    Print #K, "Dim wShell"
+    Print #K, "Set wShell = wscript.CreateObject(" & """" & "wscript.Shell""" & ")"
+    Print #K, "wShell.SendKeys " & """" & xArt & """"
+    Print #K, "Set wShell = Nothing"
+    Print #K, "wscript.Quit"
     Close #K
     
     If K = 1 Then Shell ("wscript.exe " & sysKey0), 0: Exit Function
@@ -1372,7 +1396,7 @@ ElseIf InStr(1, xArt, "click(", vbTextCompare) Then
 xArt = Replace(xArt, "click(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 
-'//article switches
+'//switches
 If InStr(1, xArt, "-double", vbTextCompare) Then xArt = Replace(xArt, "-double", vbNullString, , , vbTextCompare): S = 1: GoTo setClick
 If InStr(1, xArt, "-leftdown", vbTextCompare) Then xArt = Replace(xArt, "-leftdown", vbNullString, , , vbTextCompare): S = 2: GoTo setClick
 If InStr(1, xArt, "-leftup", vbTextCompare) Then xArt = Replace(xArt, "-leftup", vbNullString, , , vbTextCompare): S = 3: GoTo setClick
@@ -1382,12 +1406,12 @@ If InStr(1, xArt, "-rightup", vbTextCompare) Then xArt = Replace(xArt, "-rightup
 setClick:
 If InStr(1, xArt, ",") Then
 xArt = Trim(xArt)
-xArtArr = Split(xArt, ",") '//parameter
+xArtArr = Split(xArt, ",") '//arguments
 xPos = xArtArr(0) & "," & xArtArr(1)
 Call basClick(S, xPos): Exit Function
 End If
 
-'//no parameter
+'//no arguments
 S = 5: Call basClick(S, xPos)
 Exit Function
 '//#
@@ -1403,7 +1427,7 @@ ElseIf InStr(1, xArt, "conv(", vbTextCompare) Then
 xArt = Replace(xArt, "conv(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 
-'//article switches
+'//switches
 If InStr(1, xArt, "-upper", vbTextCompare) Then S = vbUpperCase: GoTo setConv
 If InStr(1, xArt, "-lower", vbTextCompare) Then S = vbLowerCase: GoTo setConv
 If InStr(1, xArt, "-proper", vbTextCompare) Then S = vbProperCase: GoTo setConv
@@ -1569,13 +1593,13 @@ Exit Function
 '//System shell...
 ElseIf InStr(1, xArt, "sh(", vbTextCompare) Then
 
-If InStr(1, xArt, "h(0)", vbTextCompare) Then S = 0: xArt = Replace(xArt, "sh(0)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(1)", vbTextCompare) Then S = 1: xArt = Replace(xArt, "sh(1)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(2)", vbTextCompare) Then S = 2: xArt = Replace(xArt, "sh(2)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(3)", vbTextCompare) Then S = 3: xArt = Replace(xArt, "sh(3)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(4)", vbTextCompare) Then S = 4: xArt = Replace(xArt, "sh(4)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(5)", vbTextCompare) Then S = 5: xArt = Replace(xArt, "sh(5)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(6)", vbTextCompare) Then S = 6: xArt = Replace(xArt, "sh(6)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(0)", vbTextCompare) Then P = 0: xArt = Replace(xArt, "sh(0)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(1)", vbTextCompare) Then P = 1: xArt = Replace(xArt, "sh(1)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(2)", vbTextCompare) Then P = 2: xArt = Replace(xArt, "sh(2)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(3)", vbTextCompare) Then P = 3: xArt = Replace(xArt, "sh(3)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(4)", vbTextCompare) Then P = 4: xArt = Replace(xArt, "sh(4)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(5)", vbTextCompare) Then P = 5: xArt = Replace(xArt, "sh(5)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, xArt, "h(6)", vbTextCompare) Then P = 6: xArt = Replace(xArt, "sh(6)", vbNullString, , , vbTextCompare): GoTo setSh
 
 setSh:
    xArt = Replace(xArt, "sh(", vbNullString, , , vbTextCompare)
@@ -1587,7 +1611,7 @@ setSh:
    
    xArt = "start " & xArt
     
-   sysShell = Shell("cmd.exe /s /c" & xArt, S)
+   sysShell = Shell("cmd.exe /s /c" & xArt, P)
    sysShell = vbNullString
    Exit Function
 
@@ -1596,30 +1620,31 @@ ElseIf InStr(1, xArt, "pc(", vbTextCompare) Then
 
 xArt = Replace(xArt, "pc", vbNullString, , , vbTextCompare)
 
-'//article switches
+'//switches
 If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = 1
 If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = 2
 
-If InStr(1, xArt, ".exist", vbTextCompare) Then S = S & 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo SetPC
-If InStr(1, xArt, ".del", vbTextCompare) Then S = S & 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo SetPC
-If InStr(1, xArt, ".open", vbTextCompare) Then S = 3: xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare): GoTo SetPC
-If InStr(1, xArt, ".stop", vbTextCompare) Then S = 4: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo SetPC
+'//parameters
+If InStr(1, xArt, ".exist", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, xArt, ".del", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, xArt, ".open", vbTextCompare) Then P = 3: xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, xArt, ".stop", vbTextCompare) Then P = 4: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo SetPC
 
 SetPC:
 Call modArtP(xArt): Call modArtQ(xArt): xArt = Trim(xArt)
 
 '//file exists...
-If S = 1 Or S = 11 Then If Dir(xArt) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
+If S = 1 And P = 1 Then If Dir(xArt) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
 '//directory exists...
-If S = 21 Then If Dir(xArt, vbDirectory) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
+If S = 2 And P = 1 Then If Dir(xArt, vbDirectory) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
 '//delete file...
-If S = 2 Or S = 12 Then Kill (xArt): Exit Function
+If S = 1 And P = 2 Then Kill (xArt): Exit Function
 '//delete empty directory...
-If S = 22 Then RmDir (xArt): Exit Function
+If S = 2 And P = 2 Then RmDir (xArt): Exit Function
 '//open...
-If S = 3 Then xArt = "start " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 3 Then xArt = "start " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
 '//stop (taskkill)
-If S = 4 Then xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 4 Then xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
 
 '//no excerpt provided
 MsgBox (xArt)
@@ -1628,19 +1653,20 @@ Exit Function
 '//PC dot-direct articles...
 ElseIf InStr(1, xArt, "pc.", vbTextCompare) Then
 
-If InStr(1, xArt, ".copy&", vbTextCompare) Then C = 1
-If InStr(1, xArt, ".copy&!", vbTextCompare) Then C = 2: GoTo setPCdot
-If InStr(1, xArt, ".shutdown", vbTextCompare) Then C = 3: GoTo setPCdot
-If InStr(1, xArt, ".off", vbTextCompare) Then C = 4: GoTo setPCdot
-If InStr(1, xArt, ".rest", vbTextCompare) Then C = 5: GoTo setPCdot
-If InStr(1, xArt, ".reboot", vbTextCompare) Then C = 6: GoTo setPCdot
-If InStr(1, xArt, ".clr", vbTextCompare) Then C = 7: GoTo setPCdot
+'//parameters
+If InStr(1, xArt, ".copy&", vbTextCompare) Then P = 1
+If InStr(1, xArt, ".copy&!", vbTextCompare) Then P = 2: GoTo setPCdot
+If InStr(1, xArt, ".shutdown", vbTextCompare) Then P = 3: GoTo setPCdot
+If InStr(1, xArt, ".off", vbTextCompare) Then P = 4: GoTo setPCdot
+If InStr(1, xArt, ".rest", vbTextCompare) Then P = 5: GoTo setPCdot
+If InStr(1, xArt, ".reboot", vbTextCompare) Then P = 6: GoTo setPCdot
+If InStr(1, xArt, ".clr", vbTextCompare) Then P = 7: GoTo setPCdot
 
 setPCdot:
 xArt = Replace(xArt, "pc.", vbNullString, , , vbTextCompare)
 Call modArtP(xArt)
 '//article switches
-If InStr(1, xArt, "-e", vbTextCompare) Then xArt = Replace(xArt, "-e", vbNullString, , , vbTextCompare): C = C & "1" '//check for switch(s)
+If InStr(1, xArt, "-e", vbTextCompare) Then xArt = Replace(xArt, "-e", vbNullString, , , vbTextCompare): P = P & "1" '//check for switch(s)
 If InStr(1, xArt, "-t", vbTextCompare) Then '//check for timer switch
 Dim xT As String
 xArtArr = Split(xArt, "-t")
@@ -1648,25 +1674,25 @@ xT = "/t " & xArtArr(1)
 End If
 
 '//Copy & paste a file
-If C = 1 Then xArt = Replace(xArt, "copy&", vbNullString, , , vbTextCompare): xArtArr = Split(xArt, ","): _
+If P = 1 Then xArt = Replace(xArt, "copy&", vbNullString, , , vbTextCompare): xArtArr = Split(xArt, ","): _
 xArt = "copy /y " & xArtArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Copy, paste then delete copied file
-If C = 2 Then xArt = Replace(xArt, "copy&!", vbNullString, , , vbTextCompare): xArtArr = Split(xArt, ","): _
+If P = 2 Then xArt = Replace(xArt, "copy&!", vbNullString, , , vbTextCompare): xArtArr = Split(xArt, ","): _
 xArt = "copy /y " & xArtArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: If Dir(xArtArr(0)) <> "" Then Kill (xArtArr(0)): Exit Function
 '//Shutdown pc
-If C = 3 Then xArt = "shutdown /s " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 3 Then xArt = "shutdown /s " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Shutdown pc, on next boot auto-sign in if enabled. Restart apps.
-If C = 31 Then xArt = "shutdown /sg " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 31 Then xArt = "shutdown /sg " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Logoff pc
-If C = 4 Then xArt = "shutdown /l ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 4 Then xArt = "shutdown /l ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Hibernate pc
-If C = 5 Then xArt = "shutdown /h ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 5 Then xArt = "shutdown /h ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Restart pc
-If C = 6 Then xArt = "shutdown /r " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 6 Then xArt = "shutdown /r " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Restart pc, on next boot auto-sign in if enabled. Restart apps.
-If C = 61 Then xArt = "shutdown /g " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 61 Then xArt = "shutdown /g " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Clear logoff queue
-If C = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//#
 '//
 '/\_____________________________________
@@ -1677,21 +1703,22 @@ If C = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, v
 '//Query...
 ElseIf InStr(1, xArt, "q(", vbTextCompare) Then
 
-If InStr(1, xArt, ".exist", vbTextCompare) Then C = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".del", vbTextCompare) Then C = 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".move", vbTextCompare) Then C = 3: xArt = Replace(xArt, ".move", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".name", vbTextCompare) Then C = 4: xArt = Replace(xArt, ".name", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".open", vbTextCompare) Then C = 5: xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".stop", vbTextCompare) Then C = 6: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo setQ
-If C = 0 Then Exit Function
-
-setQ:
-'//article switches
+'//switches
 If InStr(1, xArt, "-loose", vbTextCompare) Then xArt = Replace(xArt, "-loose", vbNullString, , , vbTextCompare): S = 1
 If InStr(1, xArt, "-strict", vbTextCompare) Then xArt = Replace(xArt, "-strict", vbNullString, , , vbTextCompare): S = 2
 If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = S & 3
 If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = S & 4
 
+'//parameters
+If InStr(1, xArt, ".exist", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, xArt, ".del", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, xArt, ".move", vbTextCompare) Then P = 3: xArt = Replace(xArt, ".move", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, xArt, ".name", vbTextCompare) Then P = 4: xArt = Replace(xArt, ".name", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, xArt, ".open", vbTextCompare) Then P = 5: xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, xArt, ".stop", vbTextCompare) Then P = 6: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo setQ
+If P = 0 Then Exit Function
+
+setQ:
 xArtArr = Split(xArt, "q(", , vbTextCompare)
 If InStr(1, xArtArr(1), ",") Then xArtArr = Split(xArtArr(1), ","): _
 xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = Trim(xArt): xArt = xArtArr(0): _
@@ -1715,17 +1742,17 @@ Call basQuery(QX, S)
 xQueryArr = Split(QX, ",")
 
 '//exists...
-If C = 1 Then If xQueryArr(1) = 0 Then MsgBox ("TRUE" & vbNewLine & vbNewLine & xQueryArr(0)): Exit Function Else MsgBox ("FALSE"): Exit Function
+If P = 1 Then If xQueryArr(1) = 0 Then MsgBox ("TRUE" & vbNewLine & vbNewLine & xQueryArr(0)): Exit Function Else MsgBox ("FALSE"): Exit Function
 '//delete...
-If C = 2 Then Kill (xQueryArr(0)): Exit Function
+If P = 2 Then Kill (xQueryArr(0)): Exit Function
 '//move...
-If C = 3 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): xArt = "move " & xQueryArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 3 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): xArt = "move " & xQueryArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
 '//name...
-If C = 4 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): xArt = "ren " & xQueryArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 4 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): xArt = "ren " & xQueryArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
 '//open...
-If C = 5 Then xArt = "start " & xQueryArr(0): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 5 Then xArt = "start " & xQueryArr(0): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
 '//stop (taskkill)
-If C = 6 Then xArtArr = Split(xArt, "\"): xArt = xArtArr(UBound(xArtArr)): xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 6 Then xArtArr = Split(xArt, "\"): xArt = xArtArr(UBound(xArtArr)): xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
 Exit Function
 '//#
 '//
@@ -1737,22 +1764,22 @@ Exit Function
 ElseIf InStr(1, xArt, "incr(", vbTextCompare) Then
 xArt = Replace(xArt, "incr(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt)
-If InStr(1, xArt, "+") Then C = 1: xArt = Replace(xArt, "+", vbNullString)
-If InStr(1, xArt, "-") Then C = 2: xArt = Replace(xArt, "-", vbNullString)
+If InStr(1, xArt, "+") Then P = 1: xArt = Replace(xArt, "+", vbNullString)
+If InStr(1, xArt, "-") Then P = 2: xArt = Replace(xArt, "-", vbNullString)
 If InStr(1, xArt, "=") Then
 xArtArr = Split(xArt, "=") '//find variable
 xArtArr(0) = Trim(xArtArr(0)): xArtArr(1) = Trim(xArtArr(1))
 
-If C = 1 Then xArtArr(1) = CLng(xArtArr(1)) + CLng(xArtArr(1))
-If C = 2 Then xArtArr(1) = -(CLng(xArtArr(1))) + -(CLng(xArtArr(1)))
+If P = 1 Then xArtArr(1) = CLng(xArtArr(1)) + CLng(xArtArr(1))
+If P = 2 Then xArtArr(1) = -(CLng(xArtArr(1))) + -(CLng(xArtArr(1)))
 
 xArt = xArtArr(0) & "=" & xArtArr(1)
 
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 End If
 
-If C = 1 Then xArt = xArt + xArt
-If C = 2 Then xArt = xArt - xArt
+If P = 1 Then xArt = xArt + xArt
+If P = 2 Then xArt = xArt - xArt
 
 Exit Function
 
@@ -1785,23 +1812,55 @@ Exit Function
 '/\_____________________________________
 '//
 '//Output current window number...
-ElseIf InStr(1, xArt, "me()", vbTextCompare) And Len(xArt) <= 4 Then MsgBox (Range("xlasWinForm").Value): Exit Function
+ElseIf InStr(1, xArt, "me(", vbTextCompare) Then
+xArt = Replace(xArt, "me(", vbNullString, , , vbTextCompare)
+
+'//modifiers
+If InStr(1, xArt, "get.", vbTextCompare) Then M = 1: xArt = Replace(xArt, "get.", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "post.", vbTextCompare) Then M = 2: xArt = Replace(xArt, "post.", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "set.", vbTextCompare) Then M = 3: xArt = Replace(xArt, "set.", vbNullString, , , vbTextCompare)
+
+'//switches
+If InStr(1, xArt, "-x", vbTextCompare) Then S = 1: xArt = Replace(xArt, "-x", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "-y", vbTextCompare) Then S = 2: xArt = Replace(xArt, "-y", vbNullString, , , vbTextCompare)
+If InStr(1, xArt, "-pos", vbTextCompare) Then S = 3: xArt = Replace(xArt, "-pos", vbNullString, , , vbTextCompare)
+
+Call modArtP(xArt): xArt = Trim(xArt)
+If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",")
+
+Select Case True
+Case M = 1 And S = 1: Call basGetWinFormPos(xWin, X, Y): MsgBox (X): Exit Function
+Case M = 1 And S = 2: Call basGetWinFormPos(xWin, X, Y): MsgBox (Y): Exit Function
+Case M = 1 And S = 3: Call basGetWinFormPos(xWin, X, Y): MsgBox (X & ", " & Y): Exit Function
+Case M = 1 And S = 0: Call basGetWinFormPos(xWin, X, Y): MsgBox (X & ", " & Y): Exit Function
+Case M = 2 And S = 1: X = xArt: Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 2: Y = xArt: Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 3: X = xArtArr(0): Y = xArtArr(1): Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 0: X = xArtArr(0): Y = xArtArr(1): Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 1: X = xArt: Call basSetWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 2: Y = xArt: Call basSetWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 3: X = xArtArr(0): Y = xArtArr(1): Call basSetWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 0: Call basSetWinFormPos(xWin, X, Y): Exit Function
+End Select
+'//no excerpt
+MsgBox (Range("xlasWinForm").Value2)
+Exit Function
 
     '//Set window number...
         ElseIf InStr(1, xArt, "winform(", vbTextCompare) Then
         
-    '//article switches
+    '//switches
         If InStr(1, xArt, "-last", vbTextCompare) Then _
-        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value = _
-        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormLast").Value: Exit Function  '//set to last window
+        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = _
+        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormLast").Value2: Exit Function  '//set to last window
         
         xArt = Replace(xArt, "winform(", vbNullString, , , vbTextCompare)
         Call modArtP(xArt): Call modArtQ(xArt)
         
-        Call xlAppScript_lex.findChar(xArt)
+        Call xlAppScript_lex.fndChar(xArt)
         If xArt = "(*Err)" Then Exit Function
         
-        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value = xArt
+        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = xArt
         
         Exit Function
         
@@ -1821,7 +1880,7 @@ Private Function libFlag$(xArt, errLvl As Byte)
 '//
 On Error GoTo ErrMsg
 
-Call findEnvironment(appEnv, appBlk)
+Call fndEnvironment(appEnv, appBlk)
 
 '//Create runtime error
 If InStr(1, xArt, "--err", vbTextCompare) Then xArt = "(*Err)"
@@ -1913,16 +1972,16 @@ Private Function libSwitch$(xArt, errLvl As Byte)
 '//         LIBRARY SWITCHES
 '/\_____________________________________
 '//
-Dim xArtCl As String
+Dim xArtH As String
 Dim X As Integer
 
 On Error GoTo ErrMsg
 
-xArtCl = xArt
+xArtH = xArt
 xArtArr = Split(xArt, "--")
 
 For X = 0 To UBound(xArtArr)
-xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): Call modArtS(xArt): xArtArr(X) = xArt: xArt = xArtCl
+xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): Call modArtS(xArt): xArtArr(X) = xArt: xArt = xArtH
 If InStr(1, xArtArr(X), "date", vbTextCompare) Then xArt = Replace(xArt, "--date", Date, , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "day", vbTextCompare) Then xArt = Replace(xArt, "--day", Day(Date), , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "present", vbTextCompare) Then xArt = Replace(xArt, "--present", Date & " " & Time, , , vbTextCompare): GoTo NextStep
@@ -1937,7 +1996,7 @@ If InStr(1, xArtArr(X), "space", vbTextCompare) Then xArt = Replace(xArt, "--spa
 If InStr(1, xArtArr(X), "time", vbTextCompare) Then xArt = Replace(xArt, "--time", Time, , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "year", vbTextCompare) Then xArt = Replace(xArt, "--year", Year(Date), , , vbTextCompare): GoTo NextStep
 NextStep:
-xArtCl = xArt
+xArtH = xArt
 Next
 
 Exit Function
@@ -1998,6 +2057,51 @@ xPosArr = Split(xPos, ",")
   SetCursorPos xPosArr(0), xPosArr(1) '//x & y position
   mouse_event MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0
 End Sub
+Public Function basGetWinFormPos(ByVal xWin As Object, X, Y) As Integer
+
+'/#########################\
+'//   Get WinForm Position #\\
+'///#######################\\\
+On Error Resume Next
+
+If xWin.name = vbNullString Then Call fndWindow(xWin)
+If X = 0 Then X = xWin.Left
+If Y = 0 Then Y = xWin.Top
+Set xWin = Nothing
+
+End Function
+Public Function basPostWinFormPos(ByVal xWin As Object, ByVal X As Integer, ByVal Y As Integer)
+
+'/#########################\
+'// Post WinForm Position #\\
+'///#######################\\\
+Call fndEnvironment(appEnv, appBlk)
+
+On Error Resume Next
+
+If xWin.name = vbNullString Then Call fndWindow(xWin)
+If X = 0 Then X = xWin.Left
+If Y = 0 Then Y = xWin.Top
+Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 = X
+Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormY").Value2 = Y
+Set xWin = Nothing
+
+End Function
+Public Function basSetWinFormPos(ByVal xWin As Object, ByVal X As Integer, ByVal Y As Integer)
+
+'/#########################\
+'// Set WinForm Position  #\\
+'///#######################\\\
+Call fndEnvironment(appEnv, appBlk)
+
+On Error Resume Next
+
+If xWin.name = vbNullString Then Call fndWindow(xWin)
+If X = 0 Then xWin.Left = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 Else xWin.Left = X
+If Y = 0 Then xWin.Top = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormY").Value2 Else xWin.Top = Y
+Set xWin = Nothing
+
+End Function
 Private Function basQuery$(QX, ByVal S As Byte)
 
 '/#########################\
@@ -2196,123 +2300,69 @@ QX = QX & "," & 1
 End Function
 Private Function basSaveFormat(EX) As String
 
+'/#########################\
+'//   Excel Save Formats  #\\
+'///#######################\\\
+
 EX = Replace(EX, " ", vbNullString)
 
 Select Case EX
-
-Case Is = "0" Or EX = "AddIn"
-EX = xlAddIn: Exit Function
-Case Is = "1" Or EX = "AddIn8"
-EX = xlAddIn8: Exit Function
-Case Is = "2" Or EX = "CSV"
-EX = xlCSV: Exit Function
-Case Is = "3" Or EX = "CSVMac"
-EX = xlCSVMac: Exit Function
-Case Is = "4" Or EX = "CSVMSDOS"
-EX = xlCSVMSDOS: Exit Function
-Case Is = "5" Or EX = "CSVUTF8"
-EX = xlCSVUTF8: Exit Function
-Case Is = "6" Or EX = "CSVWindows"
-EX = xlCSVWindows: Exit Function
-Case Is = "7" Or EX = "CurrentPlatformText"
-EX = xlCurrentPlatformText: Exit Function
-Case Is = "8" Or EX = "DBF2"
-EX = xlDBF2: Exit Function
-Case Is = "9" Or EX = "DBF3"
-EX = xlDBF3: Exit Function
-Case Is = "10" Or EX = "DBF4"
-EX = xlDBF4: Exit Function
-Case Is = "11" Or EX = "DIF"
-EX = xlDIF: Exit Function
-Case Is = "12" Or EX = "Excel12"
-EX = xlExcel12: Exit Function
-Case Is = "13" Or EX = "Excel2"
-EX = xlExcel2: Exit Function
-Case Is = "14" Or EX = "Excel2FarEast"
-EX = xlExcel2FarEast: Exit Function
-Case Is = "15" Or EX = "Excel3"
-EX = xlExcel3: Exit Function
-Case Is = "16" Or EX = "Excel4"
-EX = xlExcel4: Exit Function
-Case Is = "17" Or EX = "Excel4Workbook"
-EX = xlExcel4Workbook: Exit Function
-Case Is = "18" Or EX = "Excel5"
-EX = xlExcel5: Exit Function
-Case Is = "19" Or EX = "Excel7"
-EX = xlExcel7: Exit Function
-Case Is = "20" Or EX = "Excel8"
-EX = xlExcel8: Exit Function
-Case Is = "21" Or EX = "Excel9795"
-EX = xlExcel9795: Exit Function
-Case Is = "22" Or EX = "Html"
-EX = xlHtml: Exit Function
-Case Is = "23" Or EX = "IntlAddIn"
-EX = xlIntlAddIn: Exit Function
-Case Is = "24" Or EX = "IntlMacro"
-EX = xlIntlMacro: Exit Function
-Case Is = "25" Or EX = "OpenDocumentSpreadsheet"
-EX = xlOpenDocumentSpreadsheet: Exit Function
-Case Is = "26" Or EX = "OpenXMLAddIn"
-EX = xlOpenXMLAddIn: Exit Function
-Case Is = "27" Or EX = "OpenXMLStrictWorkbook"
-EX = xlOpenXMLStrictWorkbook:  Exit Function
-Case Is = "28" Or EX = "OpenXMLTemplate"
-EX = xlOpenXMLTemplate: Exit Function
-Case Is = "29" Or EX = "OpenXMLTemplateMacroEnabled"
-EX = xlOpenXMLTemplateMacroEnabled: Exit Function
-Case Is = "30" Or EX = "OpenXMLWorkbook"
-EX = xlOpenXMLWorkbook: Exit Function
-Case Is = "31" Or EX = "OpenXMLWorkbookMacroEnabled"
-EX = xlOpenXMLWorkbookMacroEnabled: Exit Function
-Case Is = "32" Or EX = "SYLK"
-EX = xlSYLK: Exit Function
-Case Is = "33" Or EX = "Template"
-EX = xlTemplate: Exit Function
-Case Is = "34" Or EX = "Template8"
-EX = xlTemplate8: Exit Function
-Case Is = "35" Or EX = "TextMac"
-EX = xlTextMac: Exit Function
-Case Is = "36" Or EX = "TextMSDOS"
-EX = xlTextMSDOS: Exit Function
-Case Is = "37" Or EX = "TextPrinter"
-EX = xlTextPrinter: Exit Function
-Case Is = "38" Or EX = "TextWindows"
-EX = xlTextWindows: Exit Function
-Case Is = "39" Or EX = "UnicodeText"
-EX = xlUnicodeText: Exit Function
-Case Is = "40" Or EX = "WebArchive"
-EX = xlWebArchive: Exit Function
-Case Is = "41" Or EX = "WJ2WD1"
-EX = xlWJ2WD1: Exit Function
-Case Is = "42" Or EX = "WJ3"
-EX = xlWJ3: Exit Function
-Case Is = "43" Or EX = "WJ3FJ3"
-EX = xlWJ3FJ3: Exit Function
-Case Is = "44" Or EX = "WK1"
-EX = xlWK1: Exit Function
-Case Is = "45" Or EX = "WK1ALL"
-EX = xlWK1ALL: Exit Function
-Case Is = "46" Or EX = "WK1FMT"
-EX = xlWK1FMT: Exit Function
-Case Is = "47" Or EX = "WK3"
-EX = xlWK3: Exit Function
-Case Is = "48" Or EX = "WK3FM3"
-EX = xlWK3FM3: Exit Function
-Case Is = "49" Or EX = "WK4"
-EX = xlWK4: Exit Function
-Case Is = "50" Or EX = "WKS"
-EX = xlWKS: Exit Function
-Case Is = "51" Or EX = "WorkbookDefault"
-EX = xlWorkbookDefault: Exit Function
-Case Is = "52" Or EX = "WorkbookNormal"
-EX = xlWorkbookNormal: Exit Function
-Case Is = "53" Or EX = "Works2FarEast"
-EX = xlWorks2FarEast: Exit Function
-Case Is = "54" Or EX = "WQ1"
-EX = xlWQ1: Exit Function
-Case Is = "55" Or EX = "XMLSpreadsheet"
-EX = xlXMLSpreadsheet: Exit Function
-
+Case Is = "0" Or EX = "AddIn": EX = xlAddIn: Exit Function
+Case Is = "1" Or EX = "AddIn8": EX = xlAddIn8: Exit Function
+Case Is = "2" Or EX = "CSV": EX = xlCSV: Exit Function
+Case Is = "3" Or EX = "CSVMac": EX = xlCSVMac: Exit Function
+Case Is = "4" Or EX = "CSVMSDOS": EX = xlCSVMSDOS: Exit Function
+Case Is = "5" Or EX = "CSVUTF8": EX = xlCSVUTF8: Exit Function
+Case Is = "6" Or EX = "CSVWindows": EX = xlCSVWindows: Exit Function
+Case Is = "7" Or EX = "CurrentPlatformText": EX = xlCurrentPlatformText: Exit Function
+Case Is = "8" Or EX = "DBF2": EX = xlDBF2: Exit Function
+Case Is = "9" Or EX = "DBF3": EX = xlDBF3: Exit Function
+Case Is = "10" Or EX = "DBF4": EX = xlDBF4: Exit Function
+Case Is = "11" Or EX = "DIF": EX = xlDIF: Exit Function
+Case Is = "12" Or EX = "Excel12": EX = xlExcel12: Exit Function
+Case Is = "13" Or EX = "Excel2": EX = xlExcel2: Exit Function
+Case Is = "14" Or EX = "Excel2FarEast": EX = xlExcel2FarEast: Exit Function
+Case Is = "15" Or EX = "Excel3": EX = xlExcel3: Exit Function
+Case Is = "16" Or EX = "Excel4": EX = xlExcel4: Exit Function
+Case Is = "17" Or EX = "Excel4Workbook": EX = xlExcel4Workbook: Exit Function
+Case Is = "18" Or EX = "Excel5": EX = xlExcel5: Exit Function
+Case Is = "19" Or EX = "Excel7": EX = xlExcel7: Exit Function
+Case Is = "20" Or EX = "Excel8": EX = xlExcel8: Exit Function
+Case Is = "21" Or EX = "Excel9795": EX = xlExcel9795: Exit Function
+Case Is = "22" Or EX = "Html": EX = xlHtml: Exit Function
+Case Is = "23" Or EX = "IntlAddIn": EX = xlIntlAddIn: Exit Function
+Case Is = "24" Or EX = "IntlMacro": EX = xlIntlMacro: Exit Function
+Case Is = "25" Or EX = "OpenDocumentSpreadsheet": EX = xlOpenDocumentSpreadsheet: Exit Function
+Case Is = "26" Or EX = "OpenXMLAddIn": EX = xlOpenXMLAddIn: Exit Function
+Case Is = "27" Or EX = "OpenXMLStrictWorkbook": EX = xlOpenXMLStrictWorkbook: Exit Function
+Case Is = "28" Or EX = "OpenXMLTemplate": EX = xlOpenXMLTemplate: Exit Function
+Case Is = "29" Or EX = "OpenXMLTemplateMacroEnabled": EX = xlOpenXMLTemplateMacroEnabled: Exit Function
+Case Is = "30" Or EX = "OpenXMLWorkbook": EX = xlOpenXMLWorkbook: Exit Function
+Case Is = "31" Or EX = "OpenXMLWorkbookMacroEnabled": EX = xlOpenXMLWorkbookMacroEnabled: Exit Function
+Case Is = "32" Or EX = "SYLK": EX = xlSYLK: Exit Function
+Case Is = "33" Or EX = "Template": EX = xlTemplate: Exit Function
+Case Is = "34" Or EX = "Template8": EX = xlTemplate8: Exit Function
+Case Is = "35" Or EX = "TextMac": EX = xlTextMac: Exit Function
+Case Is = "36" Or EX = "TextMSDOS": EX = xlTextMSDOS: Exit Function
+Case Is = "37" Or EX = "TextPrinter": EX = xlTextPrinter: Exit Function
+Case Is = "38" Or EX = "TextWindows": EX = xlTextWindows: Exit Function
+Case Is = "39" Or EX = "UnicodeText": EX = xlUnicodeText: Exit Function
+Case Is = "40" Or EX = "WebArchive": EX = xlWebArchive: Exit Function
+Case Is = "41" Or EX = "WJ2WD1": EX = xlWJ2WD1: Exit Function
+Case Is = "42" Or EX = "WJ3": EX = xlWJ3: Exit Function
+Case Is = "43" Or EX = "WJ3FJ3": EX = xlWJ3FJ3: Exit Function
+Case Is = "44" Or EX = "WK1": EX = xlWK1: Exit Function
+Case Is = "45" Or EX = "WK1ALL": EX = xlWK1ALL: Exit Function
+Case Is = "46" Or EX = "WK1FMT": EX = xlWK1FMT: Exit Function
+Case Is = "47" Or EX = "WK3": EX = xlWK3: Exit Function
+Case Is = "48" Or EX = "WK3FM3": EX = xlWK3FM3: Exit Function
+Case Is = "49" Or EX = "WK4": EX = xlWK4: Exit Function
+Case Is = "50" Or EX = "WKS": EX = xlWKS: Exit Function
+Case Is = "51" Or EX = "WorkbookDefault": EX = xlWorkbookDefault: Exit Function
+Case Is = "52" Or EX = "WorkbookNormal": EX = xlWorkbookNormal: Exit Function
+Case Is = "53" Or EX = "Works2FarEast": EX = xlWorks2FarEast: Exit Function
+Case Is = "54" Or EX = "WQ1": EX = xlWQ1: Exit Function
+Case Is = "55" Or EX = "XMLSpreadsheet": EX = xlXMLSpreadsheet: Exit Function
 End Select
 
 EX = "(*Err)"
@@ -2498,150 +2548,154 @@ End If
 End Function
 Private Function basColor(HX) As String
 
+'/#########################\
+'//      Basic Colors     #\\
+'///#######################\\\
+
 Dim xNotColor As String: Dim xRGBC As String
-Dim X As Integer: Dim xCl As Integer
+Dim X As Integer: Dim XH As Integer
 Dim I As Byte '//waste
 xNotColor = "/NULL"
 
 Retry:
 X = 1
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "aliceblue;#F0F8FF;240,248,255", HX, vbTextCompare) Then xRGBCl = "aliceblue;#F0F8FF;240,248,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "antiquewhite;#FAEBD7;250,235,215", HX, vbTextCompare) Then xRGBCl = "antiquewhite;#FAEBD7;250,235,215": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "aqua;#00FFFF;0,255,255", HX, vbTextCompare) Then xRGBCl = "aqua;#00FFFF;0,255,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "aquamarine;#7FFFD4;127,255,212", HX, vbTextCompare) Then xRGBCl = "aquamarine;#7FFFD4;127,255,212": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "azure;#F0FFFF;240,255,255", HX, vbTextCompare) Then xRGBCl = "azure;#F0FFFF;240,255,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "beige;#F5F5DC;245,245,220", HX, vbTextCompare) Then xRGBCl = "beige;#F5F5DC;245,245,220": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "bisque;#FFE4C4;255,228,196", HX, vbTextCompare) Then xRGBCl = "bisque;#FFE4C4;255,228,196": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "black;#000000;0,0,0", HX, vbTextCompare) Then xRGBCl = "black;#000000;0,0,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "blanchedalmond;#FFEBCD;255,235,205", HX, vbTextCompare) Then xRGBCl = "blanchedalmond;#FFEBCD;255,235,205": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "blue;#0000FF;0,0,255", HX, vbTextCompare) Then xRGBCl = "blue;#0000FF;0,0,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "blueviolet;#8A2BE2;138,43,226", HX, vbTextCompare) Then xRGBCl = "blueviolet;#8A2BE2;138,43,226": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "brown;#A52A2A;165,42,42", HX, vbTextCompare) Then xRGBCl = "brown;#A52A2A;165,42,42": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "burlywood;#DEB887;222,184,135", HX, vbTextCompare) Then xRGBCl = "burlywood;#DEB887;222,184,135": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "cadetblue;#5F9EA0;95,158,160", HX, vbTextCompare) Then xRGBCl = "cadetblue;#5F9EA0;95,158,160": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "chartreuse;#7FFF00;127,255,0", HX, vbTextCompare) Then xRGBCl = "chartreuse;#7FFF00;127,255,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "chocolate;#D2691E;210,105,30", HX, vbTextCompare) Then xRGBCl = "chocolate;#D2691E;210,105,30": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "coral;#FF7F50;255,127,80", HX, vbTextCompare) Then xRGBCl = "coral;#FF7F50;255,127,80": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "cornflowerblue;#6495ED;100,149,237", HX, vbTextCompare) Then xRGBCl = "cornflowerblue;#6495ED;100,149,237": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "cornsilk;#FFF8DC;255,248,220", HX, vbTextCompare) Then xRGBCl = "cornsilk;#FFF8DC;255,248,220": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "crimson;#DC143C;220,20,60", HX, vbTextCompare) Then xRGBCl = "crimson;#DC143C;220,20,60": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "cyan;#00FFFF;0,255,255", HX, vbTextCompare) Then xRGBCl = "cyan;#00FFFF;0,255,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dblue;#00008B;0,0,139", HX, vbTextCompare) Then xRGBCl = "dblue;#00008B;0,0,139": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dcyan;#008B8B;0,139,139", HX, vbTextCompare) Then xRGBCl = "dcyan;#008B8B;0,139,139": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "deeppink;#FF1493;255,20,147", HX, vbTextCompare) Then xRGBCl = "deeppink;#FF1493;255,20,147": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "deepskyblue;#00BFFF;0,191,255", HX, vbTextCompare) Then xRGBCl = "deepskyblue;#00BFFF;0,191,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dgoldenrod;#B8860B;184,134,11", HX, vbTextCompare) Then xRGBCl = "dgoldenrod;#B8860B;184,134,11": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dgray;#A9A9A9;169,169,169", HX, vbTextCompare) Then xRGBCl = "dgray;#A9A9A9;169,169,169": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dgreen;#006400;0,100,0", HX, vbTextCompare) Then xRGBCl = "dgreen;#006400;0,100,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dimgray;#696969;105,105,105", HX, vbTextCompare) Then xRGBCl = "dimgray;#696969;105,105,105": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dkhaki;#BDB76B;189,183,107", HX, vbTextCompare) Then xRGBCl = "dkhaki;#BDB76B;189,183,107": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dmagenta;#8B008B;139,0,139", HX, vbTextCompare) Then xRGBCl = "dmagenta;#8B008B;139,0,139": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dodgerblue;#1E90FF;30,144,255", HX, vbTextCompare) Then xRGBCl = "dodgerblue;#1E90FF;30,144,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dolivegreen;#556B2F;85,107,47", HX, vbTextCompare) Then xRGBCl = "dolivegreen;#556B2F;85,107,47": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dorange;#FF8C00;255,140,0", HX, vbTextCompare) Then xRGBCl = "dorange;#FF8C00;255,140,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dorchid;#9932CC;153,50,204", HX, vbTextCompare) Then xRGBCl = "dorchid;#9932CC;153,50,204": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dred;#8B0000;139,0,0", HX, vbTextCompare) Then xRGBCl = "dred;#8B0000;139,0,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dsalmon;#E9967A;233,150,122", HX, vbTextCompare) Then xRGBCl = "dsalmon;#E9967A;233,150,122": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dseagreen;#8FBC8F;143,188,143", HX, vbTextCompare) Then xRGBCl = "dseagreen;#8FBC8F;143,188,143": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dslateblue;#483D8B;72,61,139", HX, vbTextCompare) Then xRGBCl = "dslateblue;#483D8B;72,61,139": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dslategray;#2F4F4F;47,79,79", HX, vbTextCompare) Then xRGBCl = "dslategray;#2F4F4F;47,79,79": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dturquoise;#00CED1;0,206,209", HX, vbTextCompare) Then xRGBCl = "dturquoise;#00CED1;0,206,209": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "dviolet;#9400D3;148,0,211", HX, vbTextCompare) Then xRGBCl = "dviolet;#9400D3;148,0,211": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "firebrick;#B22222;178,34,34", HX, vbTextCompare) Then xRGBCl = "firebrick;#B22222;178,34,34": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "floralwhite;#FFFAF0;255,250,240", HX, vbTextCompare) Then xRGBCl = "floralwhite;#FFFAF0;255,250,240": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "forestgreen;#228B22;34,139,34", HX, vbTextCompare) Then xRGBCl = "forestgreen;#228B22;34,139,34": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "gainsboro;#DCDCDC;220,220,220", HX, vbTextCompare) Then xRGBCl = "gainsboro;#DCDCDC;220,220,220": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "ghostwhite;#F8F8FF;248,248,255", HX, vbTextCompare) Then xRGBCl = "ghostwhite;#F8F8FF;248,248,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "gold;#FFD700;255,215,0", HX, vbTextCompare) Then xRGBCl = "gold;#FFD700;255,215,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "goldenrod;#DAA520;218,165,32", HX, vbTextCompare) Then xRGBCl = "goldenrod;#DAA520;218,165,32": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "gray;#808080;128,128,128", HX, vbTextCompare) Then xRGBCl = "gray;#808080;128,128,128": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "green;#008000;0,128,0", HX, vbTextCompare) Then xRGBCl = "green;#008000;0,128,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "greenyellow;#ADFF2F;173,255,47", HX, vbTextCompare) Then xRGBCl = "greenyellow;#ADFF2F;173,255,47": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "honeydew;#F0FFF0;240,255,240", HX, vbTextCompare) Then xRGBCl = "honeydew;#F0FFF0;240,255,240": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "hotpink;#FF69B4;255,105,180", HX, vbTextCompare) Then xRGBCl = "hotpink;#FF69B4;255,105,180": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "indigo;#4B0082;75,0,130", HX, vbTextCompare) Then xRGBCl = "indigo;#4B0082;75,0,130": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "ivory;#FFFFF0;255,255,240", HX, vbTextCompare) Then xRGBCl = "ivory;#FFFFF0;255,255,240": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "khaki;#F0E68C;240,230,140", HX, vbTextCompare) Then xRGBCl = "khaki;#F0E68C;240,230,140": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lavender;#E6E6FA;230,230,250", HX, vbTextCompare) Then xRGBCl = "lavender;#E6E6FA;230,230,250": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lavenderblush;#FFF0F5;255,240,245", HX, vbTextCompare) Then xRGBCl = "lavenderblush;#FFF0F5;255,240,245": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lawngreen;#7CFC00;124,252,0", HX, vbTextCompare) Then xRGBCl = "lawngreen;#7CFC00;124,252,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lblue;#ADD8E6;173,216,230", HX, vbTextCompare) Then xRGBCl = "lblue;#ADD8E6;173,216,230": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lcoral;#F08080;240,128,128", HX, vbTextCompare) Then xRGBCl = "lcoral;#F08080;240,128,128": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lcyan;#E0FFFF;224,255,255", HX, vbTextCompare) Then xRGBCl = "lcyan;#E0FFFF;224,255,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lemonchiffon;#FFFACD;255,250,205", HX, vbTextCompare) Then xRGBCl = "lemonchiffon;#FFFACD;255,250,205": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lgray;#D3D3D3;211,211,211", HX, vbTextCompare) Then xRGBCl = "lgray;#D3D3D3;211,211,211": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lgreen;#90EE90;144,238,144", HX, vbTextCompare) Then xRGBCl = "lgreen;#90EE90;144,238,144": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lime;#00FF00;0,255,0", HX, vbTextCompare) Then xRGBCl = "lime;#00FF00;0,255,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "limegreen;#32CD32;50,205,50", HX, vbTextCompare) Then xRGBCl = "limegreen;#32CD32;50,205,50": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "linen;#FAF0E6;250,240,230", HX, vbTextCompare) Then xRGBCl = "linen;#FAF0E6;250,240,230": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lpink;#FFB6C1;255,182,193", HX, vbTextCompare) Then xRGBCl = "lpink;#FFB6C1;255,182,193": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lrodyellow;#FAFAD2;250,250,210", HX, vbTextCompare) Then xRGBCl = "lrodyellow;#FAFAD2;250,250,210": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lsalmon;#FFA07A;255,160,122", HX, vbTextCompare) Then xRGBCl = "lsalmon;#FFA07A;255,160,122": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lseagreen;#20B2AA;32,178,170", HX, vbTextCompare) Then xRGBCl = "lseagreen;#20B2AA;32,178,170": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lskyblue;#87CEFA;135,206,250", HX, vbTextCompare) Then xRGBCl = "lskyblue;#87CEFA;135,206,250": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lslategray;#778899;119,136,153", HX, vbTextCompare) Then xRGBCl = "lslategray;#778899;119,136,153": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lsteelblue;#B0C4DE;176,196,222", HX, vbTextCompare) Then xRGBCl = "lsteelblue;#B0C4DE;176,196,222": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "lyellow;#FFFFE0;255,255,224", HX, vbTextCompare) Then xRGBCl = "lyellow;#FFFFE0;255,255,224": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "magenta;#FF00FF;255,0,255", HX, vbTextCompare) Then xRGBCl = "magenta;#FF00FF;255,0,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "maquamarine;#66CDAA;102,205,170", HX, vbTextCompare) Then xRGBCl = "maquamarine;#66CDAA;102,205,170": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mblue;#0000CD;0,0,205", HX, vbTextCompare) Then xRGBCl = "mblue;#0000CD;0,0,205": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "midnightblue;#191970;25,25,112", HX, vbTextCompare) Then xRGBCl = "midnightblue;#191970;25,25,112": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mintcream;#F5FFFA;245,255,250", HX, vbTextCompare) Then xRGBCl = "mintcream;#F5FFFA;245,255,250": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mistyrose;#FFE4E1;255,228,225", HX, vbTextCompare) Then xRGBCl = "mistyrose;#FFE4E1;255,228,225": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "moccasin;#FFE4B5;255,228,181", HX, vbTextCompare) Then xRGBCl = "moccasin;#FFE4B5;255,228,181": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "morchid;#BA55D3;186,85,211", HX, vbTextCompare) Then xRGBCl = "morchid;#BA55D3;186,85,211": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mpurple;#9370DB;147,112,219", HX, vbTextCompare) Then xRGBCl = "mpurple;#9370DB;147,112,219": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mseagreen;#3CB371;60,179,113", HX, vbTextCompare) Then xRGBCl = "mseagreen;#3CB371;60,179,113": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mslateblue;#7B68EE;123,104,238", HX, vbTextCompare) Then xRGBCl = "mslateblue;#7B68EE;123,104,238": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mspringgreen;#00FA9A;0,250,154", HX, vbTextCompare) Then xRGBCl = "mspringgreen;#00FA9A;0,250,154": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mturquoise;#48D1CC;72,209,204", HX, vbTextCompare) Then xRGBCl = "mturquoise;#48D1CC;72,209,204": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "mvioletred;#C71585;199,21,133", HX, vbTextCompare) Then xRGBCl = "mvioletred;#C71585;199,21,133": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "navajowhite;#FFDEAD;255,222,173", HX, vbTextCompare) Then xRGBCl = "navajowhite;#FFDEAD;255,222,173": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "navy;#000080;0,0,128", HX, vbTextCompare) Then xRGBCl = "navy;#000080;0,0,128": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "oldlace;#FDF5E6;253,245,230", HX, vbTextCompare) Then xRGBCl = "oldlace;#FDF5E6;253,245,230": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "olive;#808000;128,128,0", HX, vbTextCompare) Then xRGBCl = "olive;#808000;128,128,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "olivedrab;#6B8E23;107,142,35", HX, vbTextCompare) Then xRGBCl = "olivedrab;#6B8E23;107,142,35": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "orange;#FFA500;255,165,0", HX, vbTextCompare) Then xRGBCl = "orange;#FFA500;255,165,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "orangered;#FF4500;255,69,0", HX, vbTextCompare) Then xRGBCl = "orangered;#FF4500;255,69,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "orchid;#DA70D6;218,112,214", HX, vbTextCompare) Then xRGBCl = "orchid;#DA70D6;218,112,214": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "palegoldenrod;#EEE8AA;238,232,170", HX, vbTextCompare) Then xRGBCl = "palegoldenrod;#EEE8AA;238,232,170": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "palegreen;#98FB98;152,251,152", HX, vbTextCompare) Then xRGBCl = "palegreen;#98FB98;152,251,152": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "paleturquoise;#AFEEEE;175,238,238", HX, vbTextCompare) Then xRGBCl = "paleturquoise;#AFEEEE;175,238,238": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "palevioletred;#DB7093;219,112,147", HX, vbTextCompare) Then xRGBCl = "palevioletred;#DB7093;219,112,147": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "papayawhip;#FFEFD5;255,239,213", HX, vbTextCompare) Then xRGBCl = "papayawhip;#FFEFD5;255,239,213": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "peachpuff;#FFDAB9;255,218,185", HX, vbTextCompare) Then xRGBCl = "peachpuff;#FFDAB9;255,218,185": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "peru;#CD853F;205,133,63", HX, vbTextCompare) Then xRGBCl = "peru;#CD853F;205,133,63": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "pink;#FFC0CB;255,192,203", HX, vbTextCompare) Then xRGBCl = "pink;#FFC0CB;255,192,203": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "plum;#DDA0DD;221,160,221", HX, vbTextCompare) Then xRGBCl = "plum;#DDA0DD;221,160,221": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "powderblue;#B0E0E6;176,224,230", HX, vbTextCompare) Then xRGBCl = "powderblue;#B0E0E6;176,224,230": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "purple;#800080;128,0,128", HX, vbTextCompare) Then xRGBCl = "purple;#800080;128,0,128": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "red;#FF0000;255,0,0", HX, vbTextCompare) Then xRGBCl = "red;#FF0000;255,0,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "rosybrown;#BC8F8F;188,143,143", HX, vbTextCompare) Then xRGBCl = "rosybrown;#BC8F8F;188,143,143": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "royalblue;#4169E1;65,105,225", HX, vbTextCompare) Then xRGBCl = "royalblue;#4169E1;65,105,225": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "saddlebrown;#8B4513;139,69,19", HX, vbTextCompare) Then xRGBCl = "saddlebrown;#8B4513;139,69,19": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "salmon;#FA8072;250,128,114", HX, vbTextCompare) Then xRGBCl = "salmon;#FA8072;250,128,114": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "sandybrown;#F4A460;244,164,96", HX, vbTextCompare) Then xRGBCl = "sandybrown;#F4A460;244,164,96": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "seagreen;#2E8B57;46,139,87", HX, vbTextCompare) Then xRGBCl = "seagreen;#2E8B57;46,139,87": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "seashell;#FFF5EE;255,245,238", HX, vbTextCompare) Then xRGBCl = "seashell;#FFF5EE;255,245,238": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "sienna;#A0522D;160,82,45", HX, vbTextCompare) Then xRGBCl = "sienna;#A0522D;160,82,45": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "silver;#C0C0C0;192,192,192", HX, vbTextCompare) Then xRGBCl = "silver;#C0C0C0;192,192,192": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "skyblue;#87CEEB;135,206,235", HX, vbTextCompare) Then xRGBCl = "skyblue;#87CEEB;135,206,235": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "slateblue;#6A5ACD;106,90,205", HX, vbTextCompare) Then xRGBCl = "slateblue;#6A5ACD;106,90,205": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "slategray;#708090;112,128,144", HX, vbTextCompare) Then xRGBCl = "slategray;#708090;112,128,144": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "snow;#FFFAFA;255,250,250", HX, vbTextCompare) Then xRGBCl = "snow;#FFFAFA;255,250,250": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "springgreen;#00FF7F;0,255,127", HX, vbTextCompare) Then xRGBCl = "springgreen;#00FF7F;0,255,127": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "steelblue;#4682B4;70,130,180", HX, vbTextCompare) Then xRGBCl = "steelblue;#4682B4;70,130,180": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "tan;#D2B48C;210,180,140", HX, vbTextCompare) Then xRGBCl = "tan;#D2B48C;210,180,140": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "teal;#008080;0,128,128", HX, vbTextCompare) Then xRGBCl = "teal;#008080;0,128,128": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "thistle;#D8BFD8;216,191,216", HX, vbTextCompare) Then xRGBCl = "thistle;#D8BFD8;216,191,216": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "tomato;#FF6347;255,99,71", HX, vbTextCompare) Then xRGBCl = "tomato;#FF6347;255,99,71": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "turquoise;#40E0D0;64,224,208", HX, vbTextCompare) Then xRGBCl = "turquoise;#40E0D0;64,224,208": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "violet;#EE82EE;238,130,238", HX, vbTextCompare) Then xRGBCl = "violet;#EE82EE;238,130,238": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "wheat;#F5DEB3;245,222,179", HX, vbTextCompare) Then xRGBCl = "wheat;#F5DEB3;245,222,179": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "white;#FFFFFF;255,255,255", HX, vbTextCompare) Then xRGBCl = "white;#FFFFFF;255,255,255": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "whitesmoke;#F5F5F5;245,245,245", HX, vbTextCompare) Then xRGBCl = "whitesmoke;#F5F5F5;245,245,245": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "yellow;#FFFF00;255,255,0", HX, vbTextCompare) Then xRGBCl = "yellow;#FFFF00;255,255,0": GoTo ColorFound
-X = X + 1: If X > (xCl) Then I = I: If InStr(1, "yellowgreen;#9ACD32;154,205,50", HX, vbTextCompare) Then xRGBCl = "yellowgreen;#9ACD32;154,205,50": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "aliceblue;#F0F8FF;240,248,255", HX, vbTextCompare) Then xRGBCl = "aliceblue;#F0F8FF;240,248,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "antiquewhite;#FAEBD7;250,235,215", HX, vbTextCompare) Then xRGBCl = "antiquewhite;#FAEBD7;250,235,215": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "aqua;#00FFFF;0,255,255", HX, vbTextCompare) Then xRGBCl = "aqua;#00FFFF;0,255,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "aquamarine;#7FFFD4;127,255,212", HX, vbTextCompare) Then xRGBCl = "aquamarine;#7FFFD4;127,255,212": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "azure;#F0FFFF;240,255,255", HX, vbTextCompare) Then xRGBCl = "azure;#F0FFFF;240,255,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "beige;#F5F5DC;245,245,220", HX, vbTextCompare) Then xRGBCl = "beige;#F5F5DC;245,245,220": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "bisque;#FFE4C4;255,228,196", HX, vbTextCompare) Then xRGBCl = "bisque;#FFE4C4;255,228,196": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "black;#000000;0,0,0", HX, vbTextCompare) Then xRGBCl = "black;#000000;0,0,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "blanchedalmond;#FFEBCD;255,235,205", HX, vbTextCompare) Then xRGBCl = "blanchedalmond;#FFEBCD;255,235,205": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "blue;#0000FF;0,0,255", HX, vbTextCompare) Then xRGBCl = "blue;#0000FF;0,0,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "blueviolet;#8A2BE2;138,43,226", HX, vbTextCompare) Then xRGBCl = "blueviolet;#8A2BE2;138,43,226": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "brown;#A52A2A;165,42,42", HX, vbTextCompare) Then xRGBCl = "brown;#A52A2A;165,42,42": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "burlywood;#DEB887;222,184,135", HX, vbTextCompare) Then xRGBCl = "burlywood;#DEB887;222,184,135": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "cadetblue;#5F9EA0;95,158,160", HX, vbTextCompare) Then xRGBCl = "cadetblue;#5F9EA0;95,158,160": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "chartreuse;#7FFF00;127,255,0", HX, vbTextCompare) Then xRGBCl = "chartreuse;#7FFF00;127,255,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "chocolate;#D2691E;210,105,30", HX, vbTextCompare) Then xRGBCl = "chocolate;#D2691E;210,105,30": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "coral;#FF7F50;255,127,80", HX, vbTextCompare) Then xRGBCl = "coral;#FF7F50;255,127,80": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "cornflowerblue;#6495ED;100,149,237", HX, vbTextCompare) Then xRGBCl = "cornflowerblue;#6495ED;100,149,237": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "cornsilk;#FFF8DC;255,248,220", HX, vbTextCompare) Then xRGBCl = "cornsilk;#FFF8DC;255,248,220": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "crimson;#DC143C;220,20,60", HX, vbTextCompare) Then xRGBCl = "crimson;#DC143C;220,20,60": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "cyan;#00FFFF;0,255,255", HX, vbTextCompare) Then xRGBCl = "cyan;#00FFFF;0,255,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dblue;#00008B;0,0,139", HX, vbTextCompare) Then xRGBCl = "dblue;#00008B;0,0,139": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dcyan;#008B8B;0,139,139", HX, vbTextCompare) Then xRGBCl = "dcyan;#008B8B;0,139,139": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "deeppink;#FF1493;255,20,147", HX, vbTextCompare) Then xRGBCl = "deeppink;#FF1493;255,20,147": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "deepskyblue;#00BFFF;0,191,255", HX, vbTextCompare) Then xRGBCl = "deepskyblue;#00BFFF;0,191,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dgoldenrod;#B8860B;184,134,11", HX, vbTextCompare) Then xRGBCl = "dgoldenrod;#B8860B;184,134,11": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dgray;#A9A9A9;169,169,169", HX, vbTextCompare) Then xRGBCl = "dgray;#A9A9A9;169,169,169": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dgreen;#006400;0,100,0", HX, vbTextCompare) Then xRGBCl = "dgreen;#006400;0,100,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dimgray;#696969;105,105,105", HX, vbTextCompare) Then xRGBCl = "dimgray;#696969;105,105,105": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dkhaki;#BDB76B;189,183,107", HX, vbTextCompare) Then xRGBCl = "dkhaki;#BDB76B;189,183,107": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dmagenta;#8B008B;139,0,139", HX, vbTextCompare) Then xRGBCl = "dmagenta;#8B008B;139,0,139": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dodgerblue;#1E90FF;30,144,255", HX, vbTextCompare) Then xRGBCl = "dodgerblue;#1E90FF;30,144,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dolivegreen;#556B2F;85,107,47", HX, vbTextCompare) Then xRGBCl = "dolivegreen;#556B2F;85,107,47": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dorange;#FF8C00;255,140,0", HX, vbTextCompare) Then xRGBCl = "dorange;#FF8C00;255,140,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dorchid;#9932CC;153,50,204", HX, vbTextCompare) Then xRGBCl = "dorchid;#9932CC;153,50,204": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dred;#8B0000;139,0,0", HX, vbTextCompare) Then xRGBCl = "dred;#8B0000;139,0,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dsalmon;#E9967A;233,150,122", HX, vbTextCompare) Then xRGBCl = "dsalmon;#E9967A;233,150,122": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dseagreen;#8FBC8F;143,188,143", HX, vbTextCompare) Then xRGBCl = "dseagreen;#8FBC8F;143,188,143": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dslateblue;#483D8B;72,61,139", HX, vbTextCompare) Then xRGBCl = "dslateblue;#483D8B;72,61,139": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dslategray;#2F4F4F;47,79,79", HX, vbTextCompare) Then xRGBCl = "dslategray;#2F4F4F;47,79,79": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dturquoise;#00CED1;0,206,209", HX, vbTextCompare) Then xRGBCl = "dturquoise;#00CED1;0,206,209": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "dviolet;#9400D3;148,0,211", HX, vbTextCompare) Then xRGBCl = "dviolet;#9400D3;148,0,211": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "firebrick;#B22222;178,34,34", HX, vbTextCompare) Then xRGBCl = "firebrick;#B22222;178,34,34": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "floralwhite;#FFFAF0;255,250,240", HX, vbTextCompare) Then xRGBCl = "floralwhite;#FFFAF0;255,250,240": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "forestgreen;#228B22;34,139,34", HX, vbTextCompare) Then xRGBCl = "forestgreen;#228B22;34,139,34": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "gainsboro;#DCDCDC;220,220,220", HX, vbTextCompare) Then xRGBCl = "gainsboro;#DCDCDC;220,220,220": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "ghostwhite;#F8F8FF;248,248,255", HX, vbTextCompare) Then xRGBCl = "ghostwhite;#F8F8FF;248,248,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "gold;#FFD700;255,215,0", HX, vbTextCompare) Then xRGBCl = "gold;#FFD700;255,215,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "goldenrod;#DAA520;218,165,32", HX, vbTextCompare) Then xRGBCl = "goldenrod;#DAA520;218,165,32": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "gray;#808080;128,128,128", HX, vbTextCompare) Then xRGBCl = "gray;#808080;128,128,128": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "green;#008000;0,128,0", HX, vbTextCompare) Then xRGBCl = "green;#008000;0,128,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "greenyellow;#ADFF2F;173,255,47", HX, vbTextCompare) Then xRGBCl = "greenyellow;#ADFF2F;173,255,47": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "honeydew;#F0FFF0;240,255,240", HX, vbTextCompare) Then xRGBCl = "honeydew;#F0FFF0;240,255,240": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "hotpink;#FF69B4;255,105,180", HX, vbTextCompare) Then xRGBCl = "hotpink;#FF69B4;255,105,180": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "indigo;#4B0082;75,0,130", HX, vbTextCompare) Then xRGBCl = "indigo;#4B0082;75,0,130": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "ivory;#FFFFF0;255,255,240", HX, vbTextCompare) Then xRGBCl = "ivory;#FFFFF0;255,255,240": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "khaki;#F0E68C;240,230,140", HX, vbTextCompare) Then xRGBCl = "khaki;#F0E68C;240,230,140": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lavender;#E6E6FA;230,230,250", HX, vbTextCompare) Then xRGBCl = "lavender;#E6E6FA;230,230,250": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lavenderblush;#FFF0F5;255,240,245", HX, vbTextCompare) Then xRGBCl = "lavenderblush;#FFF0F5;255,240,245": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lawngreen;#7CFC00;124,252,0", HX, vbTextCompare) Then xRGBCl = "lawngreen;#7CFC00;124,252,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lblue;#ADD8E6;173,216,230", HX, vbTextCompare) Then xRGBCl = "lblue;#ADD8E6;173,216,230": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lcoral;#F08080;240,128,128", HX, vbTextCompare) Then xRGBCl = "lcoral;#F08080;240,128,128": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lcyan;#E0FFFF;224,255,255", HX, vbTextCompare) Then xRGBCl = "lcyan;#E0FFFF;224,255,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lemonchiffon;#FFFACD;255,250,205", HX, vbTextCompare) Then xRGBCl = "lemonchiffon;#FFFACD;255,250,205": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lgray;#D3D3D3;211,211,211", HX, vbTextCompare) Then xRGBCl = "lgray;#D3D3D3;211,211,211": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lgreen;#90EE90;144,238,144", HX, vbTextCompare) Then xRGBCl = "lgreen;#90EE90;144,238,144": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lime;#00FF00;0,255,0", HX, vbTextCompare) Then xRGBCl = "lime;#00FF00;0,255,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "limegreen;#32CD32;50,205,50", HX, vbTextCompare) Then xRGBCl = "limegreen;#32CD32;50,205,50": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "linen;#FAF0E6;250,240,230", HX, vbTextCompare) Then xRGBCl = "linen;#FAF0E6;250,240,230": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lpink;#FFB6C1;255,182,193", HX, vbTextCompare) Then xRGBCl = "lpink;#FFB6C1;255,182,193": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lrodyellow;#FAFAD2;250,250,210", HX, vbTextCompare) Then xRGBCl = "lrodyellow;#FAFAD2;250,250,210": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lsalmon;#FFA07A;255,160,122", HX, vbTextCompare) Then xRGBCl = "lsalmon;#FFA07A;255,160,122": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lseagreen;#20B2AA;32,178,170", HX, vbTextCompare) Then xRGBCl = "lseagreen;#20B2AA;32,178,170": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lskyblue;#87CEFA;135,206,250", HX, vbTextCompare) Then xRGBCl = "lskyblue;#87CEFA;135,206,250": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lslategray;#778899;119,136,153", HX, vbTextCompare) Then xRGBCl = "lslategray;#778899;119,136,153": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lsteelblue;#B0C4DE;176,196,222", HX, vbTextCompare) Then xRGBCl = "lsteelblue;#B0C4DE;176,196,222": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "lyellow;#FFFFE0;255,255,224", HX, vbTextCompare) Then xRGBCl = "lyellow;#FFFFE0;255,255,224": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "magenta;#FF00FF;255,0,255", HX, vbTextCompare) Then xRGBCl = "magenta;#FF00FF;255,0,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "maquamarine;#66CDAA;102,205,170", HX, vbTextCompare) Then xRGBCl = "maquamarine;#66CDAA;102,205,170": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mblue;#0000CD;0,0,205", HX, vbTextCompare) Then xRGBCl = "mblue;#0000CD;0,0,205": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "midnightblue;#191970;25,25,112", HX, vbTextCompare) Then xRGBCl = "midnightblue;#191970;25,25,112": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mintcream;#F5FFFA;245,255,250", HX, vbTextCompare) Then xRGBCl = "mintcream;#F5FFFA;245,255,250": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mistyrose;#FFE4E1;255,228,225", HX, vbTextCompare) Then xRGBCl = "mistyrose;#FFE4E1;255,228,225": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "moccasin;#FFE4B5;255,228,181", HX, vbTextCompare) Then xRGBCl = "moccasin;#FFE4B5;255,228,181": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "morchid;#BA55D3;186,85,211", HX, vbTextCompare) Then xRGBCl = "morchid;#BA55D3;186,85,211": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mpurple;#9370DB;147,112,219", HX, vbTextCompare) Then xRGBCl = "mpurple;#9370DB;147,112,219": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mseagreen;#3CB371;60,179,113", HX, vbTextCompare) Then xRGBCl = "mseagreen;#3CB371;60,179,113": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mslateblue;#7B68EE;123,104,238", HX, vbTextCompare) Then xRGBCl = "mslateblue;#7B68EE;123,104,238": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mspringgreen;#00FA9A;0,250,154", HX, vbTextCompare) Then xRGBCl = "mspringgreen;#00FA9A;0,250,154": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mturquoise;#48D1CC;72,209,204", HX, vbTextCompare) Then xRGBCl = "mturquoise;#48D1CC;72,209,204": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "mvioletred;#C71585;199,21,133", HX, vbTextCompare) Then xRGBCl = "mvioletred;#C71585;199,21,133": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "navajowhite;#FFDEAD;255,222,173", HX, vbTextCompare) Then xRGBCl = "navajowhite;#FFDEAD;255,222,173": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "navy;#000080;0,0,128", HX, vbTextCompare) Then xRGBCl = "navy;#000080;0,0,128": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "oldlace;#FDF5E6;253,245,230", HX, vbTextCompare) Then xRGBCl = "oldlace;#FDF5E6;253,245,230": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "olive;#808000;128,128,0", HX, vbTextCompare) Then xRGBCl = "olive;#808000;128,128,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "olivedrab;#6B8E23;107,142,35", HX, vbTextCompare) Then xRGBCl = "olivedrab;#6B8E23;107,142,35": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "orange;#FFA500;255,165,0", HX, vbTextCompare) Then xRGBCl = "orange;#FFA500;255,165,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "orangered;#FF4500;255,69,0", HX, vbTextCompare) Then xRGBCl = "orangered;#FF4500;255,69,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "orchid;#DA70D6;218,112,214", HX, vbTextCompare) Then xRGBCl = "orchid;#DA70D6;218,112,214": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "palegoldenrod;#EEE8AA;238,232,170", HX, vbTextCompare) Then xRGBCl = "palegoldenrod;#EEE8AA;238,232,170": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "palegreen;#98FB98;152,251,152", HX, vbTextCompare) Then xRGBCl = "palegreen;#98FB98;152,251,152": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "paleturquoise;#AFEEEE;175,238,238", HX, vbTextCompare) Then xRGBCl = "paleturquoise;#AFEEEE;175,238,238": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "palevioletred;#DB7093;219,112,147", HX, vbTextCompare) Then xRGBCl = "palevioletred;#DB7093;219,112,147": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "papayawhip;#FFEFD5;255,239,213", HX, vbTextCompare) Then xRGBCl = "papayawhip;#FFEFD5;255,239,213": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "peachpuff;#FFDAB9;255,218,185", HX, vbTextCompare) Then xRGBCl = "peachpuff;#FFDAB9;255,218,185": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "peru;#CD853F;205,133,63", HX, vbTextCompare) Then xRGBCl = "peru;#CD853F;205,133,63": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "pink;#FFC0CB;255,192,203", HX, vbTextCompare) Then xRGBCl = "pink;#FFC0CB;255,192,203": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "plum;#DDA0DD;221,160,221", HX, vbTextCompare) Then xRGBCl = "plum;#DDA0DD;221,160,221": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "powderblue;#B0E0E6;176,224,230", HX, vbTextCompare) Then xRGBCl = "powderblue;#B0E0E6;176,224,230": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "purple;#800080;128,0,128", HX, vbTextCompare) Then xRGBCl = "purple;#800080;128,0,128": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "red;#FF0000;255,0,0", HX, vbTextCompare) Then xRGBCl = "red;#FF0000;255,0,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "rosybrown;#BC8F8F;188,143,143", HX, vbTextCompare) Then xRGBCl = "rosybrown;#BC8F8F;188,143,143": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "royalblue;#4169E1;65,105,225", HX, vbTextCompare) Then xRGBCl = "royalblue;#4169E1;65,105,225": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "saddlebrown;#8B4513;139,69,19", HX, vbTextCompare) Then xRGBCl = "saddlebrown;#8B4513;139,69,19": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "salmon;#FA8072;250,128,114", HX, vbTextCompare) Then xRGBCl = "salmon;#FA8072;250,128,114": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "sandybrown;#F4A460;244,164,96", HX, vbTextCompare) Then xRGBCl = "sandybrown;#F4A460;244,164,96": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "seagreen;#2E8B57;46,139,87", HX, vbTextCompare) Then xRGBCl = "seagreen;#2E8B57;46,139,87": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "seashell;#FFF5EE;255,245,238", HX, vbTextCompare) Then xRGBCl = "seashell;#FFF5EE;255,245,238": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "sienna;#A0522D;160,82,45", HX, vbTextCompare) Then xRGBCl = "sienna;#A0522D;160,82,45": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "silver;#C0C0C0;192,192,192", HX, vbTextCompare) Then xRGBCl = "silver;#C0C0C0;192,192,192": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "skyblue;#87CEEB;135,206,235", HX, vbTextCompare) Then xRGBCl = "skyblue;#87CEEB;135,206,235": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "slateblue;#6A5ACD;106,90,205", HX, vbTextCompare) Then xRGBCl = "slateblue;#6A5ACD;106,90,205": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "slategray;#708090;112,128,144", HX, vbTextCompare) Then xRGBCl = "slategray;#708090;112,128,144": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "snow;#FFFAFA;255,250,250", HX, vbTextCompare) Then xRGBCl = "snow;#FFFAFA;255,250,250": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "springgreen;#00FF7F;0,255,127", HX, vbTextCompare) Then xRGBCl = "springgreen;#00FF7F;0,255,127": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "steelblue;#4682B4;70,130,180", HX, vbTextCompare) Then xRGBCl = "steelblue;#4682B4;70,130,180": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "tan;#D2B48C;210,180,140", HX, vbTextCompare) Then xRGBCl = "tan;#D2B48C;210,180,140": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "teal;#008080;0,128,128", HX, vbTextCompare) Then xRGBCl = "teal;#008080;0,128,128": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "thistle;#D8BFD8;216,191,216", HX, vbTextCompare) Then xRGBCl = "thistle;#D8BFD8;216,191,216": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "tomato;#FF6347;255,99,71", HX, vbTextCompare) Then xRGBCl = "tomato;#FF6347;255,99,71": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "turquoise;#40E0D0;64,224,208", HX, vbTextCompare) Then xRGBCl = "turquoise;#40E0D0;64,224,208": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "violet;#EE82EE;238,130,238", HX, vbTextCompare) Then xRGBCl = "violet;#EE82EE;238,130,238": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "wheat;#F5DEB3;245,222,179", HX, vbTextCompare) Then xRGBCl = "wheat;#F5DEB3;245,222,179": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "white;#FFFFFF;255,255,255", HX, vbTextCompare) Then xRGBCl = "white;#FFFFFF;255,255,255": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "whitesmoke;#F5F5F5;245,245,245", HX, vbTextCompare) Then xRGBCl = "whitesmoke;#F5F5F5;245,245,245": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "yellow;#FFFF00;255,255,0", HX, vbTextCompare) Then xRGBCl = "yellow;#FFFF00;255,255,0": GoTo ColorFound
+X = X + 1: If X > (XH) Then I = I: If InStr(1, "yellowgreen;#9ACD32;154,205,50", HX, vbTextCompare) Then xRGBCl = "yellowgreen;#9ACD32;154,205,50": GoTo ColorFound
 
 Exit Function
 
@@ -2650,7 +2704,7 @@ ColorFound:
 xRGBArr = Split(xRGBCl, ";"): If HX = xRGBArr(0) Then HX = xRGBArr(2): Exit Function
 
 '//color not found
-xCl = X
+XH = X
 xNotColor = xRGBArr(2): GoTo Retry
 
 End Function
@@ -2658,41 +2712,23 @@ Private Function basBorder(BX) As Long
 
 '//check for border type
 Select Case BX
+Case Is = 0: BX = xlNone: Exit Function
+Case Is = 1: BX = xlDiagonalDown: Exit Function
+Case Is = 2: BX = xlDiagonalUp: Exit Function
+Case Is = 3: BX = xlEdgeBottom: Exit Function
+Case Is = 4: BX = xlEdgeLeft: Exit Function
+Case Is = 5: BX = xlEdgeRight: Exit Function
+Case Is = 6: BX = xlEdgeTop: Exit Function
+Case Is = 7: BX = xlInsideHorizontal: Exit Function
 
-Case Is = 0
-BX = xlNone: Exit Function
-Case Is = 1
-BX = xlDiagonalDown: Exit Function
-Case Is = 2
-BX = xlDiagonalUp: Exit Function
-Case Is = 3
-BX = xlEdgeBottom: Exit Function
-Case Is = 4
-BX = xlEdgeLeft: Exit Function
-Case Is = 5
-BX = xlEdgeRight: Exit Function
-Case Is = 6
-BX = xlEdgeTop: Exit Function
-Case Is = 7
-BX = xlInsideHorizontal: Exit Function
-
-Case Is = "none"
-BX = xlNone: Exit Function
-Case Is = "ddown"
-BX = xlDiagonalDown: Exit Function
-Case Is = "dup"
-BX = xlDiagonalUp: Exit Function
-Case Is = "bottom"
-BX = xlEdgeBottom: Exit Function
-Case Is = "left"
-BX = xlEdgeLeft: Exit Function
-Case Is = "right"
-BX = xlEdgeRight: Exit Function
-Case Is = "top"
-BX = xlEdgeTop: Exit Function
-Case Is = "inside"
-BX = xlInsideHorizontal: Exit Function
-
+Case Is = "none": BX = xlNone: Exit Function
+Case Is = "ddown": BX = xlDiagonalDown: Exit Function
+Case Is = "dup": BX = xlDiagonalUp: Exit Function
+Case Is = "bottom": BX = xlEdgeBottom: Exit Function
+Case Is = "left": BX = xlEdgeLeft: Exit Function
+Case Is = "right": BX = xlEdgeRight: Exit Function
+Case Is = "top": BX = xlEdgeTop: Exit Function
+Case Is = "inside": BX = xlInsideHorizontal: Exit Function
 End Select
 
 End Function
@@ -2700,41 +2736,23 @@ Private Function basBorderStyle(SX) As Long
 
 '//check for border style
 Select Case SX
+Case Is = 0: SX = xlNone: Exit Function
+Case Is = 1: SX = xlContinuous: Exit Function
+Case Is = 2: SX = xlDash: Exit Function
+Case Is = 3: SX = xlDot: Exit Function
+Case Is = 4: SX = xlDashDot: Exit Function
+Case Is = 5: SX = xlDashDotDot: Exit Function
+Case Is = 6: SX = xlSlantDashDot: Exit Function
+Case Is = 7: SX = xlDouble: Exit Function
 
-Case Is = 0
-SX = xlNone: Exit Function
-Case Is = 1
-SX = xlContinuous: Exit Function
-Case Is = 2
-SX = xlDash: Exit Function
-Case Is = 3
-SX = xlDot: Exit Function
-Case Is = 4
-SX = xlDashDot: Exit Function
-Case Is = 5
-SX = xlDashDotDot: Exit Function
-Case Is = 6
-SX = xlSlantDashDot: Exit Function
-Case Is = 7
-SX = xlDouble: Exit Function
-
-Case Is = "none"
-SX = xlNone: Exit Function
-Case Is = "line"
-SX = xlContinuous: Exit Function
-Case Is = "dash"
-SX = xlDash: Exit Function
-Case Is = "dot"
-SX = xlDot: Exit Function
-Case Is = "ddot"
-SX = xlDashDot: Exit Function
-Case Is = "ddotdot"
-SX = xlDashDotDot: Exit Function
-Case Is = "sddot"
-SX = xlSlantDashDot: Exit Function
-Case Is = "double"
-SX = xlDouble: Exit Function
-
+Case Is = "none": SX = xlNone: Exit Function
+Case Is = "line": SX = xlContinuous: Exit Function
+Case Is = "dash": SX = xlDash: Exit Function
+Case Is = "dot": SX = xlDot: Exit Function
+Case Is = "ddot": SX = xlDashDot: Exit Function
+Case Is = "ddotdot": SX = xlDashDotDot: Exit Function
+Case Is = "sddot": SX = xlSlantDashDot: Exit Function
+Case Is = "double": SX = xlDouble: Exit Function
 End Select
 
 End Function
@@ -2742,14 +2760,9 @@ Private Function basCompare(CX) As Long
 
 '//check for comparison type
 Select Case CX
-
-Case Is = 0
-CX = vbBinaryCompare: Exit Function
-Case Is = 1
-CX = vbDatabaseCompare: Exit Function
-Case Is = 2
-CX = vbTextCompare: Exit Function
-
+Case Is = 0: CX = vbBinaryCompare: Exit Function
+Case Is = 1: CX = vbDatabaseCompare: Exit Function
+Case Is = 2: CX = vbTextCompare: Exit Function
 End Select
 
 End Function
@@ -2757,49 +2770,27 @@ Private Function basPattern(PX) As Long
  
 '//check for pattern
 Select Case PX
+Case Is = 0: PX = xlNone: Exit Function
+Case Is = 1: PX = xlPatternChecker: Exit Function
+Case Is = 2: PX = xlPatternCrissCross: Exit Function
+Case Is = 3: PX = xlPatternDown: Exit Function
+Case Is = 4: PX = xlPatternHorizontal: Exit Function
+Case Is = 5: PX = xlPatternLightDown: Exit Function
+Case Is = 6: PX = xlPatternLightHorizontal: Exit Function
+Case Is = 7: PX = xlPatternLightUp: Exit Function
+Case Is = 8: PX = xlPatternLightVertical: Exit Function
+Case Is = 9: PX = xlPatternUp: Exit Function
 
-Case Is = 0
-PX = xlNone: Exit Function
-Case Is = 1
-PX = xlPatternChecker: Exit Function
-Case Is = 2
-PX = xlPatternCrissCross: Exit Function
-Case Is = 3
-PX = xlPatternDown: Exit Function
-Case Is = 4
-PX = xlPatternHorizontal: Exit Function
-Case Is = 5
-PX = xlPatternLightDown: Exit Function
-Case Is = 6
-PX = xlPatternLightHorizontal: Exit Function
-Case Is = 7
-PX = xlPatternLightUp: Exit Function
-Case Is = 8
-PX = xlPatternLightVertical: Exit Function
-Case Is = 9
-PX = xlPatternUp: Exit Function
-
-Case Is = "none"
-PX = xlNone: Exit Function
-Case Is = "pcheck"
-PX = xlPatternChecker: Exit Function
-Case Is = "pcross"
-PX = xlPatternCrissCross: Exit Function
-Case Is = "pdown"
-PX = xlPatternDown: Exit Function
-Case Is = "phori"
-PX = xlPatternHorizontal: Exit Function
-Case Is = "pldown"
-PX = xlPatternLightDown: Exit Function
-Case Is = "plhori"
-PX = xlPatternLightHorizontal: Exit Function
-Case Is = "plup"
-PX = xlPatternLightUp: Exit Function
-Case Is = "plvert"
-PX = xlPatternLightVertical: Exit Function
-Case Is = "pup"
-PX = xlPatternUp: Exit Function
-
+Case Is = "none": PX = xlNone: Exit Function
+Case Is = "pcheck": PX = xlPatternChecker: Exit Function
+Case Is = "pcross": PX = xlPatternCrissCross: Exit Function
+Case Is = "pdown": PX = xlPatternDown: Exit Function
+Case Is = "phori": PX = xlPatternHorizontal: Exit Function
+Case Is = "pldown": PX = xlPatternLightDown: Exit Function
+Case Is = "plhori": PX = xlPatternLightHorizontal: Exit Function
+Case Is = "plup": PX = xlPatternLightUp: Exit Function
+Case Is = "plvert": PX = xlPatternLightVertical: Exit Function
+Case Is = "pup": PX = xlPatternUp: Exit Function
 End Select
 
 End Function
@@ -2832,6 +2823,32 @@ End Function
 '/\_________________________________________________________________________________________________________________________
 '
 '
+' Version 1.1.0
+'
+' [ Date: 5/12/2022 ]
+'
+' (1): Associating names/syntax for xlAppScript parameters are now ".param" & modifiers "mod."
+'
+' Changes to variables/titling were made to reflect.
+'
+' (2): Added "get.", "post.", & "set." modifiers to "me()" article for retrieving, updating, & modifying X & Y coordinates for the currently
+' active WinForm.
+'
+' ---> "-x", "-y", & "-pos" switches for assigning arguments to a specific position or both using "-pos"
+'
+'
+' Version 1.0.9
+'
+' [ Date: 5/4/2022 ]
+'
+' (1): Added ".value2" parameter to "rng()", "sel()" & "cell()" articles
+'
+' This method is slightly more efficient than using ".value" for dealing w/ cell values (not including 'Date' cell types)
+'
+' (2): Adjusted parsing properties in "rng().value", "sel().value" & "cell().value" & ".value2" variations to accept a null
+' value for clearing a cell.
+'
+'
 ' Version 1.0.8
 '
 ' [ Date: 4/24/2022 ]
@@ -2840,7 +2857,7 @@ End Function
 '     []
 '   _[__]_
 '  [______]
-' [________] Happy Birthday André! :)
+' [________] Happy Birthday AndrÃ©! :)
 '
 '
 '
@@ -2857,9 +2874,9 @@ End Function
 ' [ Date: 4/21/2022 ]
 '
 '
-' (1): Added extended syntax functionality for "cell()", "rng()", & "sel()" article modifiers
+' (1): Added extended syntax functionality for "cell()", "rng()", & "sel()" article parameters
 '
-' These article modifiers can now be typed like:
+' These article parameters can now be typed like:
 '
 ' cell(1,1).value @var; or cell(1,1).value(@var);
 '
@@ -2871,7 +2888,7 @@ End Function
 '
 ' (4): Added "--enableerr" & "--disableerr" flags for setting the library error level
 '
-' (5): Added ".move" modifier for "q()" article to query & move files/folders
+' (5): Added ".move" parameter for "q()" article to query & move files/folders
 '
 '
 '
@@ -2971,7 +2988,7 @@ End Function
 '
 ' [ Date: 3/9/2022 ]
 '
-' (1): Added "fil()" & "dir()" articles & reworked them to include enhancers "mk." & "del."
+' (1): Added "fil()" & "dir()" articles & reworked them to include modifiers "mk." & "del."
 '
 '
 ' [ Date: 3/8/2022 ]
@@ -3115,11 +3132,13 @@ End Function
 '
 ' [ Date: 1/5/2022 ]
 '
+' [ Edited: 5/4/2022 ]
+'
 ' (1) Added "repl()" article to replace a value within a string
 '
 ' Syntax: @var = repl(@strToReplace, @strToFind, @strToReplace, @compType)
 '
-' ***If using 3 parameters like: @var = repl(@strToReplace, @strToFind, @strToReplace) the default comparison method
+' ***If using 3 arguments like: @var = repl(@strToReplace, @strToFind, @strToReplace) the default comparison method
 ' will be binary.
 '
 '
