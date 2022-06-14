@@ -14,7 +14,7 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     xbas (basic) Library
-'//        Version: 1.1.0
+'//        Version: 1.1.1
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     License Information:
@@ -45,7 +45,7 @@ Public Function runLib$(xArt)
 '//                             (previous versions not tested &/or unsupported)
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Latest Revision: 5/11/2022
+'//     Latest Revision: 6/7/2022
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     Developer(s): anz7re
@@ -1804,6 +1804,22 @@ If UBound(xArtArr) = 1 Then xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1
 End If
 
 Exit Function
+
+'//Perform mathematics...
+ElseIf InStr(1, xArt, "sum(", vbTextCompare) Then
+
+xArt = Replace(xArt, "sum(", vbNullString, , , vbTextCompare)
+Call modArtP(xArt): Call modArtQ(xArt)
+
+xArtArr = Split(xArt, "=") '//find variable
+
+Workbooks(appEnv).Worksheets(appBlk).Range("xlasBlkAddr138").Value2 = "=SUM(" & xArtArr(1) & ")"
+xArtArr(1) = Workbooks(appEnv).Worksheets(appBlk).Range("xlasBlkAddr138").Value2
+
+xArt = xArtArr(0) & "=" & xArtArr(1)
+
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+Exit Function
 '//#
 '//
 '/\_____________________________________
@@ -2822,6 +2838,18 @@ End Function
 '//         CHANGE LOG
 '/\_________________________________________________________________________________________________________________________
 '
+'
+' Version 1.1.1
+'
+' [ Date: 6/7/2022 ]
+'
+' (1): Added "sum()" article for performing mathematic operations
+'
+' Example(s):
+'
+' @x=sum(1+1); <-- Equals '2'
+' @x=sum(1*10); <-- Equals '10'
+' @x=sum(((1+1)/1)*5); <-- Equals '10'
 '
 ' Version 1.1.0
 '
