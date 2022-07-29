@@ -14,7 +14,7 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     xbas (basic) Library
-'//        Version: 1.1.1
+'//        Version: 1.1.2
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     License Information:
@@ -45,7 +45,7 @@ Public Function runLib$(xArt)
 '//                             (previous versions not tested &/or unsupported)
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Latest Revision: 6/7/2022
+'//     Latest Revision: 7/26/2022
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     Developer(s): anz7re
@@ -67,7 +67,7 @@ Public Function runLib$(xArt)
         Call modArtQ(xArt)
         
         '//Find application environment & block
-        Call fndEnvironment(appEnv, appBlk)
+        Call getEnvironment(appEnv, appBlk)
         
         '//Find flags
         If InStr(1, xArt, "--") Or InStr(1, xArt, "++") Then _
@@ -708,7 +708,7 @@ If xArt = vbNullString Then ActiveWorkbook.Close: Exit Function Else _
 Workbooks(xArt).Close: Exit Function '//close workbook
 
 'If InStr(1, xArt, ").export", vbTextCompare) Then ActiveWorkbook.ExportAsFixedFormat = vbnullstring '//export file
-If InStr(1, xArt, ").nwin", vbTextCompare) Then ActiveWorkbook.NewWindow: Exit Function '//create new window
+If InStr(1, xArt, ").newwin", vbTextCompare) Then ActiveWorkbook.NewWindow: Exit Function '//create new window
 
 If InStr(1, xArt, ").save", vbTextCompare) And InStr(1, xArt, ").saveas", vbTextCompare) = False Then _
 xArt = Replace(xArt, ".save", vbNullString, , , vbTextCompare): _
@@ -736,12 +736,12 @@ End If
 If InStr(1, xArt, ").name", vbTextCompare) Then MsgBox (ActiveWorkbook.name), 0, "": Exit Function '//get name of workbook
 If InStr(1, xArt, ").path", vbTextCompare) Then MsgBox (ActiveWorkbook.Path), 0, "": Exit Function '//get path of workbook
 
-If InStr(1, xArt, ").add", vbTextCompare) Then '//add worksheet
+If InStr(1, xArt, ").addsheet", vbTextCompare) Then '//add worksheet
 
 Call modArtP(xArt): Call modArtQ(xArt)
 
-If InStr(1, xArt, ").addafter", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".addafter", vbNullString, , , vbTextCompare) '//add after worksheet
-If InStr(1, xArt, ").addbefore", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".addbefore", vbNullString, , , vbTextCompare) '//add before worksheet
+If InStr(1, xArt, ").addsheetafter", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".addafter", vbNullString, , , vbTextCompare) '//add after worksheet
+If InStr(1, xArt, ").addsheetbefore", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".addbefore", vbNullString, , , vbTextCompare) '//add before worksheet
 
 xArt = Replace(xArt, ".add", vbNullString, , , vbTextCompare)
 If xArt = vbNullString Then '//default add no arguments
@@ -767,11 +767,11 @@ If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(
                     End If
                         End If
         
-If InStr(1, xArt, ").new", vbTextCompare) Then '//add new workbook
+If InStr(1, xArt, ").newbook", vbTextCompare) Then '//add new workbook
 
 Call modArtP(xArt): Call modArtQ(xArt)
 
-xArt = Replace(xArt, ".new", vbNullString, , , vbTextCompare)
+xArt = Replace(xArt, ".newbook", vbNullString, , , vbTextCompare)
 xArtArr = Split(xArt, ",")
 If UBound(xArtArr) = 1 Then
 EX = xArtArr(1): Call basSaveFormat(EX)
@@ -1160,7 +1160,7 @@ If InStr(1, xArt, "h", vbTextCompare) Then xHrArr = Split(xArt, "h", , vbTextCom
 '//set millisecond
 If xMil = "T" Then
 xArt = xTimeArr(0)
-Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 xArt = -1 * (xArt * -0.00000001)
 Application.Wait (Now + xArt)
 Exit Function
@@ -1169,7 +1169,7 @@ End If
 '//set second
 If xSec = "T" Then
 xArt = xTimeArr(1)
-Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 If Len(xTimeArr(1)) < 2 Then
 xTimeArr(1) = "0" & xTimeArr(1): xSec = xTimeArr(1)
 Else: xSec = xTimeArr(1)
@@ -1180,7 +1180,7 @@ End If
 '//set minute
 If xMin = "T" Then
 xArt = xTimeArr(2)
-Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 If Len(xTimeArr(2)) < 2 Then
 xTimeArr(2) = "0" & xTimeArr(2): xMin = xTimeArr(2)
 Else: xMin = xTimeArr(2)
@@ -1191,7 +1191,7 @@ End If
 '//set hour
 If xHr = "T" Then
 xArt = xTimeArr(3)
-Call xlAppScript_lex.fndChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
 If Len(xTimeArr(3)) < 2 Then
 xTimeArr(3) = "0" & xTimeArr(3): xHr = xTimeArr(3)
 Else: xHr = xTimeArr(3)
@@ -1464,21 +1464,10 @@ Exit Function
 '//Trim starting & ending string by similiar character...
 ElseIf InStr(1, xArt, "ptrim(", vbTextCompare) Then
 
+If InStr(1, xArt, "lptrim", vbTextCompare) Then GoTo rmvLParen
+If InStr(1, xArt, "rptrim", vbTextCompare) Then GoTo rmvRParen
+
 xArt = Replace(xArt, "ptrim(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
-
-xVarArr = Split(xArt, "=") '//find variable
-If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
-
-If Left(xVarArr(1), 1) = "(" Then xVarArr(1) = Right(xVarArr(1), Len(xVarArr(1)) - 1):
-If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 2):
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
-Exit Function
-
-'//Trim char/string by starting left facing parentheses...
-ElseIf InStr(1, xArt, "lptrim(", vbTextCompare) Then
-
-xArt = Replace(xArt, "lptrim(", vbNullString, , , vbTextCompare)
 Call modArtQ(xArt)
 
 xVarArr = Split(xArt, "=") '//find variable
@@ -1489,8 +1478,21 @@ If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Le
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
+'//Trim char/string by starting left facing parentheses...
+rmvLParen:
+
+xArt = Replace(xArt, "lptrim(", vbNullString, , , vbTextCompare)
+Call modArtQ(xArt)
+
+xVarArr = Split(xArt, "=") '//find variable
+If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
+
+If Left(xVarArr(1), 1) = "(" Then xArt = xVarArr(0) & "=" & Right(xVarArr(1), Len(xVarArr(1)) - 1):
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+Exit Function
+
 '//Trim char/string by ending right facing parentheses...
-ElseIf InStr(1, xArt, "rptrim(", vbTextCompare) Then
+rmvRParen:
 
 xArt = Replace(xArt, "rptrim(", vbNullString, , , vbTextCompare)
 Call modArtQ(xArt)
@@ -1498,7 +1500,7 @@ Call modArtQ(xArt)
 xVarArr = Split(xArt, "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
 
-If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 2): _
+If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1): _
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
@@ -1873,7 +1875,7 @@ Exit Function
         xArt = Replace(xArt, "winform(", vbNullString, , , vbTextCompare)
         Call modArtP(xArt): Call modArtQ(xArt)
         
-        Call xlAppScript_lex.fndChar(xArt)
+        Call xlAppScript_lex.getChar(xArt)
         If xArt = "(*Err)" Then Exit Function
         
         Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = xArt
@@ -1896,7 +1898,7 @@ Private Function libFlag$(xArt, errLvl As Byte)
 '//
 On Error GoTo ErrMsg
 
-Call fndEnvironment(appEnv, appBlk)
+Call getEnvironment(appEnv, appBlk)
 
 '//Create runtime error
 If InStr(1, xArt, "--err", vbTextCompare) Then xArt = "(*Err)"
@@ -2080,7 +2082,7 @@ Public Function basGetWinFormPos(ByVal xWin As Object, X, Y) As Integer
 '///#######################\\\
 On Error Resume Next
 
-If xWin.name = vbNullString Then Call fndWindow(xWin)
+If xWin.name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then X = xWin.Left
 If Y = 0 Then Y = xWin.Top
 Set xWin = Nothing
@@ -2091,11 +2093,11 @@ Public Function basPostWinFormPos(ByVal xWin As Object, ByVal X As Integer, ByVa
 '/#########################\
 '// Post WinForm Position #\\
 '///#######################\\\
-Call fndEnvironment(appEnv, appBlk)
+Call getEnvironment(appEnv, appBlk)
 
 On Error Resume Next
 
-If xWin.name = vbNullString Then Call fndWindow(xWin)
+If xWin.name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then X = xWin.Left
 If Y = 0 Then Y = xWin.Top
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 = X
@@ -2108,11 +2110,11 @@ Public Function basSetWinFormPos(ByVal xWin As Object, ByVal X As Integer, ByVal
 '/#########################\
 '// Set WinForm Position  #\\
 '///#######################\\\
-Call fndEnvironment(appEnv, appBlk)
+Call getEnvironment(appEnv, appBlk)
 
 On Error Resume Next
 
-If xWin.name = vbNullString Then Call fndWindow(xWin)
+If xWin.name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then xWin.Left = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 Else xWin.Left = X
 If Y = 0 Then xWin.Top = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormY").Value2 Else xWin.Top = Y
 Set xWin = Nothing
@@ -2837,6 +2839,25 @@ End Function
 '//
 '//         CHANGE LOG
 '/\_________________________________________________________________________________________________________________________
+'
+' Version 1.1.2
+'
+' [ Date: 7/26/2022 ]
+'
+' (1): Fixed issue w/ "lptrim()" & "rptrim()" articles triggering the "ptrim()" article b/c of similiarities in name
+'
+' (2): Changed "wb()" parameters...
+'
+'  wb().add --> wb().addsheet
+'  wb().addafter --> wb().addsheetafter
+'  wb().addbefore --> wb().addsheetbefore
+'  wb().new --> wb().newbook
+'  wb().nwin --> wb().newwin
+'
+'
+' [ Date: 6/28/2022 ]
+'
+' (1): Changes to various lexer functions were reflected
 '
 '
 ' Version 1.1.1
