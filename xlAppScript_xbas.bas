@@ -14,7 +14,7 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     xbas (basic) Library
-'//        Version: 1.1.2
+'//        Version: 1.1.3
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     License Information:
@@ -45,7 +45,7 @@ Public Function runLib$(xArt)
 '//                             (previous versions not tested &/or unsupported)
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Latest Revision: 7/26/2022
+'//     Latest Revision: 8/11/2022
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     Developer(s): anz7re
@@ -54,10 +54,11 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
         
         '//Library variable declarations
-        Dim oFSO As Object: Dim oDrv As Object: Dim oFile As Object: Dim oSubFldr As Object: Dim xWin As Object
-        Dim appEnv As String: Dim appBlk As String: Dim xCell As String: Dim FX As String: Dim HX As String
-        Dim sysShell As String: Dim wbMacro As String: Dim xArtArr() As String: Dim xArtH As String: Dim xArtArrH() As String
-        Dim xExt As String: Dim xExtArr() As String: Dim xRGBArr() As String: Dim xMod As String: Dim xWb As String: Dim xVar As String
+        Dim oFSO As Object: Dim oDrv As Object: Dim oFile As Object: Dim oSubFldr As Object: Dim oShell As Object: Dim oShellItem As Object: Dim xWin As Object
+        Dim appEnv As String: Dim appBlk As String: Dim FX As String: Dim HX As String
+        Dim sysShell As String: Dim wbMacro As String: Dim xArtH As String
+        Dim xArg As String: Dim xDir As String: Dim xCell As String: Dim xExt As String: Dim xMod As String: Dim xWb As String: Dim xVar As String: Dim xVar2 As String
+        Dim xArtArr() As String:  Dim xArtArrH() As String: Dim xExtArr() As String: Dim xRGBArr() As String
         Dim BX As Long: Dim EX As Long: Dim CX As Long: Dim PX As Long: Dim SX As Long: Dim TX As Long: Dim x1 As Long: Dim y1 As Long: Dim x2 As Long: Dim y2 As Long
         Dim K As Byte: Dim M As Byte: Dim S As Byte: Dim P As Byte: Dim T As Byte: Dim errLvl As Byte
         Dim X As Variant: Dim Y As Variant
@@ -107,16 +108,21 @@ xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
 xArt = Replace(xArt, "name(", vbNullString, , , vbTextCompare)
 Call modArtQ(xArt)
 
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox (Application.name): Exit Function '//no excerpt provided
+If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox (Application.Name): Exit Function '//no excerpt provided
 Exit Function
 
-'//Application run module...
+'//Application run...
 ElseIf InStr(1, xArt, "run(", vbTextCompare) Then
 
 xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
 xArt = Replace(xArt, "run(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+Call modArtP(xArt): Call modArtQ(xArt)
 
+'//switches
+If InStr(1, xArt, "-xlas", vbTextCompare) Then xArt = Replace(xArt, "-xlas", vbNullString, , , vbTextCompare): S = 7
+
+'//run VBA module
+If S = 0 Then
 If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else X = Application.Run(xArt): Exit Function '//no arguments provided
 xMod = xArtArr(0) '//extract module
 
@@ -130,6 +136,15 @@ xArt = xArtH
 If Right(xArt, Len(xArt) - Len(xArt) + 1) = "," Then xArt = Left(xArt, Len(xArt) - 1)
 
 X = Application.Run(xMod, (xArt))
+Exit Function
+    
+'//run xlas script
+ElseIf S = 7 Then xArt = Trim(xArt): _
+Open xArt For Input As #7: xArt = vbNullString: _
+Do Until EOF(7): Line Input #7, xArtH: xArt = xArt & xArtH: Loop: Close #7: xArt = xArt & "$": Call lexKey(xArt): Exit Function
+
+End If
+
 Exit Function
 '//#
 '//
@@ -223,10 +238,10 @@ xArtArr(X) = Replace(xArtArr(X), "name(", vbNullString, , , vbTextCompare)
 xArt = xArtArr(X): Call modArtP(xArt)
 '//no name entered (clear name)
 If xArtArr(X) = vbNullString Then
-xArtArr(X) = Cells(x1, y1).name.name
+xArtArr(X) = Cells(x1, y1).Name.Name
 ActiveWorkbook.Names(xArtArr(X)).Delete
     Else
-        Cells(x1, y1).name = xArtArr(X)
+        Cells(x1, y1).Name = xArtArr(X)
             End If
                 End If
 '//Set cell value2...
@@ -397,10 +412,10 @@ xArtArr(X) = Replace(xArtArr(X), "name ", vbNullString, , , vbTextCompare)
 xArtArr(X) = Replace(xArtArr(X), "name(", vbNullString, , , vbTextCompare)
 '//no name entered (clear name)
 If xArtArr(X) = vbNullString Then
-xArtArr(X) = Range(xArtArr(0)).name.name
+xArtArr(X) = Range(xArtArr(0)).Name.Name
 ActiveWorkbook.Names(xArtArr(X)).Delete
     Else
-        Range(xArtArr(0)).name = xArtArr(X)
+        Range(xArtArr(0)).Name = xArtArr(X)
             End If
                 End If
 '//Set range value2...
@@ -570,10 +585,10 @@ xArtArr(X) = Replace(xArtArr(X), "name ", vbNullString, , , vbTextCompare)
 xArtArr(X) = Replace(xArtArr(X), "name(", vbNullString, , , vbTextCompare)
 '//no name entered (clear name)
 If xArtArr(X) = vbNullString Then
-xArtArr(X) = Range(xArtArr(0)).name.name
+xArtArr(X) = Range(xArtArr(0)).Name.Name
 ActiveWorkbook.Names(xArtArr(X)).Delete
     Else
-        Range(xArtArr(0)).name = xArtArr(X)
+        Range(xArtArr(0)).Name = xArtArr(X)
             End If
                 End If
 '//Set cell value2...
@@ -682,8 +697,8 @@ If InStr(1, xArt, ").active", vbTextCompare) Then '//activate specific workbook
 xArt = Replace(xArt, ".active", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 Workbooks(xArt).Activate
-Range("MAS2").name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
-Range("MAS3").name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
+Range("MAS2").Name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
+Range("MAS3").Name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
 Exit Function
 End If
 
@@ -692,8 +707,8 @@ If InStr(1, xArt, ").open", vbTextCompare) Then '//open workbook
 xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 Workbooks.Open (xArt)
-Range("MAS2").name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
-Range("MAS3").name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
+Range("MAS2").Name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
+Range("MAS3").Name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
 Workbooks(appEnv).Worksheets(appBlk).Activate
 Exit Function
 End If
@@ -724,16 +739,16 @@ xArt = Replace(xArt, ".saveas", vbNullString, , , vbTextCompare)
 xArtArr = Split(xArt, ",")
 If UBound(xArtArr) = 1 Then
 EX = xArtArr(1): Call basSaveFormat(EX)
-If EX <> "(*Err)" Then
-Range("MAS2").name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
-Range("MAS3").name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
+If EX <> "*/ERR" Then
+Range("MAS2").Name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
+Range("MAS3").Name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
 ActiveWorkbook.SaveAs FileName:=xArtArr(0), FileFormat:=xExt
 End If
     End If
         Exit Function
             End If
     
-If InStr(1, xArt, ").name", vbTextCompare) Then MsgBox (ActiveWorkbook.name), 0, "": Exit Function '//get name of workbook
+If InStr(1, xArt, ").name", vbTextCompare) Then MsgBox (ActiveWorkbook.Name), 0, "": Exit Function '//get name of workbook
 If InStr(1, xArt, ").path", vbTextCompare) Then MsgBox (ActiveWorkbook.Path), 0, "": Exit Function '//get path of workbook
 
 If InStr(1, xArt, ").addsheet", vbTextCompare) Then '//add worksheet
@@ -746,7 +761,7 @@ If InStr(1, xArt, ").addsheetbefore", vbTextCompare) Then P = 2: xArt = Replace(
 xArt = Replace(xArt, ".add", vbNullString, , , vbTextCompare)
 If xArt = vbNullString Then '//default add no arguments
 xArt = "Sheet" & ActiveWorkbook.Worksheets.Count + 1
-Worksheets.Add.name = xArt
+Worksheets.Add.Name = xArt
 Exit Function
 End If
 
@@ -758,12 +773,12 @@ If P = 2 Then Worksheets.Add Before:=Worksheets(Worksheets.Count), Count:=Int(xA
 xArtArr = Split(xArt, ",")
 If UBound(xArtArr) = 1 Then
 '//two arguments... (set add worksheet name & place before or after assigned sheet
-If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0))).name = xArtArr(1): Exit Function
-If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0))).name = xArtArr(1): Exit Function
+If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0))).Name = xArtArr(1): Exit Function
+If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0))).Name = xArtArr(1): Exit Function
 ElseIf UBound(xArtArr) = 2 Then
 '//three arguments... (set add worksheet name & place before or after assigned  sheet w/ count)
-If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).name = xArtArr(1): Exit Function
-If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).name = xArtArr(1): Exit Function
+If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).Name = xArtArr(1): Exit Function
+If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).Name = xArtArr(1): Exit Function
                     End If
                         End If
         
@@ -775,7 +790,7 @@ xArt = Replace(xArt, ".newbook", vbNullString, , , vbTextCompare)
 xArtArr = Split(xArt, ",")
 If UBound(xArtArr) = 1 Then
 EX = xArtArr(1): Call basSaveFormat(EX)
-If EX <> "(*Err)" Then
+If EX <> "*/ERR" Then
 Application.Workbooks.Add.SaveAs FileName:=xArtArr(0), FileFormat:=xExt
 Workbooks(appEnv).Worksheets(appBlk).Activate
 End If
@@ -832,7 +847,7 @@ Exit Function
 End If
 
 '//excerpt not supplied
-MsgBox (ActiveWorkbook.name)
+MsgBox (ActiveWorkbook.Name)
 Exit Function
 '//#
 '//
@@ -1160,7 +1175,7 @@ If InStr(1, xArt, "h", vbTextCompare) Then xHrArr = Split(xArt, "h", , vbTextCom
 '//set millisecond
 If xMil = "T" Then
 xArt = xTimeArr(0)
-Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
 xArt = -1 * (xArt * -0.00000001)
 Application.Wait (Now + xArt)
 Exit Function
@@ -1169,7 +1184,7 @@ End If
 '//set second
 If xSec = "T" Then
 xArt = xTimeArr(1)
-Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
 If Len(xTimeArr(1)) < 2 Then
 xTimeArr(1) = "0" & xTimeArr(1): xSec = xTimeArr(1)
 Else: xSec = xTimeArr(1)
@@ -1180,7 +1195,7 @@ End If
 '//set minute
 If xMin = "T" Then
 xArt = xTimeArr(2)
-Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
 If Len(xTimeArr(2)) < 2 Then
 xTimeArr(2) = "0" & xTimeArr(2): xMin = xTimeArr(2)
 Else: xMin = xTimeArr(2)
@@ -1191,7 +1206,7 @@ End If
 '//set hour
 If xHr = "T" Then
 xArt = xTimeArr(3)
-Call xlAppScript_lex.getChar(xArt): If xArt = "(*Err)" Then GoTo ErrMsg
+Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
 If Len(xTimeArr(3)) < 2 Then
 xTimeArr(3) = "0" & xTimeArr(3): xHr = xTimeArr(3)
 Else: xHr = xTimeArr(3)
@@ -1213,9 +1228,9 @@ Else
                     End If
 Exit Function
 
-'//Waste time...
-ElseIf InStr(1, xArt, "wastetime(", vbTextCompare) Then
-xArt = Replace(xArt, "wastetime(", vbNullString, , , vbTextCompare)
+'//Delay event...
+ElseIf InStr(1, xArt, "delayevent(", vbTextCompare) Then
+xArt = Replace(xArt, "delayevent(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
 For TX = 0 To xArt * 360: T = 1: Call basWasteTime(T): Next
 Exit Function
@@ -1271,7 +1286,7 @@ Call modArtP(xArt)
 ElseIf InStr(1, xArt, "host(", vbTextCompare) Then
 
    xArt = Replace(xArt, "host(", vbNullString, , , vbTextCompare)
-   Call modArtQ(xArt)
+   Call modArtP(xArt): Call modArtQ(xArt)
    If Right(xArt, 1) = ")" Then xArt = Left(xArt, Len(xArt) - 1)
    MsgBox (xArt)
    Exit Function
@@ -1592,7 +1607,7 @@ Exit Function
 '//      SYSTEM SHELL/PC ARTICLES
 '/\_____________________________________
 '//
-'//System shell...
+'//Quick shell...
 ElseIf InStr(1, xArt, "sh(", vbTextCompare) Then
 
 If InStr(1, xArt, "h(0)", vbTextCompare) Then P = 0: xArt = Replace(xArt, "sh(0)", vbNullString, , , vbTextCompare): GoTo setSh
@@ -1617,14 +1632,107 @@ setSh:
    sysShell = vbNullString
    Exit Function
 
+'//System shell...
+ElseIf InStr(1, xArt, "shell32(", vbTextCompare) Then
+
+xArt = Replace(xArt, "shell32(", vbNullString, , , vbTextCompare)
+
+'//parameters
+If InStr(1, xArt, ".execute", vbTextCompare) Then
+P = 1: xArt = Replace(xArt, ".execute", vbNullString, , , vbTextCompare)
+'//switches
+If InStr(1, xArt, "-hidden", vbTextCompare) Then xArt = Replace(xArt, "-hidden", vbNullString, , , vbTextCompare): S = 0: GoTo GetSh32
+If InStr(1, xArt, "-normal", vbTextCompare) Then xArt = Replace(xArt, "-normal", vbNullString, , , vbTextCompare): S = 1: GoTo GetSh32
+If InStr(1, xArt, "-minimized", vbTextCompare) Then xArt = Replace(xArt, "-minimized", vbNullString, , , vbTextCompare): S = 2: GoTo GetSh32
+If InStr(1, xArt, "-maximized", vbTextCompare) Then xArt = Replace(xArt, "-maximized", vbNullString, , , vbTextCompare): S = 3: GoTo GetSh32
+'//parameters
+ElseIf InStr(1, xArt, ".namespace", vbTextCompare) Then
+P = 2: xArt = Replace(xArt, ".namespace", vbNullString, , , vbTextCompare)
+'//switches
+If InStr(1, xArt, "-date", vbTextCompare) Then xArt = Replace(xArt, "-date", vbNullString, , , vbTextCompare): S = 1: GoTo GetSh32
+If InStr(1, xArt, "-name", vbTextCompare) Then xArt = Replace(xArt, "-name", vbNullString, , , vbTextCompare): S = 2: GoTo GetSh32
+If InStr(1, xArt, "-path", vbTextCompare) Then xArt = Replace(xArt, "-path", vbNullString, , , vbTextCompare): S = 3: GoTo GetSh32
+If InStr(1, xArt, "-size", vbTextCompare) Then xArt = Replace(xArt, "-size", vbNullString, , , vbTextCompare): S = 4: GoTo GetSh32
+If InStr(1, xArt, "-type", vbTextCompare) Then xArt = Replace(xArt, "-type", vbNullString, , , vbTextCompare): S = 5: GoTo GetSh32
+'//parameters
+ElseIf InStr(1, xArt, ".information", vbTextCompare) Then
+P = 3: xArt = Replace(xArt, ".information", vbNullString, , , vbTextCompare)
+GoTo GetSh32
+End If
+
+GetSh32:
+Set oShell = CreateObject("Shell.Application")
+
+xArtArr = Split(xArt, "=") '//find variable
+
+xArt = xArtArr(1): Call modArtP(xArt): xArt = Trim(xArt)
+
+'//execute
+If P = 1 Then
+If InStr(1, xArt, ",") Then
+xArtArrH = Split(xArt, ",")
+If UBound(xArtArrH) >= 0 Then xArt = Trim(xArtArrH(0))
+If UBound(xArtArrH) >= 1 Then xArg = Trim(xArtArrH(1))
+If UBound(xArtArrH) >= 2 Then xDir = Trim(xArtArrH(2))
+If UBound(xArtArrH) >= 3 Then xVar = Trim(xArtArrH(3))
+If UBound(xArtArrH) >= 4 Then S = Trim(xArtArrH(4))
+End If
+
+oShell.ShellExecute xArt, xArg, xDir, xVar, S
+
+Set oShell = Nothing
+
+xArt = xArtArr(0) & "=" & xArt
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Exit Function
+
+'//namespace
+ElseIf P = 2 Then
+FX = xArt: Call basShell32Namespace(FX)
+If FX <> "*/PATH" Then
+Set oShellItem = oShell.Namespace(((CInt(FX))))
+    Else
+        Set oShellItem = oShell.Namespace((xArt))
+            End If
+
+If S = 1 Then xArt = oShellItem.Self.ModifyDate: GoTo SetSh32
+If S = 2 Then xArt = oShellItem.Self.Name: GoTo SetSh32
+If S = 3 Then xArt = oShellItem.Self.Path: GoTo SetSh32
+If S = 4 Then xArt = oShellItem.Self.Size: GoTo SetSh32
+If S = 5 Then xArt = oShellItem.Self.Type: GoTo SetSh32
+
+Set oShell = Nothing: Set oShellItem = Nothing
+
+SetSh32:
+xArt = xArtArr(0) & "=" & xArt
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Exit Function
+
+'//system information
+ElseIf P = 3 Then
+FX = xArt: Call basShell32GetSysInfo(FX)
+If FX <> "*/ERR" Then
+
+xArt = oShell.GetSystemInformation(FX)
+
+Set oShell = Nothing
+
+xArt = xArtArr(0) & "=" & xArt
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+End If
+Exit Function
+        End If
+
+'//no parameter...
+oShell.ShellExecute xArt
+xArt = xArtArr(0) & "=" & xArt
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Exit Function
+
 '//PC articles...
 ElseIf InStr(1, xArt, "pc(", vbTextCompare) Then
 
 xArt = Replace(xArt, "pc", vbNullString, , , vbTextCompare)
-
-'//switches
-If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = 1
-If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = 2
 
 '//parameters
 If InStr(1, xArt, ".exist", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo SetPC
@@ -1633,6 +1741,10 @@ If InStr(1, xArt, ".open", vbTextCompare) Then P = 3: xArt = Replace(xArt, ".ope
 If InStr(1, xArt, ".stop", vbTextCompare) Then P = 4: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo SetPC
 
 SetPC:
+'//switches
+If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = 1
+If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = 2
+
 Call modArtP(xArt): Call modArtQ(xArt): xArt = Trim(xArt)
 
 '//file exists...
@@ -1705,12 +1817,6 @@ If P = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, v
 '//Query...
 ElseIf InStr(1, xArt, "q(", vbTextCompare) Then
 
-'//switches
-If InStr(1, xArt, "-loose", vbTextCompare) Then xArt = Replace(xArt, "-loose", vbNullString, , , vbTextCompare): S = 1
-If InStr(1, xArt, "-strict", vbTextCompare) Then xArt = Replace(xArt, "-strict", vbNullString, , , vbTextCompare): S = 2
-If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = S & 3
-If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = S & 4
-
 '//parameters
 If InStr(1, xArt, ".exist", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo setQ
 If InStr(1, xArt, ".del", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo setQ
@@ -1721,6 +1827,12 @@ If InStr(1, xArt, ".stop", vbTextCompare) Then P = 6: xArt = Replace(xArt, ".sto
 If P = 0 Then Exit Function
 
 setQ:
+'//switches
+If InStr(1, xArt, "-loose", vbTextCompare) Then xArt = Replace(xArt, "-loose", vbNullString, , , vbTextCompare): S = 1
+If InStr(1, xArt, "-strict", vbTextCompare) Then xArt = Replace(xArt, "-strict", vbNullString, , , vbTextCompare): S = 2
+If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = S & 3
+If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = S & 4
+
 xArtArr = Split(xArt, "q(", , vbTextCompare)
 If InStr(1, xArtArr(1), ",") Then xArtArr = Split(xArtArr(1), ","): _
 xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = Trim(xArt): xArt = xArtArr(0): _
@@ -1729,7 +1841,7 @@ xArt = xArtArr(1): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(1) = Trim(xAr
 Set oFSO = CreateObject("Scripting.FileSystemObject")
 Set oDrv = oFSO.GetFolder("C:\") '//set drive (default is C:)
 For Each oSubFldr In oDrv.SubFolders
-If InStr(1, xArt, oSubFldr.name, vbTextCompare) Then xSubFldr = oSubFldr.name: GoTo hQ '//check for folder match in drive
+If InStr(1, xArt, oSubFldr.Name, vbTextCompare) Then xSubFldr = oSubFldr.Name: GoTo hQ '//check for folder match in drive
 Next
 
 hQ:
@@ -1876,7 +1988,7 @@ Exit Function
         Call modArtP(xArt): Call modArtQ(xArt)
         
         Call xlAppScript_lex.getChar(xArt)
-        If xArt = "(*Err)" Then Exit Function
+        If xArt = "*/ERR" Then Exit Function
         
         Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = xArt
         
@@ -1886,7 +1998,7 @@ End If '//end
         
 ErrMsg:
 '//Article not found...
-If errLvl <> 0 Then xArt = xArt & "(*Err)"
+If errLvl <> 0 Then xArt = xArt & "*/ERR"
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasErrRef").Value = """" & xArt & """"
 End Function
 Private Function libFlag$(xArt, errLvl As Byte)
@@ -1901,7 +2013,7 @@ On Error GoTo ErrMsg
 Call getEnvironment(appEnv, appBlk)
 
 '//Create runtime error
-If InStr(1, xArt, "--err", vbTextCompare) Then xArt = "(*Err)"
+If InStr(1, xArt, "--err", vbTextCompare) Then xArt = "*/ERR"
 
 '//Run script w/ environment errors enabled (default)
 If InStr(1, xArt, "--enableerr", vbTextCompare) Then
@@ -1980,7 +2092,7 @@ Exit Function
 
 ErrMsg:
 '//flag not found...
-xArt = "(*Err)"
+xArt = "*/ERR"
 
 End Function
 Private Function libSwitch$(xArt, errLvl As Byte)
@@ -2003,7 +2115,7 @@ xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): Call modArtS(xArt): x
 If InStr(1, xArtArr(X), "date", vbTextCompare) Then xArt = Replace(xArt, "--date", Date, , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "day", vbTextCompare) Then xArt = Replace(xArt, "--day", Day(Date), , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "present", vbTextCompare) Then xArt = Replace(xArt, "--present", Date & " " & Time, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "me", vbTextCompare) Then xArt = Replace(xArt, "--me", ActiveWorkbook.name, , , vbTextCompare): GoTo NextStep
+If InStr(1, xArtArr(X), "me", vbTextCompare) Then xArt = Replace(xArt, "--me", ActiveWorkbook.Name, , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "month", vbTextCompare) Then xArt = Replace(xArt, "--month", Month(Date), , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "now", vbTextCompare) Then xArt = Replace(xArt, "--now", Time, , , vbTextCompare): GoTo NextStep
 If InStr(1, xArtArr(X), "null", vbTextCompare) Then xArt = Replace(xArt, "--null", vbNullString, , , vbTextCompare): GoTo NextStep
@@ -2021,7 +2133,13 @@ Exit Function
 
 ErrMsg:
 '//switch not found...
-xArt = "(*Err)"
+xArt = "*/ERR"
+
+End Function
+Private Function basWasteTime(ByVal T As Byte) As Byte
+
+T = T + 1: T = T - 1
+DoEvents
 
 End Function
 Private Function basClick(ByVal S As Byte, ByVal xPos As String)
@@ -2082,7 +2200,7 @@ Public Function basGetWinFormPos(ByVal xWin As Object, X, Y) As Integer
 '///#######################\\\
 On Error Resume Next
 
-If xWin.name = vbNullString Then Call getWindow(xWin)
+If xWin.Name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then X = xWin.Left
 If Y = 0 Then Y = xWin.Top
 Set xWin = Nothing
@@ -2097,7 +2215,7 @@ Call getEnvironment(appEnv, appBlk)
 
 On Error Resume Next
 
-If xWin.name = vbNullString Then Call getWindow(xWin)
+If xWin.Name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then X = xWin.Left
 If Y = 0 Then Y = xWin.Top
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 = X
@@ -2114,7 +2232,7 @@ Call getEnvironment(appEnv, appBlk)
 
 On Error Resume Next
 
-If xWin.name = vbNullString Then Call getWindow(xWin)
+If xWin.Name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then xWin.Left = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 Else xWin.Left = X
 If Y = 0 Then xWin.Top = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormY").Value2 Else xWin.Top = Y
 Set xWin = Nothing
@@ -2178,20 +2296,20 @@ qFldr:
 '//
 '//Query for folder...
 For Each oSubFldr In oDir.SubFolders
-QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
+QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
 If oFSO.FolderExists(QX) = True Then GoTo qFound
 
 '//loose match
-If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
+If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
 '//strict match
-If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
+If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
 Next
 
 Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase)
 
 '//search through local base drive directories
     For Each oSubFldr In oDir.SubFolders
-    QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
+    QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
     If Dir(QX) <> "" Then
     GoTo qFound
         Else: GoTo searchLocalFol
@@ -2204,16 +2322,16 @@ Set oLastDir = oDir
 For Each oSubFldr1 In oLastDir.SubFolders
 
 '//search through folders in local base drive directories
-Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.name)
+Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.Name)
 
                 For Each oSubFldr In oDir.SubFolders
                 QX = oSubFldr & "\" & xFind '//set query search to next folder
                 If oFSO.FolderExists(QX) = True Then GoTo qFound
                 
                 '//loose match
-                If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
+                If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
                 '//strict match
-                If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
+                If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
                 Next
                     Next
                     
@@ -2232,14 +2350,14 @@ Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.name)
 qFile:
 
 For Each oSubFldr In oDir.SubFolders
-QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
+QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
 If oFSO.FileExists(QX) = True Then GoTo qFound
 
 '//loose match
 If Q_MATCH = 1 Then
 If oSubFldr <> Empty Then
     For Each oFile In oSubFldr.Files
-      If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
+      If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
             Next
                 End If
                     End If
@@ -2248,7 +2366,7 @@ If oSubFldr <> Empty Then
 If Q_MATCH = 2 Then
 If oSubFldr <> Empty Then
     For Each oFile In oSubFldr.Files
-      If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
+      If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
             Next
                 End If
                     End If
@@ -2258,7 +2376,7 @@ Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase)
 
 '//search through local base drive directories
     For Each oSubFldr In oDir.SubFolders
-    QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
+    QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
     If Dir(QX) <> "" Then
     GoTo qFound
         Else: GoTo searchLocalFil
@@ -2271,7 +2389,7 @@ Set oLastDir = oDir
 For Each oSubFldr1 In oLastDir.SubFolders
 
 '//search through folders in local base drive directories
-Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.name)
+Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.Name)
 
 For Each oSubFldr In oDir.SubFolders
 QX = oSubFldr & "\" & xFind '//set query search to next folder
@@ -2281,7 +2399,7 @@ If oFSO.FileExists(QX) = True Then GoTo qFound
 If Q_MATCH = 1 Then
 If oSubFldr <> Empty Then
   For Each oFile In oSubFldr.Files
-    If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
+    If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
           Next
               End If
                   End If
@@ -2290,7 +2408,7 @@ If oSubFldr <> Empty Then
 If Q_MATCH = 2 Then
 If oSubFldr <> Empty Then
     For Each oFile In oSubFldr.Files
-    If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
+    If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
         Next
             End If
                 End If
@@ -2383,7 +2501,7 @@ Case Is = "54" Or EX = "WQ1": EX = xlWQ1: Exit Function
 Case Is = "55" Or EX = "XMLSpreadsheet": EX = xlXMLSpreadsheet: Exit Function
 End Select
 
-EX = "(*Err)"
+EX = "*/ERR"
 
 End Function
 Private Function basWebFilter(FX) As String
@@ -2812,10 +2930,64 @@ Case Is = "pup": PX = xlPatternUp: Exit Function
 End Select
 
 End Function
-Private Function basWasteTime(ByVal T As Byte) As Byte
+Private Function basShell32Namespace(FX) As Integer
 
-T = T + 1: T = T - 1
-DoEvents
+'//check for ShellSpecialFolderConstants
+  If InStr(1, FX, "ssfDESKTOP", vbTextCompare) Then FX = 0: Exit Function
+  If InStr(1, FX, "ssfPROGRAMS", vbTextCompare) Then FX = 2: Exit Function
+  If InStr(1, FX, "ssfCONTROLS", vbTextCompare) Then FX = 3: Exit Function
+  If InStr(1, FX, "ssfPRINTERS", vbTextCompare) Then FX = 4: Exit Function
+  If InStr(1, FX, "ssfPERSONAL", vbTextCompare) Then FX = 5: Exit Function
+  If InStr(1, FX, "ssfFAVORITES", vbTextCompare) Then FX = 6: Exit Function
+  If InStr(1, FX, "ssfSTARTUP", vbTextCompare) Then FX = 7: Exit Function
+  If InStr(1, FX, "ssfRECENT", vbTextCompare) Then FX = 8: Exit Function
+  If InStr(1, FX, "ssfSENDTO", vbTextCompare) Then FX = 9: Exit Function
+  If InStr(1, FX, "ssfBITBUCKET", vbTextCompare) Then FX = 10: Exit Function
+  If InStr(1, FX, "ssfSTARTMENU", vbTextCompare) Then FX = 11: Exit Function
+  If InStr(1, FX, "ssfDESKTOPDIRECTORY", vbTextCompare) Then FX = 16: Exit Function
+  If InStr(1, FX, "ssfDRIVES", vbTextCompare) Then FX = 17: Exit Function
+  If InStr(1, FX, "ssfNETWORK", vbTextCompare) Then FX = 18: Exit Function
+  If InStr(1, FX, "ssfNETHOOD", vbTextCompare) Then FX = 19: Exit Function
+  If InStr(1, FX, "ssfFONTS", vbTextCompare) Then FX = 20: Exit Function
+  If InStr(1, FX, "ssfTEMPLATES", vbTextCompare) Then FX = 21: Exit Function
+  If InStr(1, FX, "ssfCOMMONSTARTMENU", vbTextCompare) Then FX = 22: Exit Function
+  If InStr(1, FX, "ssfCOMMONPROGRAMS", vbTextCompare) Then FX = 23: Exit Function
+  If InStr(1, FX, "ssfCOMMONSTARTUP", vbTextCompare) Then FX = 24: Exit Function
+  If InStr(1, FX, "ssfCOMMONDESKTOPDIR", vbTextCompare) Then FX = 25: Exit Function
+  If InStr(1, FX, "ssfAPPDATA", vbTextCompare) Then FX = 26: Exit Function
+  If InStr(1, FX, "ssfPRINTHOOD", vbTextCompare) Then FX = 27: Exit Function
+  If InStr(1, FX, "ssfLOCALAPPDATA", vbTextCompare) Then FX = 28: Exit Function
+  If InStr(1, FX, "ssfALTSTARTUP", vbTextCompare) Then FX = 29: Exit Function
+  If InStr(1, FX, "ssfCOMMONALTSTARTUP", vbTextCompare) Then FX = 30: Exit Function
+  If InStr(1, FX, "ssfCOMMONFAVORITES", vbTextCompare) Then FX = 31: Exit Function
+  If InStr(1, FX, "ssfINTERNETCACHE", vbTextCompare) Then FX = 32: Exit Function
+  If InStr(1, FX, "ssfCOOKIES", vbTextCompare) Then FX = 33: Exit Function
+  If InStr(1, FX, "ssfHISTORY", vbTextCompare) Then FX = 34: Exit Function
+  If InStr(1, FX, "ssfCOMMONAPPDATA", vbTextCompare) Then FX = 35: Exit Function
+  If InStr(1, FX, "ssfWINDOWS", vbTextCompare) Then FX = 36: Exit Function
+  If InStr(1, FX, "ssfSYSTEM", vbTextCompare) Then FX = 37: Exit Function
+  If InStr(1, FX, "ssfPROGRAMFILES", vbTextCompare) Then FX = 38: Exit Function
+  If InStr(1, FX, "ssfMYPICTURES", vbTextCompare) Then FX = 39: Exit Function
+  If InStr(1, FX, "ssfPROFILE", vbTextCompare) Then FX = 40: Exit Function
+  If InStr(1, FX, "ssfSYSTEMx86", vbTextCompare) Then FX = 41: Exit Function
+  If InStr(1, FX, "ssfPROGRAMFILEFX86", vbTextCompare) Then FX = 42: Exit Function
+  
+  FX = "*/PATH"
+  
+End Function
+Private Function basShell32GetSysInfo(FX) As String
+
+If FX = "1" Then FX = "DirectoryServiceAvailable": Exit Function
+If FX = "2" Then FX = "DoubleClickTime": Exit Function
+If FX = "3" Then FX = "ProcessorLevel": Exit Function
+If FX = "4" Then FX = "ProcessorSpeed": Exit Function
+If FX = "5" Then FX = "ProcessorArchitecture": Exit Function
+If FX = "6" Then FX = "PhysicalMemoryInstalled": Exit Function
+If FX = "7" Then FX = "IsOS_Professional": Exit Function
+If FX = "8" Then FX = "IsOS_Personal": Exit Function
+If FX = "9" Then FX = "IsOS_DomainMember": Exit Function
+
+FX = "*/ERR"
 
 End Function
 Public Function disableWbUpdates() As Byte
@@ -2839,6 +3011,28 @@ End Function
 '//
 '//         CHANGE LOG
 '/\_________________________________________________________________________________________________________________________
+'
+'
+'
+' Version 1.1.3
+'
+' [ Date: 8/10/2022 ]
+'
+' (1): Added "shell32()" article for envoking shell32 API library functions
+'
+' Parameters:
+'
+' .execute = perform operation on file
+' .namespace = get folder information
+' .information = get system information
+'
+' (2): Changed "wastetime()" base article to "delayevent()"
+'
+' [ Date: 8/11/2022 ]
+'
+' (1): Added "-xlas" switch to "run()" article for parsing, & exectuing a .xlas script file
+'
+'
 '
 ' Version 1.1.2
 '
