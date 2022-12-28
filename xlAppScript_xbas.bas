@@ -14,7 +14,7 @@ Public Function runLib$(xArt)
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     xbas (basic) Library
-'//        Version: 1.1.3
+'//        Version: 1.1.4
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     License Information:
@@ -45,7 +45,7 @@ Public Function runLib$(xArt)
 '//                             (previous versions not tested &/or unsupported)
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Latest Revision: 8/11/2022
+'//     Latest Revision: 12/18/2022
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     Developer(s): anz7re
@@ -84,7 +84,7 @@ Public Function runLib$(xArt)
 '//          APPLICATION ARTICLES
 '/\_____________________________________
 '//
-'//Application build...
+'//build() = Application build...
 If InStr(1, xArt, "build(", vbTextCompare) Then
 xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
 xArt = Replace(xArt, "build(", vbNullString, , , vbTextCompare)
@@ -93,7 +93,7 @@ Call modArtQ(xArt)
 If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox MsgBox(Application.Build): Exit Function  '//no excerpt provided
 Exit Function
 
-'//Application printer...
+'//printer() = Application printer...
 ElseIf InStr(1, xArt, "printer(", vbTextCompare) Then
 xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
 xArt = Replace(xArt, "printer(", vbNullString, , , vbTextCompare)
@@ -102,7 +102,7 @@ Call modArtQ(xArt)
 If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox (Application.ActivePrinter): Exit Function '//no excerpt provided
 Exit Function
 
-'//Application name...
+'//name() = Application name...
 ElseIf InStr(1, xArt, "name(", vbTextCompare) Then
 xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
 xArt = Replace(xArt, "name(", vbNullString, , , vbTextCompare)
@@ -111,7 +111,7 @@ Call modArtQ(xArt)
 If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox (Application.Name): Exit Function '//no excerpt provided
 Exit Function
 
-'//Application run...
+'//run() = Application run...
 ElseIf InStr(1, xArt, "run(", vbTextCompare) Then
 
 xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
@@ -153,7 +153,7 @@ Exit Function
 '//          CELL/RANGE ARTICLES
 '/\_____________________________________
 '//
-'//Modify cell...
+'//cell() = Modify cell...
 ElseIf InStr(1, xArt, "cell(", vbTextCompare) Then
 Call modArtQ(xArt)
 
@@ -334,7 +334,7 @@ End If
 Exit Function
 '//#
 '//
-'//Modify range...
+'//rng() = Modify range...
 ElseIf InStr(1, xArt, "rng(", vbTextCompare) Then
 
 '//Check for parameters...
@@ -688,7 +688,7 @@ Exit Function
 '//        WORKBOOK ARTICLES
 '/\_____________________________________
 '//
-'//Modify Workbook...
+'//wb() = Modify Workbook...
 ElseIf InStr(1, xArt, "wb(", vbTextCompare) Then
 xArt = Replace(xArt, "wb(", vbNullString, , , vbTextCompare)
 
@@ -857,7 +857,7 @@ Exit Function
 '/\_____________________________________
 '//
 '//
-'//Modify file
+'//fil() = Modify file
 ElseIf InStr(1, xArt, "fil(", vbTextCompare) Then
 
 If InStr(1, xArt, ".fil", vbTextCompare) Then
@@ -889,7 +889,7 @@ Else
 errLvl = 1: GoTo ErrMsg
 End If
 
-'//Modify folder
+'//dir() = Modify folder
 ElseIf InStr(1, xArt, "dir(", vbTextCompare) Then
 
 If InStr(1, xArt, ".dir", vbTextCompare) Then
@@ -921,7 +921,7 @@ errLvl = 1: GoTo ErrMsg
 End If
 
 
-'//Delete empty directory
+'//dfldr() = Delete empty directory
 ElseIf InStr(1, xArt, "dfldr(", vbTextCompare) Then
 
 xArt = Replace(xArt, "dfldr", vbNullString, , , vbTextCompare)
@@ -929,7 +929,7 @@ Call modArtP(xArt): Call modArtQ(xArt)
 
 If Dir(xArt, vbDirectory) <> "" Then RmDir (xArt): Exit Function
 
-'//Delete file
+'//dfile() = Delete file
 ElseIf InStr(1, xArt, "dfile(", vbTextCompare) Then
 
 xArt = Replace(xArt, "dfile", vbNullString, , , vbTextCompare)
@@ -937,7 +937,7 @@ Call modArtP(xArt): Call modArtQ(xArt)
 
 If Dir(xArt) <> "" Then Kill (xArt): Exit Function
 
-'//Create empty directory
+'//mfldr() = Create empty directory
 ElseIf InStr(1, xArt, "mfldr(", vbTextCompare) Then
 
 xArt = Replace(xArt, "mfldr", vbNullString, , , vbTextCompare)
@@ -945,7 +945,7 @@ Call modArtP(xArt): Call modArtQ(xArt)
 
 MkDir (xArt): Exit Function
 
-'//Create file
+'//mfile() = Create file
 ElseIf InStr(1, xArt, "mfile(", vbTextCompare) Then
 
 xArt = Replace(xArt, "mfile", vbNullString, , , vbTextCompare)
@@ -953,7 +953,7 @@ Call modArtP(xArt): Call modArtQ(xArt)
 
 Open (xArt) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
 
-'//Move file or folder
+'//move() = Move file or folder
 ElseIf InStr(1, xArt, "move(", vbTextCompare) Then
 xArt = Replace(xArt, "move(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
@@ -969,7 +969,7 @@ sysShell = vbNullString
 End If
 Exit Function
 
-'//Rename file or folder
+'//ren() = Rename file or folder
 ElseIf InStr(1, xArt, "ren(", vbTextCompare) Then
 xArt = Replace(xArt, "ren(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
@@ -1041,7 +1041,7 @@ Set oFile = Nothing
 Set oSubFldr = Nothing
 Exit Function
 
-'//Read file
+'//read() = Read file
 ElseIf InStr(1, xArt, "read(", vbTextCompare) Then
 xArt = Replace(xArt, "read", vbNullString, , , vbTextCompare)
 
@@ -1151,7 +1151,7 @@ Exit Function
 '//          HALT ARTICLES
 '/\_____________________________________
 '//
-'//Pause...
+'//wait() = Pause script (no actions allowed)
 ElseIf InStr(1, xArt, "wait(", vbTextCompare) Then
 xArt = Replace(xArt, "wait(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
@@ -1228,7 +1228,7 @@ Else
                     End If
 Exit Function
 
-'//Delay event...
+'//delayevent() = Delay script (actions allowed)
 ElseIf InStr(1, xArt, "delayevent(", vbTextCompare) Then
 xArt = Replace(xArt, "delayevent(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
@@ -1262,7 +1262,7 @@ Exit Function
 '//     OUTPUT-HOST ARTICLES
 '/\_____________________________________
 '//
-'//Output w/ CMD
+'//echo() = Output string w/ Command Prompt
 ElseIf InStr(1, xArt, "echo(", vbTextCompare) Then
 
     If InStr(1, xArt, "o(0)", vbTextCompare) Then S = 1: xArt = Replace(xArt, "echo(0)", vbNullString): GoTo setEcho
@@ -1405,7 +1405,7 @@ shKey:
 '//        MOUSE ACTION ARTICLES
 '/\_____________________________________
 '//
-'//Mouse click...
+'//click() = Assign mouse click events
 ElseIf InStr(1, xArt, "click(", vbTextCompare) Then
 
 xArt = Replace(xArt, "click(", vbNullString, , , vbTextCompare)
@@ -1436,6 +1436,26 @@ Exit Function
 '//        MODIFY STRING ARTICLES
 '/\_____________________________________
 '//
+'//conv32() = Convert decimal to binary bit string (32-bit signed/unsigned integers)
+ElseIf InStr(1, xArt, "conv32(", vbTextCompare) Then
+
+xArt = Replace(xArt, "conv32(", vbNullString, , , vbTextCompare)
+Call modArtP(xArt)
+
+'//switches
+If InStr(1, xArt, "-8bit", vbTextCompare) Then xArt = Replace(xArt, "-8bit", vbNullString, , , vbTextCompare): S = 1: GoTo setConv32
+If InStr(1, xArt, "-16bit", vbTextCompare) Then xArt = Replace(xArt, "-16bit", vbNullString, , , vbTextCompare): S = 0: GoTo setConv32
+If InStr(1, xArt, "-32bit", vbTextCompare) Then xArt = Replace(xArt, "-32bit", vbNullString, , , vbTextCompare): S = 2: GoTo setConv32
+
+setConv32:
+
+xVarArr = Split(xArt, "=") '//find variable
+xRtnBits = S
+
+X = xVarArr(1): Call basDecimalToBinary32(X, xRtnBits, xBitStr): xArt = xBitStr
+xArt = xVarArr(0) & "=" & xArt
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+
 '//Convert char/string...
 ElseIf InStr(1, xArt, "conv(", vbTextCompare) Then
 
@@ -1458,7 +1478,27 @@ If UBound(xArtArr) = 1 Then xArt = StrConv(xArtArr(1), S): xArt = xVarArr(0) & "
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Replace char/string...
+'//hash() = Hash text strings
+ElseIf InStr(1, xArt, "hash(", vbTextCompare) Then
+
+xArt = Replace(xArt, "hash(", vbNullString, , , vbTextCompare)
+Call modArtP(xArt)
+
+'//switches
+If InStr(1, xArt, "-binary1", vbTextCompare) Then xArt = Replace(xArt, "-binary1", vbNullString, , , vbTextCompare): S = 1: GoTo setHash
+
+setHash:
+xVarArr = Split(xArt, "=") '//find variable
+xVarArr(1) = Trim(xVarArr(1)): xArt = xVarArr(1): Call modArtQ(xArt)
+
+'//hash(-binary1)
+If S = 1 Then
+X = xArt: Call basBinaryHash1(X, xVerify, xHash): xArt = xHash
+xArt = xVarArr(0) & "=" & xArt
+xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+End If
+
+'//repl() = Replace character/string
 ElseIf InStr(1, xArt, "repl(", vbTextCompare) Then
 xArt = Replace(xArt, "repl(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
@@ -1476,7 +1516,7 @@ If UBound(xArtArr) = 3 Then xArt = Replace(xArtArr(0), xArtArr(1), xArtArr(2), ,
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Trim starting & ending string by similiar character...
+'//ptrim() = Trim starting & ending parentheses of string
 ElseIf InStr(1, xArt, "ptrim(", vbTextCompare) Then
 
 If InStr(1, xArt, "lptrim", vbTextCompare) Then GoTo rmvLParen
@@ -1493,7 +1533,7 @@ If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Le
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Trim char/string by starting left facing parentheses...
+'//lptrim() = Trim char/string by starting left facing parentheses
 rmvLParen:
 
 xArt = Replace(xArt, "lptrim(", vbNullString, , , vbTextCompare)
@@ -1506,7 +1546,7 @@ If Left(xVarArr(1), 1) = "(" Then xArt = xVarArr(0) & "=" & Right(xVarArr(1), Le
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Trim char/string by ending right facing parentheses...
+'//rptrim() = Trim char/string by ending right facing parentheses
 rmvRParen:
 
 xArt = Replace(xArt, "rptrim(", vbNullString, , , vbTextCompare)
@@ -1519,7 +1559,7 @@ If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Le
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Trim char/string by quotations...
+'//qtrim() = Trim char/string by quotations
 ElseIf InStr(1, xArt, "qtrim(", vbTextCompare) Then
 
 xArt = Replace(xArt, "qtrim(", vbNullString, , , vbTextCompare)
@@ -1533,7 +1573,7 @@ If Right(xVarArr(1), 1) = """" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), L
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Trim starting & ending string by similiar character...
+'//xtrim() = Trim starting & ending string by chosen character
 ElseIf InStr(1, xArt, "xtrim(", vbTextCompare) Then
 
 xArt = Replace(xArt, "xtrim(", vbNullString, , , vbTextCompare)
@@ -1549,7 +1589,7 @@ If Right(xVarArr(1), 1) = xArtArr(1) Then xVarArr(1) = Left(xVarArr(1), Len(xVar
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
 Exit Function
 
-'//Find char/string...
+'//ins() = Find character/string within a string
 ElseIf InStr(1, xArt, "ins(", vbTextCompare) Then
 xArt = Replace(xArt, "ins(", vbNullString, , , vbTextCompare)
 xArt = Replace(xArt, """", vbNullString)
@@ -1587,7 +1627,7 @@ xArt = appEnv & ",#!" & xVarArr(0) & "=" & "TRUE" & ",#!" & X & ",#!" & 1
                         End If
 Exit Function
    
-'//Reverse string characters...
+'//revstr() = Reverse string characters
 ElseIf InStr(1, xArt, "revstr(", vbTextCompare) Then
 
 xArt = Replace(xArt, "revstr(", vbNullString, , , vbTextCompare)
@@ -1607,7 +1647,7 @@ Exit Function
 '//      SYSTEM SHELL/PC ARTICLES
 '/\_____________________________________
 '//
-'//Quick shell...
+'//sh() = Quick shell
 ElseIf InStr(1, xArt, "sh(", vbTextCompare) Then
 
 If InStr(1, xArt, "h(0)", vbTextCompare) Then P = 0: xArt = Replace(xArt, "sh(0)", vbNullString, , , vbTextCompare): GoTo setSh
@@ -1632,7 +1672,7 @@ setSh:
    sysShell = vbNullString
    Exit Function
 
-'//System shell...
+'//shell32() = System shell
 ElseIf InStr(1, xArt, "shell32(", vbTextCompare) Then
 
 xArt = Replace(xArt, "shell32(", vbNullString, , , vbTextCompare)
@@ -1729,7 +1769,7 @@ xArt = xArtArr(0) & "=" & xArt
 xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
 Exit Function
 
-'//PC articles...
+'//pc() = PC file system tasks
 ElseIf InStr(1, xArt, "pc(", vbTextCompare) Then
 
 xArt = Replace(xArt, "pc", vbNullString, , , vbTextCompare)
@@ -1764,7 +1804,7 @@ If P = 4 Then xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c"
 MsgBox (xArt)
 Exit Function
 
-'//PC dot-direct articles...
+'//pc. = PC system control
 ElseIf InStr(1, xArt, "pc.", vbTextCompare) Then
 
 '//parameters
@@ -1814,7 +1854,7 @@ If P = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, v
 '//        QUERY ARTICLES
 '/\_____________________________________
 '//
-'//Query...
+'//q() = File system query
 ElseIf InStr(1, xArt, "q(", vbTextCompare) Then
 
 '//parameters
@@ -1897,7 +1937,7 @@ If P = 2 Then xArt = xArt - xArt
 
 Exit Function
 
-'//Randomize numbers...
+'//rnd() = Get a random number
 ElseIf InStr(1, xArt, "rnd(", vbTextCompare) Then
 xArt = Replace(xArt, "rnd(", vbNullString, , , vbTextCompare)
 Call modArtP(xArt): Call modArtQ(xArt)
@@ -1919,7 +1959,7 @@ End If
 
 Exit Function
 
-'//Perform mathematics...
+'//sum() = Perform basic mathematics
 ElseIf InStr(1, xArt, "sum(", vbTextCompare) Then
 
 xArt = Replace(xArt, "sum(", vbNullString, , , vbTextCompare)
@@ -1941,7 +1981,7 @@ Exit Function
 '//         WINFORM ARTICLES
 '/\_____________________________________
 '//
-'//Output current window number...
+'//me() = Output current window number (WinForm)
 ElseIf InStr(1, xArt, "me(", vbTextCompare) Then
 xArt = Replace(xArt, "me(", vbNullString, , , vbTextCompare)
 
@@ -1976,7 +2016,7 @@ End Select
 MsgBox (Range("xlasWinForm").Value2)
 Exit Function
 
-    '//Set window number...
+    '//winform() = Set window number
         ElseIf InStr(1, xArt, "winform(", vbTextCompare) Then
         
     '//switches
@@ -2195,9 +2235,9 @@ xPosArr = Split(xPos, ",")
 End Sub
 Public Function basGetWinFormPos(ByVal xWin As Object, X, Y) As Integer
 
-'/#########################\
+'/##########################\
 '//   Get WinForm Position #\\
-'///#######################\\\
+'///########################\\\
 On Error Resume Next
 
 If xWin.Name = vbNullString Then Call getWindow(xWin)
@@ -2236,6 +2276,227 @@ If xWin.Name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then xWin.Left = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 Else xWin.Left = X
 If Y = 0 Then xWin.Top = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormY").Value2 Else xWin.Top = Y
 Set xWin = Nothing
+
+End Function
+Private Function basDecimalToBinary32(ByVal X As Long, ByVal xRtnBits As Byte, xBitStr) As String
+
+'/##############################\
+'// Convert Decimal To Binary  #\\
+'///############################\\\
+'//
+'//For converting 32-bit signed integer values to binary using 2's complement
+
+Dim xBit As Byte: Dim xBitStrLen As Byte
+Dim xCntr As Byte: Dim IS_NEG As Byte: Dim xRtn As Byte
+Dim xBits As String: Dim xNewBitStr As String
+
+xBitStr = vbNullString
+
+'//Check for bit return type
+If xRtnBits = 1 Then
+xRtn = 8
+ElseIf xRtnBits = 0 Then
+xRtn = 16
+ElseIf xRtnBits = 2 Then
+xRtn = 32
+End If
+
+'//Check for postive/negative integer
+If X < 0 Then IS_NEG = 1
+
+'//Get absolute value of integer
+X = Abs(X)
+
+'//Use 2's complement to create bit string
+Do Until X <= 0
+xBit = (X Mod 2)
+If xBit = 1 Then X = X - 1
+xBitStr = xBit & xBitStr
+X = (X / 2)
+Loop
+
+'//Get length of bit string
+xBitStrLen = Len(xBitStr)
+
+'//Extend bit string w/ leading 0's
+If xBitStrLen < 32 Then
+Do Until xBitStrLen = 32
+xBitStr = 0 & xBitStr
+xBitStrLen = xBitStrLen + 1
+Loop
+End If
+
+'//Perform bitwise NOT inversion if negative integer
+If IS_NEG = 1 Then
+
+For xCntr = 1 To xBitStrLen - 3
+xBits = Left(xBitStr, xCntr)
+xBit = Mid(xBits, xCntr)
+If xBit = 0 Then xBit = 1 Else xBit = 0
+xNewBitStr = xNewBitStr & xBit
+Next
+
+'//Get 3rd to last bit
+xBits = Left(xBitStr, xCntr)
+xBit = Mid(xBits, xCntr)
+'//Invert 3rd to last bit bit if 0
+If xBit = 0 Then xBit = 1
+
+xNewBitStr = xNewBitStr & xBit
+
+'//Add last 2 remaining bits to bit string
+xBits = Right(xBitStr, 2)
+xNewBitStr = xNewBitStr & xBits
+
+xBitStr = Right(xNewBitStr, xRtn)
+
+End If
+
+End Function
+Private Function basBinaryHash1(ByVal X As String, xVerify, xHash) As String
+
+'/##############################\
+'//     Basic Binary Hash1     #\\
+'///############################\\\
+'/
+'//For creating/verifying a basic 512-bit binary hash from a given string... (collision prone/unsafe!)
+'//
+Dim xBit As Byte
+Dim xBits As String: Dim xStr As String: Dim xPos As String
+Dim xBitStrHash As String
+Dim xStrLen As Integer
+Dim xBitStrLen As Long: Dim xCntr As Long
+
+xStr = X
+xStrLen = Len(xStr)
+
+'//pre-hash
+For xCntr = 1 To xStrLen
+X = Left(xStr, xCntr)
+xPos = Mid(X, xCntr)
+X = Asc(xPos)
+xRtnBits = 32: Call basDecimalToBinary32(X, xRtnBits, xBitStr)
+X = xBitStr
+
+xSlide = Sqr(xCntr)
+
+Do Until xSlide <= 32
+xSlide = Sqr(xSlide)
+Loop
+
+xPos = xSlide
+xSlide = xSlide * 2
+
+'//slide character bits
+Call basBitSlideRight(X, xPos, xSlide, xBitStr)
+xBitStrHash = xBitStrHash & xBitStr
+Next
+
+xBitStrLen = Len(xBitStrHash)
+
+'//create 512 character bit string
+If xBitStrLen > 512 Then
+
+xStrLen = Sqr(xBitStrLen)
+
+Do Until xStrLen <= 512
+xStrLen = Sqr(xStrLen)
+Loop
+
+xCntr = 0
+Do Until Len(xBitStrHash) <= 512
+xBitStrHash = Left(xBitStrHash, xStrLen + -(xCntr))
+xCntr = xCntr - 1
+Loop
+
+xBitStrLen = Len(xBitStrHash)
+
+For xCntr = xBitStrLen To 512 - 4
+xBitStrHash = xBitStrHash & "0"
+Next
+
+xBitStrHash = xBitStrHash & "111"
+
+xBitStrLen = Len(xBitStrHash)
+
+    Else
+    
+        For xCntr = xBitStrLen To 512 - 4
+        xBitStrHash = xBitStrHash & "0"
+        Next
+        
+        xBitStrHash = xBitStrHash & "111"
+        
+        xBitStrLen = Len(xBitStrHash)
+
+        End If
+
+xHash = xBitStrHash
+
+End Function
+Private Function basBitSlideLeft(ByVal X As String, ByVal xPos As Long, ByVal xSlide As Long, xBitStr) As String
+
+'/##############################\
+'//  Slide Bit Strings (Left)  #\\
+'///############################\\\
+'/
+'//For sliding a selected bit to the left (will slide all bits in the same direction!)
+'//
+'//Input string = X
+'//
+'//Start position = xPos
+'//
+'//Slide amount = xSlide
+'//
+'//Return as bit string = xBitStr
+
+Dim xBit As String: Dim xBitStrLen As Byte: Dim xCntr As Byte
+Dim xBits As String: Dim xSplitBitStr As String
+
+End Function
+Private Function basBitSlideRight(ByVal X As String, ByVal xPos As Long, ByVal xSlide As Long, xBitStr) As String
+
+'/##############################\
+'//  Slide Bit Strings (Right) #\\
+'///############################\\\
+'/
+'//For sliding a selected bit to the right (will slide all bits in the same direction!)
+'//
+'//Input string = X
+'//
+'//Start position = xPos
+'//
+'//Slide amount = xSlide
+'//
+'//Return as bit string = xBitStr
+
+Dim xBit As Byte: Dim xBitStrLen As Byte: Dim xCntr As Byte
+Dim xBits As String: Dim xSplitBitStr As String
+
+xBitStrLen = Len(xBitStr)
+If xSlide > xBitStrLen Then xSlide = xSlide Mod xBitStrLen
+
+'//split bit string @ position
+X = Left(xBitStr, xPos)
+xBitStr = Right(xBitStr, Len(xBitStr) - xPos)
+'//retrieve bit to slide
+xBit = Right(X, 1)
+'//split bit string @ retrieved bits new position
+xSplitBitStr = Right(xBitStr, Len(xBitStr) - (xSlide - 1))
+'//retrieve remaining bits
+xBits = Left(xBitStr, xSlide)
+'//remove bit to slide from variable
+X = Left(X, xPos - 1)
+'//seperate remaining bits
+xBits = Right(xBitStr, Len(xBits))
+
+'//Check for sliding overlap
+If Len(xBitStr) - xSlide < 1 Then
+xBitStr = xBit & xBits & X
+    Else
+    xSplitBitStr = Left(xBitStr, Len(xBitStr) - xSlide)
+    xBitStr = xBits & X & xBit & xSplitBitStr
+        End If
 
 End Function
 Private Function basQuery$(QX, ByVal S As Byte)
@@ -2846,7 +3107,7 @@ xNotColor = xRGBArr(2): GoTo Retry
 End Function
 Private Function basBorder(BX) As Long
 
-'//check for border type
+'//get border type
 Select Case BX
 Case Is = 0: BX = xlNone: Exit Function
 Case Is = 1: BX = xlDiagonalDown: Exit Function
@@ -2870,7 +3131,7 @@ End Select
 End Function
 Private Function basBorderStyle(SX) As Long
 
-'//check for border style
+'//get border style
 Select Case SX
 Case Is = 0: SX = xlNone: Exit Function
 Case Is = 1: SX = xlContinuous: Exit Function
@@ -2894,7 +3155,7 @@ End Select
 End Function
 Private Function basCompare(CX) As Long
 
-'//check for comparison type
+'//get comparison type
 Select Case CX
 Case Is = 0: CX = vbBinaryCompare: Exit Function
 Case Is = 1: CX = vbDatabaseCompare: Exit Function
@@ -2904,7 +3165,7 @@ End Select
 End Function
 Private Function basPattern(PX) As Long
  
-'//check for pattern
+'//get pattern
 Select Case PX
 Case Is = 0: PX = xlNone: Exit Function
 Case Is = 1: PX = xlPatternChecker: Exit Function
@@ -2932,7 +3193,7 @@ End Select
 End Function
 Private Function basShell32Namespace(FX) As Integer
 
-'//check for ShellSpecialFolderConstants
+'//get ShellSpecialFolderConstants
   If InStr(1, FX, "ssfDESKTOP", vbTextCompare) Then FX = 0: Exit Function
   If InStr(1, FX, "ssfPROGRAMS", vbTextCompare) Then FX = 2: Exit Function
   If InStr(1, FX, "ssfCONTROLS", vbTextCompare) Then FX = 3: Exit Function
@@ -3012,6 +3273,32 @@ End Function
 '//         CHANGE LOG
 '/\_________________________________________________________________________________________________________________________
 '
+'
+' Version 1.1.4
+'
+' [ Date: 12/18/2022 ]
+'
+' (1): Added "hash()" article for hashing & verifying hashed text strings
+'
+' Article switches:
+'
+' -binary1 = create/verify using a basic DIY binary hashing algorithm (unsafe!)
+'
+'
+' [ Date: 12/16/2022 ]
+'
+' (1): Added "conv32()" article for converting 32-bit signed (-2,147,483,648 <-> 2,147,483,647) integer values to binary (2's complement).
+'
+' Article switches:
+'
+' -8bit = set return value as 8-bit binary
+' -16bit = set return value as 16-bit binary
+' -32bit = set return value as 32-bit binary
+'
+'
+' ***If no switch specified conversion will be returned as 16-bit binary
+'
+' (Keep in mind returning 32-bit will not print all points of precision to the worksheet!)
 '
 '
 ' Version 1.1.3
