@@ -10,11 +10,11 @@ Public Const MOUSEEVENTF_LEFTDOWN = &H2
 Public Const MOUSEEVENTF_LEFTUP = &H4
 Public Const MOUSEEVENTF_RIGHTDOWN As Long = &H8
 Public Const MOUSEEVENTF_RIGHTUP As Long = &H10
-Public Function runLib$(xArt)
+Public Function runLib$(Token)
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     xbas (basic) Library
-'//        Version: 1.1.4
+'//        Version: 1.1.5
 '/\_____________________________________________________________________________________________________________________________
 '//
 '//     License Information:
@@ -45,10 +45,10 @@ Public Function runLib$(xArt)
 '//                             (previous versions not tested &/or unsupported)
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Latest Revision: 12/18/2022
+'//     Latest Revision: 2/1/2023
 '/\_____________________________________________________________________________________________________________________________
 '//
-'//     Developer(s): anz7re
+'//     Developer(s): anz7re (André)
 '//     Contact: support@xlappscript.org | support@autokit.tech | anz7re@autokit.tech
 '//     Web: xlappscript.org | autokit.tech
 '/\_____________________________________________________________________________________________________________________________
@@ -56,27 +56,27 @@ Public Function runLib$(xArt)
         '//Library variable declarations
         Dim oFSO As Object: Dim oDrv As Object: Dim oFile As Object: Dim oSubFldr As Object: Dim oShell As Object: Dim oShellItem As Object: Dim xWin As Object
         Dim appEnv As String: Dim appBlk As String: Dim FX As String: Dim HX As String
-        Dim sysShell As String: Dim wbMacro As String: Dim xArtH As String
+        Dim sysShell As String: Dim wbMacro As String: Dim ArtH As String
         Dim xArg As String: Dim xDir As String: Dim xCell As String: Dim xExt As String: Dim xMod As String: Dim xWb As String: Dim xVar As String: Dim xVar2 As String
-        Dim xArtArr() As String:  Dim xArtArrH() As String: Dim xExtArr() As String: Dim xRGBArr() As String
+        Dim TokenArr() As String:  Dim TokenArrH() As String: Dim xExtArr() As String: Dim xRGBArr() As String
         Dim BX As Long: Dim EX As Long: Dim CX As Long: Dim PX As Long: Dim SX As Long: Dim TX As Long: Dim x1 As Long: Dim y1 As Long: Dim x2 As Long: Dim y2 As Long
         Dim K As Byte: Dim M As Byte: Dim S As Byte: Dim P As Byte: Dim T As Byte: Dim errLvl As Byte
         Dim X As Variant: Dim Y As Variant
         
         '//Pre-cleanup
         x1 = 0: x2 = 0: y1 = 0: y2 = 0: BX = 0: CX = 0: PX = 0: SX = 0: TX = 0: K = 0: M = 0: S = 0: P = 0: T = 0: X = 0: X = CByte(X): Y = 0: Y = CByte(Y)
-        Call modArtQ(xArt)
+        Call modArtQuotes(Token)
         
         '//Find application environment & block
         Call getEnvironment(appEnv, appBlk)
         
         '//Find flags
-        If InStr(1, xArt, "--") Or InStr(1, xArt, "++") Then _
-        Call libFlag(xArt, errLvl): If xArt = 1 Then Exit Function Else _
-        Call libSwitch(xArt, errLvl) '//Find switches
+        If InStr(1, Token, "--") Then _
+        Call libFlag(Token, errLvl): If Token = 1 Then Exit Function Else _
+        Call libSwitch(Token, errLvl) '//Find switches
         
         '//Set library error level
-        If Range("xlasLibErrLvl").Value2 = 0 Then On Error GoTo ErrMsg
+        If Range("xlasLibErrLvl").Value2 = 0 Then On Error GoTo ErrEnd
         If Range("xlasLibErrLvl").Value2 = 1 Then On Error Resume Next
 
 '/\_____________________________________
@@ -85,63 +85,63 @@ Public Function runLib$(xArt)
 '/\_____________________________________
 '//
 '//build() = Application build...
-If InStr(1, xArt, "build(", vbTextCompare) Then
-xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
-xArt = Replace(xArt, "build(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+If InStr(1, Token, "build(", vbTextCompare) Then
+Token = Replace(Token, "app.", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "build(", vbNullString, , , vbTextCompare)
+Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox MsgBox(Application.Build): Exit Function  '//no excerpt provided
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",") Else MsgBox MsgBox(Application.Build): Exit Function  '//no excerpt provided
 Exit Function
 
 '//printer() = Application printer...
-ElseIf InStr(1, xArt, "printer(", vbTextCompare) Then
-xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
-xArt = Replace(xArt, "printer(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+ElseIf InStr(1, Token, "printer(", vbTextCompare) Then
+Token = Replace(Token, "app.", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "printer(", vbNullString, , , vbTextCompare)
+Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox (Application.ActivePrinter): Exit Function '//no excerpt provided
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",") Else MsgBox (Application.ActivePrinter): Exit Function '//no excerpt provided
 Exit Function
 
 '//name() = Application name...
-ElseIf InStr(1, xArt, "name(", vbTextCompare) Then
-xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
-xArt = Replace(xArt, "name(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+ElseIf InStr(1, Token, "name(", vbTextCompare) Then
+Token = Replace(Token, "app.", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "name(", vbNullString, , , vbTextCompare)
+Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else MsgBox (Application.Name): Exit Function '//no excerpt provided
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",") Else MsgBox (Application.name): Exit Function '//no excerpt provided
 Exit Function
 
 '//run() = Application run...
-ElseIf InStr(1, xArt, "run(", vbTextCompare) Then
+ElseIf InStr(1, Token, "run(", vbTextCompare) Then
 
-xArt = Replace(xArt, "app.", vbNullString, , , vbTextCompare)
-xArt = Replace(xArt, "run(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "app.", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "run(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
 '//switches
-If InStr(1, xArt, "-xlas", vbTextCompare) Then xArt = Replace(xArt, "-xlas", vbNullString, , , vbTextCompare): S = 7
+If InStr(1, Token, "-xlas", vbTextCompare) Then Token = Replace(Token, "-xlas", vbNullString, , , vbTextCompare): S = 7
 
 '//run VBA module
 If S = 0 Then
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else X = Application.Run(xArt): Exit Function '//no arguments provided
-xMod = xArtArr(0) '//extract module
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",") Else X = Application.Run(Token): Exit Function '//no arguments provided
+xMod = TokenArr(0) '//extract module
 
 X = 1
-Do Until X > UBound(xArtArr) '//extract argument(s)
-xArt = xArtArr(X) & ",": xArtH = xArtH & xArt
+Do Until X > UBound(TokenArr) '//extract argument(s)
+Token = TokenArr(X) & ",": ArtH = ArtH & Token
 X = X + 1
 Loop
 
-xArt = xArtH
-If Right(xArt, Len(xArt) - Len(xArt) + 1) = "," Then xArt = Left(xArt, Len(xArt) - 1)
+Token = ArtH
+If Right(Token, Len(Token) - Len(Token) + 1) = "," Then Token = Left(Token, Len(Token) - 1)
 
-X = Application.Run(xMod, (xArt))
+X = Application.Run(xMod, (Token))
 Exit Function
     
 '//run xlas script
-ElseIf S = 7 Then xArt = Trim(xArt): _
-Open xArt For Input As #7: xArt = vbNullString: _
-Do Until EOF(7): Line Input #7, xArtH: xArt = xArt & xArtH: Loop: Close #7: xArt = xArt & "$": Call lexKey(xArt): Exit Function
+ElseIf S = 7 Then Token = Trim(Token): _
+Open Token For Input As #7: Token = vbNullString: _
+Do Until EOF(7): Line Input #7, ArtH: Token = Token & ArtH: Loop: Close #7: Token = Token & "$": Call xlas(Token): Exit Function
 
 End If
 
@@ -154,72 +154,72 @@ Exit Function
 '/\_____________________________________
 '//
 '//cell() = Modify cell...
-ElseIf InStr(1, xArt, "cell(", vbTextCompare) Then
-Call modArtQ(xArt)
+ElseIf InStr(1, Token, "cell(", vbTextCompare) Then
+Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") = False Then MsgBox (Application.ActiveCell.Address): Exit Function '//no excerpt provided
+If InStr(1, Token, ",") = False Then MsgBox (Application.ActiveCell.Address): Exit Function '//no excerpt provided
 
 '//Check for parameters...
-If InStr(1, xArt, ".") Then
-If InStr(1, xArt, " .") Then xArtArr = Split(xArt, " .")
-If InStr(1, xArt, ").") Then xArtArr = Split(xArt, ").")
+If InStr(1, Token, ".") Then
+If InStr(1, Token, " .") Then TokenArr = Split(Token, " .")
+If InStr(1, Token, ").") Then TokenArr = Split(Token, ").")
 
-Do Until X > UBound(xArtArr)
+Do Until X > UBound(TokenArr)
 
-xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(X) = xArt
+Token = TokenArr(X): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(X) = Token
 
 '//Extract cell...
-If InStr(1, xArtArr(X), "cell", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "cell", vbNullString, , , vbTextCompare)
-If InStr(1, xArtArr(0), "=") Then xArtArrH = Split(xArtArr(0), "="): _
-xArtArrH = Split(xArtArrH(1), ",") Else: _
-xArtArrH = Split(xArtArr(0), ",")
-xArt = xArtArrH(0): Call modArtP(xArt): xArtArrH(0) = xArt
-xArt = xArtArrH(1): Call modArtP(xArt): xArtArrH(1) = xArt
-x1 = CInt(xArtArrH(0)): y1 = CInt(xArtArrH(1))
+If InStr(1, TokenArr(X), "cell", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "cell", vbNullString, , , vbTextCompare)
+If InStr(1, TokenArr(0), "=") Then TokenArrH = Split(TokenArr(0), "="): _
+TokenArrH = Split(TokenArrH(1), ",") Else: _
+TokenArrH = Split(TokenArr(0), ",")
+Token = TokenArrH(0): Call modArtParens(Token): TokenArrH(0) = Token
+Token = TokenArrH(1): Call modArtParens(Token): TokenArrH(1) = Token
+x1 = CInt(TokenArrH(0)): y1 = CInt(TokenArrH(1))
 End If
 '//Select cell...
-If InStr(1, xArtArr(X), "sel", vbTextCompare) Then
+If InStr(1, TokenArr(X), "sel", vbTextCompare) Then
 Cells(x1, y1).Select
 End If
 '//Clean cell...
-If InStr(1, xArtArr(X), "cln", vbTextCompare) Then
+If InStr(1, TokenArr(X), "cln", vbTextCompare) Then
 Cells(x1, y1).ClearContents
 End If
 '//Clear cell...
-If InStr(1, xArtArr(X), "clr", vbTextCompare) Then
+If InStr(1, TokenArr(X), "clr", vbTextCompare) Then
 Cells(x1, y1).Clear
 End If
 '//Copy cell...
-If InStr(1, xArtArr(X), "copy") Then
-If InStr(1, xArtArr(X), "copy&") Then P = 1
-If InStr(1, xArtArr(X), "copy&!") Then P = 2
-If InStr(1, xArtArr(X), "copy&!!") Then P = 3
+If InStr(1, TokenArr(X), "copy") Then
+If InStr(1, TokenArr(X), "copy&") Then P = 1
+If InStr(1, TokenArr(X), "copy&!") Then P = 2
+If InStr(1, TokenArr(X), "copy&!!") Then P = 3
 
-    xArtArr(X) = Replace(xArtArr(X), "copy", vbNullString, vbTextCompare)
-    xArtArr(X) = Replace(xArtArr(X), "!", vbNullString)
-    xArtArr(X) = Replace(xArtArr(X), "&", vbNullString)
-    xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
+    TokenArr(X) = Replace(TokenArr(X), "copy", vbNullString, vbTextCompare)
+    TokenArr(X) = Replace(TokenArr(X), "!", vbNullString)
+    TokenArr(X) = Replace(TokenArr(X), "&", vbNullString)
+    Token = TokenArr(X): Call modArtParens(Token): TokenArr(X) = Token
     
     ActiveCell.Copy
     
     If P = vbNullString Then ActiveCell.Copy '//just copy
      
     If P = 1 Then '//copy paste cell contents
-        ActiveWorkbook.Worksheets(appBlk).Cells(xArtArr(X)).Activate
+        ActiveWorkbook.Worksheets(appBlk).Cells(TokenArr(X)).Activate
             ActiveCell.PasteSpecial
                 End If
                 
     If P = 2 Then '//copy paste clean contents
         xCell = ActiveCell.Address
-            ActiveWorkbook.Worksheets(appBlk).Cells(xArtArr(X)).Activate
+            ActiveWorkbook.Worksheets(appBlk).Cells(TokenArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Cells(xCell).ClearContents
                         End If
                         
     If P = 3 Then '//copy paste clear cell contents
         xCell = ActiveCell.Address
-            ActiveWorkbook.Worksheets(appBlk).Cells(xArtArr(X)).Activate
+            ActiveWorkbook.Worksheets(appBlk).Cells(TokenArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Cells(xCell).Clear
                         End If
@@ -227,42 +227,42 @@ If InStr(1, xArtArr(X), "copy&!!") Then P = 3
                                 End If
 
 '//Paste cell...
-If InStr(1, xArtArr(X), "paste", vbTextCompare) Then
-xArt = xArtArr(X): Call modArtP(xArt)
+If InStr(1, TokenArr(X), "paste", vbTextCompare) Then
+Token = TokenArr(X): Call modArtParens(Token)
 ActiveCell.PasteSpecial
 End If
 '//Set cell name...
-If InStr(1, xArtArr(X), "name", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "name ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "name(", vbNullString, , , vbTextCompare)
-xArt = xArtArr(X): Call modArtP(xArt)
+If InStr(1, TokenArr(X), "name", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "name ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "name(", vbNullString, , , vbTextCompare)
+Token = TokenArr(X): Call modArtParens(Token)
 '//no name entered (clear name)
-If xArtArr(X) = vbNullString Then
-xArtArr(X) = Cells(x1, y1).Name.Name
-ActiveWorkbook.Names(xArtArr(X)).Delete
+If TokenArr(X) = vbNullString Then
+TokenArr(X) = Cells(x1, y1).name.name
+ActiveWorkbook.Names(TokenArr(X)).Delete
     Else
-        Cells(x1, y1).Name = xArtArr(X)
+        Cells(x1, y1).name = TokenArr(X)
             End If
                 End If
 '//Set cell value2...
-If InStr(1, xArtArr(X), "value2", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "value2 ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value2(", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value2", vbNullString, , , vbTextCompare)
-Cells(x1, y1).Value2 = xArtArr(X)
+If InStr(1, TokenArr(X), "value2", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "value2 ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value2(", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value2", vbNullString, , , vbTextCompare)
+Cells(x1, y1).Value2 = TokenArr(X)
 End If
 '//Set cell value...
-If InStr(1, xArtArr(X), "value", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "value ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value(", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value", vbNullString, , , vbTextCompare)
-Cells(x1, y1).Value = xArtArr(X)
+If InStr(1, TokenArr(X), "value", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "value ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value(", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value", vbNullString, , , vbTextCompare)
+Cells(x1, y1).Value = TokenArr(X)
 End If
 '//Set cell font color...
-If InStr(1, xArtArr(X), "fcolor", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "fcolor ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "fcolor(", vbNullString, , , vbTextCompare)
-HX = xArtArr(X)
+If InStr(1, TokenArr(X), "fcolor", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "fcolor ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "fcolor(", vbNullString, , , vbTextCompare)
+HX = TokenArr(X)
 Call basColor(HX) '//find color
 HX = Replace(HX, ")", vbNullString)
 HX = Replace(HX, "(", vbNullString)
@@ -270,46 +270,46 @@ xRGBArr = Split(HX, ",")
 Cells(x1, y1).Font.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Set cell font size...
-If InStr(1, xArtArr(X), "fsize", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "fsize ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "fsize(", vbNullString, , , vbTextCompare)
-Cells(x1, y1).Font.Size = xArtArr(X)
+If InStr(1, TokenArr(X), "fsize", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "fsize ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "fsize(", vbNullString, , , vbTextCompare)
+Cells(x1, y1).Font.Size = TokenArr(X)
 End If
 '//Set cell font type...
-If InStr(1, xArtArr(X), "ftype", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "ftype", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "ftype(", vbNullString, , , vbTextCompare)
-Cells(x1, y1).Font.FontStyle = xArtArr(X)
+If InStr(1, TokenArr(X), "ftype", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "ftype", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "ftype(", vbNullString, , , vbTextCompare)
+Cells(x1, y1).Font.FontStyle = TokenArr(X)
 End If
 '//Set cell pattern...
-If InStr(1, xArtArr(X), "pattern", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "pattern", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "pattern(", vbNullString, , , vbTextCompare)
-PX = xArtArr(X)
+If InStr(1, TokenArr(X), "pattern", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "pattern", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "pattern(", vbNullString, , , vbTextCompare)
+PX = TokenArr(X)
 Call basPattern(PX) '//find pattern
 Cells(x1, y1).Interior.Pattern = PX
 End If
 '//Set cell border direction...
-If InStr(1, xArtArr(X), "border", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "border ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "border(", vbNullString, , , vbTextCompare)
-BX = xArtArr(X)
+If InStr(1, TokenArr(X), "border", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "border ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "border(", vbNullString, , , vbTextCompare)
+BX = TokenArr(X)
 Call basBorder(BX) '//find border
 Cells(x1, y1).BorderAround (BX)
 End If
 '//Set cell border type...
-If InStr(1, xArtArr(X), "btype", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "border ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "border(", vbNullString, , , vbTextCompare)
-SX = xArtArr(X)
+If InStr(1, TokenArr(X), "btype", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "border ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "border(", vbNullString, , , vbTextCompare)
+SX = TokenArr(X)
 Call basBorderStyle(SX) '//find border type
 Cells(x1, y1).Borders.LineStyle = SX
 End If
 '//Set cell color...
-If InStr(1, xArtArr(X), "bgcolor", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "bgcolor ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "bgcolor(", vbNullString, , , vbTextCompare)
-HX = xArtArr(X)
+If InStr(1, TokenArr(X), "bgcolor", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "bgcolor ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "bgcolor(", vbNullString, , , vbTextCompare)
+HX = TokenArr(X)
 Call basColor(HX) '//find color
 HX = Replace(HX, ")", vbNullString)
 HX = Replace(HX, "(", vbNullString)
@@ -317,12 +317,12 @@ xRGBArr = Split(HX, ",")
 Cells(x1, y1).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Read cell value into variable...
-If InStr(1, xArtArr(X), "read", vbTextCompare) Then
-If InStr(1, xArtArr(0), "=") Then
-xArtArr = Split(xArtArr(0), "=")
-xArtArr(0) = Trim(xArtArr(0))
+If InStr(1, TokenArr(X), "read", vbTextCompare) Then
+If InStr(1, TokenArr(0), "=") Then
+TokenArr = Split(TokenArr(0), "=")
+TokenArr(0) = Trim(TokenArr(0))
 xVar = Cells(x1, y1).Value
-xArt = appEnv & ",#!" & xArtArr(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Token = appEnv & "[,]" & TokenArr(0) & "=" & xVar & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 End If
     End If
 
@@ -335,66 +335,66 @@ Exit Function
 '//#
 '//
 '//rng() = Modify range...
-ElseIf InStr(1, xArt, "rng(", vbTextCompare) Then
+ElseIf InStr(1, Token, "rng(", vbTextCompare) Then
 
 '//Check for parameters...
-If InStr(1, xArt, ".") Then
-If InStr(1, xArt, " .") Then xArtArr = Split(xArt, " .")
-If InStr(1, xArt, ").") Then xArtArr = Split(xArt, ").")
+If InStr(1, Token, ".") Then
+If InStr(1, Token, " .") Then TokenArr = Split(Token, " .")
+If InStr(1, Token, ").") Then TokenArr = Split(Token, ").")
 
-Do Until X > UBound(xArtArr)
+Do Until X > UBound(TokenArr)
 
-xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(X) = xArt
+Token = TokenArr(X): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(X) = Token
 
 '//Extract range...
-If InStr(1, xArtArr(X), "rng", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "rng", vbNullString, , , vbTextCompare)
-If InStr(1, xArtArr(0), "=") Then xArtArrH = Split(xArtArr(0), "="): _
-xArt = xArtArrH(1): Call modArtP(xArt): xArtArr(0) = xArt Else: _
-xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
+If InStr(1, TokenArr(X), "rng", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "rng", vbNullString, , , vbTextCompare)
+If InStr(1, TokenArr(0), "=") Then TokenArrH = Split(TokenArr(0), "="): _
+Token = TokenArrH(1): Call modArtParens(Token): TokenArr(0) = Token Else: _
+Token = TokenArr(X): Call modArtParens(Token): TokenArr(X) = Token
 End If
 '//Select range...
-If InStr(1, xArtArr(X), "sel", vbTextCompare) Then
-Range(xArtArr(0)).Select
+If InStr(1, TokenArr(X), "sel", vbTextCompare) Then
+Range(TokenArr(0)).Select
 End If
 '//Clean range...
-If InStr(1, xArtArr(X), "cln", vbTextCompare) Then
-Range(xArtArr(0)).ClearContents
+If InStr(1, TokenArr(X), "cln", vbTextCompare) Then
+Range(TokenArr(0)).ClearContents
 End If
 '//Clear range...
-If InStr(1, xArtArr(X), "clr", vbTextCompare) Then
-Range(xArtArr(0)).Clear
+If InStr(1, TokenArr(X), "clr", vbTextCompare) Then
+Range(TokenArr(0)).Clear
 End If
 '//Copy range...
-If InStr(1, xArtArr(X), "copy") Then
-If InStr(1, xArtArr(X), "copy&") Then P = 1
-If InStr(1, xArtArr(X), "copy&!") Then P = 2
-If InStr(1, xArtArr(X), "copy&!!") Then P = 3
+If InStr(1, TokenArr(X), "copy") Then
+If InStr(1, TokenArr(X), "copy&") Then P = 1
+If InStr(1, TokenArr(X), "copy&!") Then P = 2
+If InStr(1, TokenArr(X), "copy&!!") Then P = 3
 
-    xArtArr(X) = Replace(xArtArr(X), "copy", vbNullString, vbTextCompare)
-    xArtArr(X) = Replace(xArtArr(X), "!", vbNullString)
-    xArtArr(X) = Replace(xArtArr(X), "&", vbNullString)
-    xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
+    TokenArr(X) = Replace(TokenArr(X), "copy", vbNullString, vbTextCompare)
+    TokenArr(X) = Replace(TokenArr(X), "!", vbNullString)
+    TokenArr(X) = Replace(TokenArr(X), "&", vbNullString)
+    Token = TokenArr(X): Call modArtParens(Token): TokenArr(X) = Token
     
     ActiveCell.Copy
     
     If P = vbNullString Then ActiveCell.Copy '//just copy
      
     If P = 1 Then '//copy paste range contents
-        ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
+        ActiveWorkbook.Worksheets(appBlk).Range(TokenArr(X)).Activate
             ActiveCell.PasteSpecial
                 End If
                 
     If P = 2 Then '//copy paste clean contents
         xCell = ActiveCell.Address
-            ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
+            ActiveWorkbook.Worksheets(appBlk).Range(TokenArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Range(xCell).ClearContents
                         End If
                         
     If P = 3 Then '//copy paste clear range contents
         xCell = ActiveCell.Address
-            ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
+            ActiveWorkbook.Worksheets(appBlk).Range(TokenArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Range(xCell).Clear
                         End If
@@ -403,98 +403,98 @@ If InStr(1, xArtArr(X), "copy&!!") Then P = 3
             
 
 '//Paste range...
-If InStr(1, xArtArr(X), "paste", vbTextCompare) Then
+If InStr(1, TokenArr(X), "paste", vbTextCompare) Then
 ActiveCell.PasteSpecial
 End If
 '//Set range name...
-If InStr(1, xArtArr(X), "name", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "name ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "name(", vbNullString, , , vbTextCompare)
+If InStr(1, TokenArr(X), "name", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "name ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "name(", vbNullString, , , vbTextCompare)
 '//no name entered (clear name)
-If xArtArr(X) = vbNullString Then
-xArtArr(X) = Range(xArtArr(0)).Name.Name
-ActiveWorkbook.Names(xArtArr(X)).Delete
+If TokenArr(X) = vbNullString Then
+TokenArr(X) = Range(TokenArr(0)).name.name
+ActiveWorkbook.Names(TokenArr(X)).Delete
     Else
-        Range(xArtArr(0)).Name = xArtArr(X)
+        Range(TokenArr(0)).name = TokenArr(X)
             End If
                 End If
 '//Set range value2...
-If InStr(1, xArtArr(X), "value2", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "value2 ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value2(", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value2", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Value2 = xArtArr(X)
+If InStr(1, TokenArr(X), "value2", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "value2 ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value2(", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value2", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Value2 = TokenArr(X)
 End If
 '//Set range value...
-If InStr(1, xArtArr(X), "value", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "value ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value(", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Value = xArtArr(X)
+If InStr(1, TokenArr(X), "value", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "value ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value(", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Value = TokenArr(X)
 End If
 '//Set range font color...
-If InStr(1, xArtArr(X), "fcolor", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "fcolor ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "fcolor(", vbNullString, , , vbTextCompare)
-HX = xArtArr(X)
+If InStr(1, TokenArr(X), "fcolor", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "fcolor ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "fcolor(", vbNullString, , , vbTextCompare)
+HX = TokenArr(X)
 Call basColor(HX) '//find color
 HX = Replace(HX, ")", vbNullString)
 HX = Replace(HX, "(", vbNullString)
 xRGBArr = Split(HX, ",")
-Range(xArtArr(0)).Font.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
+Range(TokenArr(0)).Font.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Set range font size...
-If InStr(1, xArtArr(X), "fsize", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "fsize ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "fsize(", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Font.Size = xArtArr(X)
+If InStr(1, TokenArr(X), "fsize", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "fsize ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "fsize(", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Font.Size = TokenArr(X)
 End If
 '//Set range font type...
-If InStr(1, xArtArr(X), "ftype", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "ftype ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "ftype(", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Font.FontStyle = xArtArr(X)
+If InStr(1, TokenArr(X), "ftype", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "ftype ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "ftype(", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Font.FontStyle = TokenArr(X)
 End If
 '//Set range pattern...
-If InStr(1, xArtArr(X), "pattern", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "pattern ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "pattern(", vbNullString, , , vbTextCompare)
-PX = xArtArr(X)
+If InStr(1, TokenArr(X), "pattern", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "pattern ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "pattern(", vbNullString, , , vbTextCompare)
+PX = TokenArr(X)
 Call basPattern(PX) '//find pattern
-Range(xArtArr(0)).Interior.Pattern = PX
+Range(TokenArr(0)).Interior.Pattern = PX
 End If
 '//Set range border direction...
-If InStr(1, xArtArr(X), "border", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "border ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "border(", vbNullString, , , vbTextCompare)
-BX = xArtArr(X)
+If InStr(1, TokenArr(X), "border", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "border ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "border(", vbNullString, , , vbTextCompare)
+BX = TokenArr(X)
 Call basBorder(BX) '//find border
-Range(xArtArr(0)).BorderAround (BX)
+Range(TokenArr(0)).BorderAround (BX)
 End If
 '//Set range border type...
-If InStr(1, xArtArr(X), "btype(", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "btype ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "btype(", vbNullString, , , vbTextCompare)
-SX = xArtArr(X)
+If InStr(1, TokenArr(X), "btype(", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "btype ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "btype(", vbNullString, , , vbTextCompare)
+SX = TokenArr(X)
 Call basBorderStyle(SX) '//find border type
-Range(xArtArr(0)).Borders.LineStyle = SX
+Range(TokenArr(0)).Borders.LineStyle = SX
 End If
 '//Set range color...
-If InStr(1, xArtArr(X), "bgcolor", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "bgcolor ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "bgcolor(", vbNullString, , , vbTextCompare)
-HX = xArtArr(X)
+If InStr(1, TokenArr(X), "bgcolor", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "bgcolor ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "bgcolor(", vbNullString, , , vbTextCompare)
+HX = TokenArr(X)
 Call basColor(HX) '//find color
 HX = Replace(HX, ")", vbNullString)
 HX = Replace(HX, "(", vbNullString)
 xRGBArr = Split(HX, ",")
-Range(xArtArr(0)).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
+Range(TokenArr(0)).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Read range value into variable...
-If InStr(1, xArtArr(X), "read", vbTextCompare) Then
-If xArtArrH(0) <> Empty Then
-xVar = Range(xArtArr(0)).Value
-xArt = appEnv & ",#!" & xArtArrH(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+If InStr(1, TokenArr(X), "read", vbTextCompare) Then
+If TokenArrH(0) <> Empty Then
+xVar = Range(TokenArr(0)).Value
+Token = appEnv & "[,]" & TokenArrH(0) & "=" & xVar & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 End If
     End If
 
@@ -504,71 +504,71 @@ Exit Function
 End If
 
 '//no parameter
-xArt = Replace(xArt, "rng(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "rng(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 '//Activate range...
-Range(xArt).Activate
+Range(Token).Activate
 Exit Function
 '//#
 '//
 '//Select & modify cell/range...
-ElseIf InStr(1, xArt, "sel(", vbTextCompare) Then
+ElseIf InStr(1, Token, "sel(", vbTextCompare) Then
 
 '//Check for parameters...
-If InStr(1, xArt, ".") Then
-If InStr(1, xArt, " .") Then xArtArr = Split(xArt, " .")
-If InStr(1, xArt, ").") Then xArtArr = Split(xArt, ").")
+If InStr(1, Token, ".") Then
+If InStr(1, Token, " .") Then TokenArr = Split(Token, " .")
+If InStr(1, Token, ").") Then TokenArr = Split(Token, ").")
 
-Do Until X > UBound(xArtArr)
+Do Until X > UBound(TokenArr)
 
-xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(X) = xArt
+Token = TokenArr(X): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(X) = Token
 
 '//Select cell...
-If InStr(1, xArtArr(X), "sel", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "sel", vbNullString, , , vbTextCompare)
-If InStr(1, xArtArr(0), "=") Then xArtArrH = Split(xArtArr(0), "="): _
-xArt = xArtArrH(1): Call modArtP(xArt): xArtArr(0) = xArt Else: _
-xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
-Range(xArtArr(X)).Select
+If InStr(1, TokenArr(X), "sel", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "sel", vbNullString, , , vbTextCompare)
+If InStr(1, TokenArr(0), "=") Then TokenArrH = Split(TokenArr(0), "="): _
+Token = TokenArrH(1): Call modArtParens(Token): TokenArr(0) = Token Else: _
+Token = TokenArr(X): Call modArtParens(Token): TokenArr(X) = Token
+Range(TokenArr(X)).Select
 End If
 '//Clean cell...
-If InStr(1, xArtArr(X), "cln", vbTextCompare) Then
-Range(xArtArr(0)).ClearContents
+If InStr(1, TokenArr(X), "cln", vbTextCompare) Then
+Range(TokenArr(0)).ClearContents
 End If
 '//Clear cell...
-If InStr(1, xArtArr(X), "clr", vbTextCompare) Then
-Range(xArtArr(0)).Clear
+If InStr(1, TokenArr(X), "clr", vbTextCompare) Then
+Range(TokenArr(0)).Clear
 End If
 '//Copy cell...
-If InStr(1, xArtArr(X), "copy", vbTextCompare) Then
-If InStr(1, xArtArr(X), "copy&", vbTextCompare) Then P = 1
-If InStr(1, xArtArr(X), "copy&!", vbTextCompare) Then P = 2
-If InStr(1, xArtArr(X), "copy&!!", vbTextCompare) Then P = 3
+If InStr(1, TokenArr(X), "copy", vbTextCompare) Then
+If InStr(1, TokenArr(X), "copy&", vbTextCompare) Then P = 1
+If InStr(1, TokenArr(X), "copy&!", vbTextCompare) Then P = 2
+If InStr(1, TokenArr(X), "copy&!!", vbTextCompare) Then P = 3
 
-    xArtArr(X) = Replace(xArtArr(X), "copy", vbNullString, , , vbTextCompare)
-    xArtArr(X) = Replace(xArtArr(X), "!", vbNullString)
-    xArtArr(X) = Replace(xArtArr(X), "&", vbNullString)
-    xArt = xArtArr(X): Call modArtP(xArt): xArtArr(X) = xArt
+    TokenArr(X) = Replace(TokenArr(X), "copy", vbNullString, , , vbTextCompare)
+    TokenArr(X) = Replace(TokenArr(X), "!", vbNullString)
+    TokenArr(X) = Replace(TokenArr(X), "&", vbNullString)
+    Token = TokenArr(X): Call modArtParens(Token): TokenArr(X) = Token
     
     ActiveCell.Copy
     
     If P = vbNullString Then ActiveCell.Copy
      
     If P = 1 Then '//copy paste
-        ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
+        ActiveWorkbook.Worksheets(appBlk).Range(TokenArr(X)).Activate
             ActiveCell.PasteSpecial
                 End If
                 
     If P = 2 Then '//copy paste clear contents
         xCell = ActiveCell.Address
-            ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
+            ActiveWorkbook.Worksheets(appBlk).Range(TokenArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Range(xCell).ClearContents
                         End If
                         
         If P = 3 Then '//copy paste clear cell
         xCell = ActiveCell.Address
-            ActiveWorkbook.Worksheets(appBlk).Range(xArtArr(X)).Activate
+            ActiveWorkbook.Worksheets(appBlk).Range(TokenArr(X)).Activate
                 ActiveCell.PasteSpecial
                     ActiveWorkbook.Worksheets(appBlk).Range(xCell).Clear
                         End If
@@ -576,98 +576,98 @@ If InStr(1, xArtArr(X), "copy&!!", vbTextCompare) Then P = 3
                                 End If
                                 
 '//Paste cell...
-If InStr(1, xArtArr(X), "paste", vbTextCompare) Then
+If InStr(1, TokenArr(X), "paste", vbTextCompare) Then
 ActiveCell.PasteSpecial
 End If
 '//Set cell name...
-If InStr(1, xArtArr(X), "name", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "name ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "name(", vbNullString, , , vbTextCompare)
+If InStr(1, TokenArr(X), "name", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "name ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "name(", vbNullString, , , vbTextCompare)
 '//no name entered (clear name)
-If xArtArr(X) = vbNullString Then
-xArtArr(X) = Range(xArtArr(0)).Name.Name
-ActiveWorkbook.Names(xArtArr(X)).Delete
+If TokenArr(X) = vbNullString Then
+TokenArr(X) = Range(TokenArr(0)).name.name
+ActiveWorkbook.Names(TokenArr(X)).Delete
     Else
-        Range(xArtArr(0)).Name = xArtArr(X)
+        Range(TokenArr(0)).name = TokenArr(X)
             End If
                 End If
 '//Set cell value2...
-If InStr(1, xArtArr(X), "value2", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "value2 ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value2(", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value2", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Value2 = xArtArr(X)
+If InStr(1, TokenArr(X), "value2", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "value2 ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value2(", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value2", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Value2 = TokenArr(X)
 End If
 '//Set cell value...
-If InStr(1, xArtArr(X), "value", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "value ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value(", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "value", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Value = xArtArr(X)
+If InStr(1, TokenArr(X), "value", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "value ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value(", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "value", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Value = TokenArr(X)
 End If
 '//Set cell font color...
-If InStr(1, xArtArr(X), "fcolor", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "fcolor ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "fcolor(", vbNullString, , , vbTextCompare)
-HX = xArtArr(X)
+If InStr(1, TokenArr(X), "fcolor", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "fcolor ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "fcolor(", vbNullString, , , vbTextCompare)
+HX = TokenArr(X)
 Call basColor(HX) '//find color
 HX = Replace(HX, ")", vbNullString)
 HX = Replace(HX, "(", vbNullString)
 xRGBArr = Split(HX, ",")
-Range(xArtArr(0)).Font.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
+Range(TokenArr(0)).Font.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Set cell font size...
-If InStr(1, xArtArr(X), "fsize", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "fsize ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "fsize(", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Font.Size = xArtArr(X)
+If InStr(1, TokenArr(X), "fsize", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "fsize ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "fsize(", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Font.Size = TokenArr(X)
 End If
 '//Set cell font type...
-If InStr(1, xArtArr(X), "ftype", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "ftype ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "ftype(", vbNullString, , , vbTextCompare)
-Range(xArtArr(0)).Font.FontStyle = xArtArr(X)
+If InStr(1, TokenArr(X), "ftype", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "ftype ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "ftype(", vbNullString, , , vbTextCompare)
+Range(TokenArr(0)).Font.FontStyle = TokenArr(X)
 End If
 '//Set cell pattern...
-If InStr(1, xArtArr(X), "pattern", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "pattern ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "pattern(", vbNullString, , , vbTextCompare)
-PX = xArtArr(X)
+If InStr(1, TokenArr(X), "pattern", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "pattern ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "pattern(", vbNullString, , , vbTextCompare)
+PX = TokenArr(X)
 Call basPattern(PX) '//find pattern
-Range(xArtArr(0)).Interior.Pattern = PX
+Range(TokenArr(0)).Interior.Pattern = PX
 End If
 '//Set cell border direction...
-If InStr(1, xArtArr(X), "border", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "border ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "border(", vbNullString, , , vbTextCompare)
-BX = xArtArr(X)
+If InStr(1, TokenArr(X), "border", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "border ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "border(", vbNullString, , , vbTextCompare)
+BX = TokenArr(X)
 Call basBorder(BX) '//find border
-Range(xArtArr(0)).BorderAround = BX
+Range(TokenArr(0)).BorderAround = BX
 End If
 '//Set cell border type...
-If InStr(1, xArtArr(X), "btype", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "btype ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "btype(", vbNullString, , , vbTextCompare)
-SX = xArtArr(X)
+If InStr(1, TokenArr(X), "btype", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "btype ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "btype(", vbNullString, , , vbTextCompare)
+SX = TokenArr(X)
 Call basBorderStyle(SX) '//find border type
-Range(xArtArr(0)).Borders.LineStyle = SX
+Range(TokenArr(0)).Borders.LineStyle = SX
 End If
 '//Set cell color...
-If InStr(1, xArtArr(X), "bgcolor", vbTextCompare) Then
-xArtArr(X) = Replace(xArtArr(X), "bgcolor ", vbNullString, , , vbTextCompare)
-xArtArr(X) = Replace(xArtArr(X), "bgcolor(", vbNullString, , , vbTextCompare)
-HX = xArtArr(X)
+If InStr(1, TokenArr(X), "bgcolor", vbTextCompare) Then
+TokenArr(X) = Replace(TokenArr(X), "bgcolor ", vbNullString, , , vbTextCompare)
+TokenArr(X) = Replace(TokenArr(X), "bgcolor(", vbNullString, , , vbTextCompare)
+HX = TokenArr(X)
 Call basColor(HX) '//find color
 HX = Replace(HX, ")", vbNullString)
 HX = Replace(HX, "(", vbNullString)
 xRGBArr = Split(HX, ",")
-Range(xArtArr(0)).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
+Range(TokenArr(0)).Interior.Color = RGB(xRGBArr(0), xRGBArr(1), xRGBArr(2))
 End If
 '//Read cell value into variable...
-If InStr(1, xArtArr(X), "read", vbTextCompare) Then
-If xArtArrH(0) <> Empty Then
-xVar = Range(xArtArr(0)).Value
-xArt = appEnv & ",#!" & xArtArrH(0) & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+If InStr(1, TokenArr(X), "read", vbTextCompare) Then
+If TokenArrH(0) <> Empty Then
+xVar = Range(TokenArr(0)).Value
+Token = appEnv & "[,]" & TokenArrH(0) & "=" & xVar & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 End If
     End If
     
@@ -676,10 +676,10 @@ Loop
 Exit Function
 End If
 '//no parameter
-xArt = Replace(xArt, "sel(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "sel(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 '//Activate cell...
-Range(xArt).Select
+Range(Token).Select
 Exit Function
 '//#
 '//
@@ -689,109 +689,109 @@ Exit Function
 '/\_____________________________________
 '//
 '//wb() = Modify Workbook...
-ElseIf InStr(1, xArt, "wb(", vbTextCompare) Then
-xArt = Replace(xArt, "wb(", vbNullString, , , vbTextCompare)
+ElseIf InStr(1, Token, "wb(", vbTextCompare) Then
+Token = Replace(Token, "wb(", vbNullString, , , vbTextCompare)
 
-If InStr(1, xArt, ".active", vbTextCompare) Then If InStr(1, xArt, ").active", vbTextCompare) = False Then ActiveWorkbook.Activate  '//activate current workbook
-If InStr(1, xArt, ").active", vbTextCompare) Then '//activate specific workbook
-xArt = Replace(xArt, ".active", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
-Workbooks(xArt).Activate
-Range("MAS2").Name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
-Range("MAS3").Name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
+If InStr(1, Token, ".active", vbTextCompare) Then If InStr(1, Token, ").active", vbTextCompare) = False Then ActiveWorkbook.Activate  '//activate current workbook
+If InStr(1, Token, ").active", vbTextCompare) Then '//activate specific workbook
+Token = Replace(Token, ".active", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
+Workbooks(Token).Activate
+Range("MAS2").name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
+Range("MAS3").name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
 Exit Function
 End If
 
-If InStr(1, xArt, ").open", vbTextCompare) Then '//open workbook
+If InStr(1, Token, ").open", vbTextCompare) Then '//open workbook
 
-xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
-Workbooks.Open (xArt)
-Range("MAS2").Name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
-Range("MAS3").Name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
+Token = Replace(Token, ".open", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
+Workbooks.Open (Token)
+Range("MAS2").name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
+Range("MAS3").name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
 Workbooks(appEnv).Worksheets(appBlk).Activate
 Exit Function
 End If
 
-If InStr(1, xArt, ").hd", vbTextCompare) Then ActiveWorkbook.Application.Visible = False   '//hide active workbook
-If InStr(1, xArt, ").sh", vbTextCompare) Then ActiveWorkbook.Application.Visible = True  '//show active workbook
+If InStr(1, Token, ").hd", vbTextCompare) Then ActiveWorkbook.Application.Visible = False   '//hide active workbook
+If InStr(1, Token, ").sh", vbTextCompare) Then ActiveWorkbook.Application.Visible = True  '//show active workbook
 
-If InStr(1, xArt, ").close", vbTextCompare) Then _
-xArt = Replace(xArt, ".close", vbNullString, , , vbTextCompare): _
-Call modArtP(xArt): Call modArtQ(xArt): _
-If xArt = vbNullString Then ActiveWorkbook.Close: Exit Function Else _
-Workbooks(xArt).Close: Exit Function '//close workbook
+If InStr(1, Token, ").close", vbTextCompare) Then _
+Token = Replace(Token, ".close", vbNullString, , , vbTextCompare): _
+Call modArtParens(Token): Call modArtQuotes(Token): _
+If Token = vbNullString Then ActiveWorkbook.Close: Exit Function Else _
+Workbooks(Token).Close: Exit Function '//close workbook
 
-'If InStr(1, xArt, ").export", vbTextCompare) Then ActiveWorkbook.ExportAsFixedFormat = vbnullstring '//export file
-If InStr(1, xArt, ").newwin", vbTextCompare) Then ActiveWorkbook.NewWindow: Exit Function '//create new window
+'If InStr(1, Token, ").export", vbTextCompare) Then ActiveWorkbook.ExportAsFixedFormat = vbnullstring '//export file
+If InStr(1, Token, ").newwin", vbTextCompare) Then ActiveWorkbook.NewWindow: Exit Function '//create new window
 
-If InStr(1, xArt, ").save", vbTextCompare) And InStr(1, xArt, ").saveas", vbTextCompare) = False Then _
-xArt = Replace(xArt, ".save", vbNullString, , , vbTextCompare): _
-Call modArtP(xArt): Call modArtQ(xArt): _
-If xArt = vbNullString Then ActiveWorkbook.Save: Exit Function Else _
-Workbooks(xArt).Save: Exit Function '//save workbook
+If InStr(1, Token, ").save", vbTextCompare) And InStr(1, Token, ").saveas", vbTextCompare) = False Then _
+Token = Replace(Token, ".save", vbNullString, , , vbTextCompare): _
+Call modArtParens(Token): Call modArtQuotes(Token): _
+If Token = vbNullString Then ActiveWorkbook.Save: Exit Function Else _
+Workbooks(Token).Save: Exit Function '//save workbook
 
-If InStr(1, xArt, ").saveas", vbTextCompare) Then '//save as workbook
+If InStr(1, Token, ").saveas", vbTextCompare) Then '//save as workbook
 
-Call modArtP(xArt): Call modArtQ(xArt)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-xArt = Replace(xArt, ".saveas", vbNullString, , , vbTextCompare)
-xArtArr = Split(xArt, ",")
-If UBound(xArtArr) = 1 Then
-EX = xArtArr(1): Call basSaveFormat(EX)
+Token = Replace(Token, ".saveas", vbNullString, , , vbTextCompare)
+TokenArr = Split(Token, ",")
+If UBound(TokenArr) = 1 Then
+EX = TokenArr(1): Call basSaveFormat(EX)
 If EX <> "*/ERR" Then
-Range("MAS2").Name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
-Range("MAS3").Name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
-ActiveWorkbook.SaveAs FileName:=xArtArr(0), FileFormat:=xExt
+Range("MAS2").name = "xlasEnvironment": Range("xlasEnvironment").Value = appEnv '//link environment to workbook
+Range("MAS3").name = "xlasBlock": Range("xlasBlock").Value = appBlk '//link block to workbook
+ActiveWorkbook.SaveAs FileName:=TokenArr(0), FileFormat:=xExt
 End If
     End If
         Exit Function
             End If
     
-If InStr(1, xArt, ").name", vbTextCompare) Then MsgBox (ActiveWorkbook.Name), 0, "": Exit Function '//get name of workbook
-If InStr(1, xArt, ").path", vbTextCompare) Then MsgBox (ActiveWorkbook.Path), 0, "": Exit Function '//get path of workbook
+If InStr(1, Token, ").name", vbTextCompare) Then MsgBox (ActiveWorkbook.name), 0, "": Exit Function '//get name of workbook
+If InStr(1, Token, ").path", vbTextCompare) Then MsgBox (ActiveWorkbook.Path), 0, "": Exit Function '//get path of workbook
 
-If InStr(1, xArt, ").addsheet", vbTextCompare) Then '//add worksheet
+If InStr(1, Token, ").addsheet", vbTextCompare) Then '//add worksheet
 
-Call modArtP(xArt): Call modArtQ(xArt)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, ").addsheetafter", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".addafter", vbNullString, , , vbTextCompare) '//add after worksheet
-If InStr(1, xArt, ").addsheetbefore", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".addbefore", vbNullString, , , vbTextCompare) '//add before worksheet
+If InStr(1, Token, ").addsheetafter", vbTextCompare) Then P = 1: Token = Replace(Token, ".addafter", vbNullString, , , vbTextCompare) '//add after worksheet
+If InStr(1, Token, ").addsheetbefore", vbTextCompare) Then P = 2: Token = Replace(Token, ".addbefore", vbNullString, , , vbTextCompare) '//add before worksheet
 
-xArt = Replace(xArt, ".add", vbNullString, , , vbTextCompare)
-If xArt = vbNullString Then '//default add no arguments
-xArt = "Sheet" & ActiveWorkbook.Worksheets.Count + 1
-Worksheets.Add.Name = xArt
+Token = Replace(Token, ".add", vbNullString, , , vbTextCompare)
+If Token = vbNullString Then '//default add no arguments
+Token = "Sheet" & ActiveWorkbook.Worksheets.Count + 1
+Worksheets.Add.name = Token
 Exit Function
 End If
 
-If InStr(1, xArt, ",") = False Then
+If InStr(1, Token, ",") = False Then
 '//single argument... (set count w/ default worksheet name & place before or after first/last sheet)
-If P = 1 Then Worksheets.Add After:=Worksheets(Worksheets.Count), Count:=Int(xArt): Exit Function
-If P = 2 Then Worksheets.Add Before:=Worksheets(Worksheets.Count), Count:=Int(xArt): Exit Function
+If P = 1 Then Worksheets.Add After:=Worksheets(Worksheets.Count), Count:=Int(Token): Exit Function
+If P = 2 Then Worksheets.Add Before:=Worksheets(Worksheets.Count), Count:=Int(Token): Exit Function
     Else
-xArtArr = Split(xArt, ",")
-If UBound(xArtArr) = 1 Then
+TokenArr = Split(Token, ",")
+If UBound(TokenArr) = 1 Then
 '//two arguments... (set add worksheet name & place before or after assigned sheet
-If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0))).Name = xArtArr(1): Exit Function
-If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0))).Name = xArtArr(1): Exit Function
-ElseIf UBound(xArtArr) = 2 Then
+If P = 1 Then Worksheets.Add(After:=Worksheets(TokenArr(0))).name = TokenArr(1): Exit Function
+If P = 2 Then Worksheets.Add(Before:=Worksheets(TokenArr(0))).name = TokenArr(1): Exit Function
+ElseIf UBound(TokenArr) = 2 Then
 '//three arguments... (set add worksheet name & place before or after assigned  sheet w/ count)
-If P = 1 Then Worksheets.Add(After:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).Name = xArtArr(1): Exit Function
-If P = 2 Then Worksheets.Add(Before:=Worksheets(xArtArr(0)), Count:=Int(xArtArr(2))).Name = xArtArr(1): Exit Function
+If P = 1 Then Worksheets.Add(After:=Worksheets(TokenArr(0)), Count:=Int(TokenArr(2))).name = TokenArr(1): Exit Function
+If P = 2 Then Worksheets.Add(Before:=Worksheets(TokenArr(0)), Count:=Int(TokenArr(2))).name = TokenArr(1): Exit Function
                     End If
                         End If
         
-If InStr(1, xArt, ").newbook", vbTextCompare) Then '//add new workbook
+If InStr(1, Token, ").newbook", vbTextCompare) Then '//add new workbook
 
-Call modArtP(xArt): Call modArtQ(xArt)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-xArt = Replace(xArt, ".newbook", vbNullString, , , vbTextCompare)
-xArtArr = Split(xArt, ",")
-If UBound(xArtArr) = 1 Then
-EX = xArtArr(1): Call basSaveFormat(EX)
+Token = Replace(Token, ".newbook", vbNullString, , , vbTextCompare)
+TokenArr = Split(Token, ",")
+If UBound(TokenArr) = 1 Then
+EX = TokenArr(1): Call basSaveFormat(EX)
 If EX <> "*/ERR" Then
-Application.Workbooks.Add.SaveAs FileName:=xArtArr(0), FileFormat:=xExt
+Application.Workbooks.Add.SaveAs FileName:=TokenArr(0), FileFormat:=xExt
 Workbooks(appEnv).Worksheets(appBlk).Activate
 End If
     End If
@@ -801,53 +801,53 @@ End If
 
 
 '//Run workbook module...
-If InStr(1, xArt, ").run", vbTextCompare) Then
+If InStr(1, Token, ").run", vbTextCompare) Then
 
-xArt = Replace(xArt, ".run", vbNullString, , , vbTextCompare)
-Call modArtD(xArt): Call modArtQ(xArt)
+Token = Replace(Token, ".run", vbNullString, , , vbTextCompare)
+Call modArtBraces(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else GoTo wbRunNoArg
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",") Else GoTo wbRunNoArg
 
-xArtArr(0) = Trim(xArtArr(0)): xArtArr(1) = Trim(xArtArr(1))
-xWb = xArtArr(0) '//extract workbook
-xMod = xArtArr(1) '//extract module
+TokenArr(0) = Trim(TokenArr(0)): TokenArr(1) = Trim(TokenArr(1))
+xWb = TokenArr(0) '//extract workbook
+xMod = TokenArr(1) '//extract module
 
 X = 2
-Do Until X > UBound(xArtArr) '//extract argument(s)
-xArt = xArtArr(X) & ",": xArtH = xArtH & xArt
+Do Until X > UBound(TokenArr) '//extract argument(s)
+Token = TokenArr(X) & ",": ArtH = ArtH & Token
 X = X + 1
 Loop
 
-xArt = xArtH
-If Right(xArt, Len(xArt) - Len(xArt) + 1) = "," Then xArt = Left(xArt, Len(xArt) - 1)
+Token = ArtH
+If Right(Token, Len(Token) - Len(Token) + 1) = "," Then Token = Left(Token, Len(Token) - 1)
 
-X = Application.Run("'" & xWb & "'!" & xMod, (xArt))
+X = Application.Run("'" & xWb & "'!" & xMod, (Token))
 Exit Function
     
 '//no arguments provided
 wbRunNoArg:
-X = Application.Run(xArt)
+X = Application.Run(Token)
 Exit Function
 End If
 
 '//Delete workbook cell name...
-If InStr(1, xArt, ").delname", vbTextCompare) Then
+If InStr(1, Token, ").delname", vbTextCompare) Then
 
-xArt = Replace(xArt, ".delname", vbNullString, , , vbTextCompare)
-Call modArtD(xArt): Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, ".delname", vbNullString, , , vbTextCompare)
+Call modArtBraces(Token): Call modArtParens(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",") Else GoTo ErrMsg
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",") Else GoTo ErrEnd
 
-xArtArr(0) = Trim(xArtArr(0)): xArtArr(1) = Trim(xArtArr(1))
+TokenArr(0) = Trim(TokenArr(0)): TokenArr(1) = Trim(TokenArr(1))
 
-Workbooks(xArtArr(0)).Names(xArtArr(1)).Delete
+Workbooks(TokenArr(0)).Names(TokenArr(1)).Delete
 
 Exit Function
 
 End If
 
 '//excerpt not supplied
-MsgBox (ActiveWorkbook.Name)
+MsgBox (ActiveWorkbook.name)
 Exit Function
 '//#
 '//
@@ -858,136 +858,136 @@ Exit Function
 '//
 '//
 '//fil() = Modify file
-ElseIf InStr(1, xArt, "fil(", vbTextCompare) Then
+ElseIf InStr(1, Token, "fil(", vbTextCompare) Then
 
-If InStr(1, xArt, ".fil", vbTextCompare) Then
-xArt = Replace(xArt, "fil(", vbNullString, , , vbTextCompare)
+If InStr(1, Token, ".fil", vbTextCompare) Then
+Token = Replace(Token, "fil(", vbNullString, , , vbTextCompare)
 
-If InStr(1, xArt, "del.", vbTextCompare) Then M = 1: xArt = Replace(xArt, "del.", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "mk.", vbTextCompare) Then M = 2: xArt = Replace(xArt, "mk.", vbNullString, , , vbTextCompare)
-If Left(xArt, 1) = " " Then xArt = Right(xArt, Len(xArt) - 1)
-If M = 0 Then errLvl = 1: GoTo ErrMsg
+If InStr(1, Token, "del.", vbTextCompare) Then M = 1: Token = Replace(Token, "del.", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "mk.", vbTextCompare) Then M = 2: Token = Replace(Token, "mk.", vbNullString, , , vbTextCompare)
+If Left(Token, 1) = " " Then Token = Right(Token, Len(Token) - 1)
+If M = 0 Then errLvl = 1: GoTo ErrEnd
 
-Call modArtP(xArt): Call modArtQ(xArt)
+Call modArtParens(Token): Call modArtQuotes(Token)
 Set oFSO = CreateObject("Scripting.FileSystemObject")
-If M = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFile (xArt): Set oFSO = Nothing: Exit Function '//delete file
+If M = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFile (Token): Set oFSO = Nothing: Exit Function '//delete file
 If M = 2 Then: _
 
-If InStr(1, xArt, ",") Then
+If InStr(1, Token, ",") Then
 M = M & "1"
-xArtArr = Split(xArt, ",")
-xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = xArt
-xArt = xArtArr(1): Call modArtP(xArt): xArtArr(1) = xArt
-xArtArr(1) = LTrim(xArtArr(1)) '//remove leading space
+TokenArr = Split(Token, ",")
+Token = TokenArr(0): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(0) = Token
+Token = TokenArr(1): Call modArtParens(Token): TokenArr(1) = Token
+TokenArr(1) = LTrim(TokenArr(1)) '//remove leading space
 End If
 
-If M = 2 Then Open (xArt) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
-If M = 21 Then Open (xArtArr(0)) For Output As #1: Print #1, xArtArr(1): Close #1: Exit Function
+If M = 2 Then Open (Token) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
+If M = 21 Then Open (TokenArr(0)) For Output As #1: Print #1, TokenArr(1): Close #1: Exit Function
 Exit Function
 
 Else
-errLvl = 1: GoTo ErrMsg
+errLvl = 1: GoTo ErrEnd
 End If
 
 '//dir() = Modify folder
-ElseIf InStr(1, xArt, "dir(", vbTextCompare) Then
+ElseIf InStr(1, Token, "dir(", vbTextCompare) Then
 
-If InStr(1, xArt, ".dir", vbTextCompare) Then
-xArt = Replace(xArt, "dir(", vbNullString, , , vbTextCompare)
+If InStr(1, Token, ".dir", vbTextCompare) Then
+Token = Replace(Token, "dir(", vbNullString, , , vbTextCompare)
 
-If InStr(1, xArt, "del.", vbTextCompare) Then M = 1: xArt = Replace(xArt, "del.", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "mk.", vbTextCompare) Then M = 2: xArt = Replace(xArt, "mk.", vbNullString, , , vbTextCompare)
-If Left(xArt, 1) = " " Then xArt = Right(xArt, Len(xArt) - 1)
-If M = 0 Then errLvl = 1: GoTo ErrMsg
+If InStr(1, Token, "del.", vbTextCompare) Then M = 1: Token = Replace(Token, "del.", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "mk.", vbTextCompare) Then M = 2: Token = Replace(Token, "mk.", vbNullString, , , vbTextCompare)
+If Left(Token, 1) = " " Then Token = Right(Token, Len(Token) - 1)
+If M = 0 Then errLvl = 1: GoTo ErrEnd
 
-Call modArtP(xArt): Call modArtQ(xArt)
-If M = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFolder (xArt): Set oFSO = Nothing: Exit Function '//create file
+Call modArtParens(Token): Call modArtQuotes(Token)
+If M = 1 Then: Set oFSO = CreateObject("Scripting.FileSystemObject"): oFSO.DeleteFolder (Token): Set oFSO = Nothing: Exit Function '//create file
 If M = 2 Then: _
 
-If InStr(1, xArt, ",") Then
+If InStr(1, Token, ",") Then
 M = M & "1"
-xArtArr = Split(xArt, ",")
-xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = xArt
-xArt = xArtArr(1): Call modArtP(xArt): xArtArr(1) = xArt
-xArtArr(1) = LTrim(xArtArr(1)) '//remove leading space
+TokenArr = Split(Token, ",")
+Token = TokenArr(0): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(0) = Token
+Token = TokenArr(1): Call modArtParens(Token): TokenArr(1) = Token
+TokenArr(1) = LTrim(TokenArr(1)) '//remove leading space
 End If
 
-If M = 2 Then MkDir (xArt): Exit Function
-If M = 21 Then MkDir (xArtArr(0)): MkDir (xArtArr(0) & "/" & xArtArr(1)): Exit Function
+If M = 2 Then MkDir (Token): Exit Function
+If M = 21 Then MkDir (TokenArr(0)): MkDir (TokenArr(0) & "/" & TokenArr(1)): Exit Function
 Exit Function
 
 Else
-errLvl = 1: GoTo ErrMsg
+errLvl = 1: GoTo ErrEnd
 End If
 
 
 '//dfldr() = Delete empty directory
-ElseIf InStr(1, xArt, "dfldr(", vbTextCompare) Then
+ElseIf InStr(1, Token, "dfldr(", vbTextCompare) Then
 
-xArt = Replace(xArt, "dfldr", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "dfldr", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If Dir(xArt, vbDirectory) <> "" Then RmDir (xArt): Exit Function
+If Dir(Token, vbDirectory) <> "" Then RmDir (Token): Exit Function
 
 '//dfile() = Delete file
-ElseIf InStr(1, xArt, "dfile(", vbTextCompare) Then
+ElseIf InStr(1, Token, "dfile(", vbTextCompare) Then
 
-xArt = Replace(xArt, "dfile", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "dfile", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If Dir(xArt) <> "" Then Kill (xArt): Exit Function
+If Dir(Token) <> "" Then Kill (Token): Exit Function
 
 '//mfldr() = Create empty directory
-ElseIf InStr(1, xArt, "mfldr(", vbTextCompare) Then
+ElseIf InStr(1, Token, "mfldr(", vbTextCompare) Then
 
-xArt = Replace(xArt, "mfldr", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "mfldr", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-MkDir (xArt): Exit Function
+MkDir (Token): Exit Function
 
 '//mfile() = Create file
-ElseIf InStr(1, xArt, "mfile(", vbTextCompare) Then
+ElseIf InStr(1, Token, "mfile(", vbTextCompare) Then
 
-xArt = Replace(xArt, "mfile", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "mfile", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-Open (xArt) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
+Open (Token) For Output As #1: Print #1, vbNullString: Close #1: Exit Function
 
 '//move() = Move file or folder
-ElseIf InStr(1, xArt, "move(", vbTextCompare) Then
-xArt = Replace(xArt, "move(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+ElseIf InStr(1, Token, "move(", vbTextCompare) Then
+Token = Replace(Token, "move(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then
+If InStr(1, Token, ",") Then
 
-xArtArr = Split(xArt, ",")
+TokenArr = Split(Token, ",")
 
-xArt = "move " & xArtArr(0) & " " & xArtArr(1)
+Token = "move " & TokenArr(0) & " " & TokenArr(1)
     
-sysShell = Shell("cmd.exe /s /c" & xArt, 0)
+sysShell = Shell("cmd.exe /s /c" & Token, 0)
 sysShell = vbNullString
 End If
 Exit Function
 
 '//ren() = Rename file or folder
-ElseIf InStr(1, xArt, "ren(", vbTextCompare) Then
-xArt = Replace(xArt, "ren(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+ElseIf InStr(1, Token, "ren(", vbTextCompare) Then
+Token = Replace(Token, "ren(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, ",") Then
+If InStr(1, Token, ",") Then
 
-xArtArr = Split(xArt, ",")
+TokenArr = Split(Token, ",")
 
-If UBound(xArtArr) = 2 Then GoTo renAll
-If InStr(1, xArt, "app.r") Then GoTo renVBA
+If UBound(TokenArr) = 2 Then GoTo renAll
+If InStr(1, Token, "app.r") Then GoTo renVBA
 
 '//default
-xArt = "ren " & xArtArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString
+Token = "ren " & TokenArr(0) & " " & TokenArr(1): sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString
 End If
 Exit Function
 
 renVBA:
-Name xArtArr(0) As xArtArr(1)
+Name TokenArr(0) As TokenArr(1)
 Exit Function
 
 renAll:
@@ -997,18 +997,18 @@ xNum = 1
 
 Set oFSO = CreateObject("Scripting.FileSystemObject")
 
-Set oSubFldr = oFSO.GetFolder(xArtArr(0))
+Set oSubFldr = oFSO.GetFolder(TokenArr(0))
 
-xExtArr = Split(xArtArr(1), "."): EX = xExtArr(1): xName = xExtArr(0)
+xExtArr = Split(TokenArr(1), "."): EX = xExtArr(1): xName = xExtArr(0)
 
-If InStr(1, xArtArr(2), "-num", vbTextCompare) Then xNum = 1: GoTo renAllNum
-If InStr(1, xArtArr(2), "-datenum", vbTextCompare) And InStr(1, xArtArr(2), "mtime", vbTextCompare) = False Then getDate = Date: getDate = Replace(getDate, "/", "-"): xNum = 1: GoTo renAllDateNum
-If InStr(1, xArtArr(2), "-datenumtime", vbTextCompare) Then getDate = Date: getDate = Replace(getDate, "/", "-"): xNum = 1: xTime = Time: xTime = Replace(xTime, ":", vbNullString): xTime = Replace(xTime, " ", vbNullString): GoTo renAllDateNumTime
+If InStr(1, TokenArr(2), "-num", vbTextCompare) Then xNum = 1: GoTo renAllNum
+If InStr(1, TokenArr(2), "-datenum", vbTextCompare) And InStr(1, TokenArr(2), "mtime", vbTextCompare) = False Then getDate = Date: getDate = Replace(getDate, "/", "-"): xNum = 1: GoTo renAllDateNum
+If InStr(1, TokenArr(2), "-datenumtime", vbTextCompare) Then getDate = Date: getDate = Replace(getDate, "/", "-"): xNum = 1: xTime = Time: xTime = Replace(xTime, ":", vbNullString): xTime = Replace(xTime, " ", vbNullString): GoTo renAllDateNumTime
 
 renAllNum:
 For Each oFile In oSubFldr.Files
-xArt = "ren " & oFile.Path & " " & xName & "_" & xNum & "." & EX
-sysShell = Shell("cmd.exe /s /c" & xArt, 0)
+Token = "ren " & oFile.Path & " " & xName & "_" & xNum & "." & EX
+sysShell = Shell("cmd.exe /s /c" & Token, 0)
 sysShell = vbNullString
 xNum = xNum + 1
 Next
@@ -1019,8 +1019,8 @@ Exit Function
 
 renAllDateNum:
 For Each oFile In oSubFldr.Files
-xArt = "ren " & oFile.Path & " " & xName & "_" & getDate & "_" & xNum & "." & EX
-sysShell = Shell("cmd.exe /s /c" & xArt, 0)
+Token = "ren " & oFile.Path & " " & xName & "_" & getDate & "_" & xNum & "." & EX
+sysShell = Shell("cmd.exe /s /c" & Token, 0)
 sysShell = vbNullString
 xNum = xNum + 1
 Next
@@ -1031,8 +1031,8 @@ Exit Function
 
 renAllDateNumTime:
 For Each oFile In oSubFldr.Files
-xNum = xNum + xArt = "ren " & oFile.Path & " " & xName & "_" & getDate & "_" & xNum & "_" & xTime & "." & EX
-sysShell = Shell("cmd.exe /s /c" & xArt, 0)
+xNum = xNum + Token = "ren " & oFile.Path & " " & xName & "_" & getDate & "_" & xNum & "_" & xTime & "." & EX
+sysShell = Shell("cmd.exe /s /c" & Token, 0)
 sysShell = vbNullString
 xNum = xNum + 1
 Next
@@ -1042,97 +1042,97 @@ Set oSubFldr = Nothing
 Exit Function
 
 '//read() = Read file
-ElseIf InStr(1, xArt, "read(", vbTextCompare) Then
-xArt = Replace(xArt, "read", vbNullString, , , vbTextCompare)
+ElseIf InStr(1, Token, "read(", vbTextCompare) Then
+Token = Replace(Token, "read", vbNullString, , , vbTextCompare)
 
 '//switches
-If InStr(1, xArt, "-all", vbTextCompare) Then S = 1: xArt = Replace(xArt, "-all", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-nlall", vbTextCompare) Then S = 2: xArt = Replace(xArt, "-nlall", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-string", vbTextCompare) Then S = 3: xArt = Replace(xArt, "-string", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-xstring", vbTextCompare) Then S = 4: xArt = Replace(xArt, "-xstring", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-nlstring", vbTextCompare) Then S = 5: xArt = Replace(xArt, "-nlstring", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-line", vbTextCompare) Then S = 6: xArt = Replace(xArt, "-line", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-xline", vbTextCompare) Then S = 7: xArt = Replace(xArt, "-xline", vbNullString, , , vbTextCompare): GoTo SetRead
-If InStr(1, xArt, "-nlline", vbTextCompare) Then S = 8: xArt = Replace(xArt, "-nlline", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-all", vbTextCompare) Then S = 1: Token = Replace(Token, "-all", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-nlall", vbTextCompare) Then S = 2: Token = Replace(Token, "-nlall", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-string", vbTextCompare) Then S = 3: Token = Replace(Token, "-string", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-xstring", vbTextCompare) Then S = 4: Token = Replace(Token, "-xstring", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-nlstring", vbTextCompare) Then S = 5: Token = Replace(Token, "-nlstring", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-line", vbTextCompare) Then S = 6: Token = Replace(Token, "-line", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-xline", vbTextCompare) Then S = 7: Token = Replace(Token, "-xline", vbNullString, , , vbTextCompare): GoTo SetRead
+If InStr(1, Token, "-nlline", vbTextCompare) Then S = 8: Token = Replace(Token, "-nlline", vbNullString, , , vbTextCompare): GoTo SetRead
 
 SetRead:
 '//modifier(s):
-If InStr(1, xArt, "count.") Then M = 1: xArt = Replace(xArt, "count.", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "count.") Then M = 1: Token = Replace(Token, "count.", vbNullString, , , vbTextCompare)
 
-xArtArr = Split(xArt, "=")
-xArt = xArtArr(1): Call modArtP(xArt): Call modArtQ(xArt): xArt = Trim(xArt): xArtArr(1) = xArt
-xArt = xArtArr(0)
+TokenArr = Split(Token, "=")
+Token = TokenArr(1): Call modArtParens(Token): Call modArtQuotes(Token): Token = Trim(Token): TokenArr(1) = Token
+Token = TokenArr(0)
 
 '//read for all
 If S = 1 Then
-Open xArtArr(1) For Input As #1: Do Until EOF(1): Line Input #1, xArtH: xVar = xVar & xArtH: Loop: Close #1
+Open TokenArr(1) For Input As #1: Do Until EOF(1): Line Input #1, ArtH: xVar = xVar & ArtH: Loop: Close #1
 GoTo EndRead
 End If
 
 '//read for newline all
 If S = 2 Then
-Open xArtArr(1) For Input As #1: Do Until EOF(1): Line Input #1, xArtH: xVar = xVar & xArtH & vbNewLine: Loop: Close #1
+Open TokenArr(1) For Input As #1: Do Until EOF(1): Line Input #1, ArtH: xVar = xVar & ArtH & vbNewLine: Loop: Close #1
 GoTo EndRead
 End If
 
 '//read for string
 If S = 3 Then
-xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
-Open xArtArr(1) For Input As #1
-Do Until EOF(1): Line Input #1, xArtH
-If InStr(1, xArtH, xArtArr(0)) Then xVar = xArtH: Close #1: GoTo EndRead
+TokenArr = Split(TokenArr(1), ","): TokenArr(1) = Trim(TokenArr(1))
+Open TokenArr(1) For Input As #1
+Do Until EOF(1): Line Input #1, ArtH
+If InStr(1, ArtH, TokenArr(0)) Then xVar = ArtH: Close #1: GoTo EndRead
 Loop: Close #1
 GoTo EndRead
 End If
 
 '//read for all string
 If S = 4 Then
-xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
-Open xArtArr(1) For Input As #1
-Do Until EOF(1): Line Input #1, xArtH
-If InStr(1, xArtH, xArtArr(0)) Then xVar = xVar & xArtH
+TokenArr = Split(TokenArr(1), ","): TokenArr(1) = Trim(TokenArr(1))
+Open TokenArr(1) For Input As #1
+Do Until EOF(1): Line Input #1, ArtH
+If InStr(1, ArtH, TokenArr(0)) Then xVar = xVar & ArtH
 Loop: Close #1
 GoTo EndRead
 End If
 
 '//read for newline string
 If S = 5 Then
-xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
-Open xArtArr(1) For Input As #1
-Do Until EOF(1): Line Input #1, xArtH
-If InStr(1, xArtH, xArtArr(0)) Then xVar = xVar & xArtH & vbNewLine
+TokenArr = Split(TokenArr(1), ","): TokenArr(1) = Trim(TokenArr(1))
+Open TokenArr(1) For Input As #1
+Do Until EOF(1): Line Input #1, ArtH
+If InStr(1, ArtH, TokenArr(0)) Then xVar = xVar & ArtH & vbNewLine
 Loop: Close #1
 GoTo EndRead
 End If
 
 '//read for line
 If S = 6 Then
-xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
-Open xArtArr(1) For Input As #1
-For X = 1 To xArtArr(0)
-Line Input #1, xArtH
-Next: Close #1: xVar = xArtH
+TokenArr = Split(TokenArr(1), ","): TokenArr(1) = Trim(TokenArr(1))
+Open TokenArr(1) For Input As #1
+For X = 1 To TokenArr(0)
+Line Input #1, ArtH
+Next: Close #1: xVar = ArtH
 GoTo EndRead
 End If
 
 '//read for all line
 If S = 7 Then
-xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
-Open xArtArr(1) For Input As #1
-For X = 1 To xArtArr(0)
-Line Input #1, xArtH
-xVar = xVar & xArtH
+TokenArr = Split(TokenArr(1), ","): TokenArr(1) = Trim(TokenArr(1))
+Open TokenArr(1) For Input As #1
+For X = 1 To TokenArr(0)
+Line Input #1, ArtH
+xVar = xVar & ArtH
 Next: Close #1
 GoTo EndRead
 End If
 
 '//read for newline line
 If S = 8 Then
-xArtArr = Split(xArtArr(1), ","): xArtArr(1) = Trim(xArtArr(1))
-Open xArtArr(1) For Input As #1
-For X = 1 To xArtArr(0)
-Line Input #1, xArtH
-xVar = xVar & xArtH & vbNewLine
+TokenArr = Split(TokenArr(1), ","): TokenArr(1) = Trim(TokenArr(1))
+Open TokenArr(1) For Input As #1
+For X = 1 To TokenArr(0)
+Line Input #1, ArtH
+xVar = xVar & ArtH & vbNewLine
 Next: Close #1
 GoTo EndRead
 End If
@@ -1141,7 +1141,7 @@ EndRead:
 '//count
 If M = 1 Then xVar = Len(xVar)
 
-xArt = appEnv & ",#!" & xArt & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Token = appEnv & "[,]" & Token & "=" & xVar & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 
 Exit Function
 '//#
@@ -1152,14 +1152,14 @@ Exit Function
 '/\_____________________________________
 '//
 '//wait() = Pause script (no actions allowed)
-ElseIf InStr(1, xArt, "wait(", vbTextCompare) Then
-xArt = Replace(xArt, "wait(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+ElseIf InStr(1, Token, "wait(", vbTextCompare) Then
+Token = Replace(Token, "wait(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, "ms", vbTextCompare) Then P = P & "1" '//millisecond
-If InStr(1, xArt, "s", vbTextCompare) Then P = P & "2" '//second
-If InStr(1, xArt, "m", vbTextCompare) Then P = P & "3" '//minute
-If InStr(1, xArt, "h", vbTextCompare) Then P = P & "4" '//hour
+If InStr(1, Token, "ms", vbTextCompare) Then P = P & "1" '//millisecond
+If InStr(1, Token, "s", vbTextCompare) Then P = P & "2" '//second
+If InStr(1, Token, "m", vbTextCompare) Then P = P & "3" '//minute
+If InStr(1, Token, "h", vbTextCompare) Then P = P & "4" '//hour
 
 If P <> 0 Then
 
@@ -1167,24 +1167,24 @@ Dim xTimeArr(3) As String
 Dim xMil, xSec, xMin, xHr As String
 Dim AppWait As Variant
 
-If InStr(1, xArt, "ms", vbTextCompare) Then xMilArr = Split(xArt, "ms", , vbTextCompare): xTimeArr(0) = xMilArr(0): xMil = "T"
-If InStr(1, xArt, "s", vbTextCompare) Then xSecArr = Split(xArt, "s", , vbTextCompare): xTimeArr(1) = xSecArr(0): xSec = "T"
-If InStr(1, xArt, "m", vbTextCompare) Then xMinArr = Split(xArt, "m", , vbTextCompare): xTimeArr(2) = xMinArr(0): xMin = "T"
-If InStr(1, xArt, "h", vbTextCompare) Then xHrArr = Split(xArt, "h", , vbTextCompare): xTimeArr(3) = xHrArr(0): xHr = "T"
+If InStr(1, Token, "ms", vbTextCompare) Then xMilArr = Split(Token, "ms", , vbTextCompare): xTimeArr(0) = xMilArr(0): xMil = "T"
+If InStr(1, Token, "s", vbTextCompare) Then xSecArr = Split(Token, "s", , vbTextCompare): xTimeArr(1) = xSecArr(0): xSec = "T"
+If InStr(1, Token, "m", vbTextCompare) Then xMinArr = Split(Token, "m", , vbTextCompare): xTimeArr(2) = xMinArr(0): xMin = "T"
+If InStr(1, Token, "h", vbTextCompare) Then xHrArr = Split(Token, "h", , vbTextCompare): xTimeArr(3) = xHrArr(0): xHr = "T"
 
 '//set millisecond
 If xMil = "T" Then
-xArt = xTimeArr(0)
-Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
-xArt = -1 * (xArt * -0.00000001)
-Application.Wait (Now + xArt)
+Token = xTimeArr(0)
+Call xlAppScript_lex.getChar(Token): If Token = "*/ERR" Then GoTo ErrEnd
+Token = -1 * (Token * -0.00000001)
+Application.Wait (Now + Token)
 Exit Function
 End If
         
 '//set second
 If xSec = "T" Then
-xArt = xTimeArr(1)
-Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
+Token = xTimeArr(1)
+Call xlAppScript_lex.getChar(Token): If Token = "*/ERR" Then GoTo ErrEnd
 If Len(xTimeArr(1)) < 2 Then
 xTimeArr(1) = "0" & xTimeArr(1): xSec = xTimeArr(1)
 Else: xSec = xTimeArr(1)
@@ -1194,8 +1194,8 @@ End If
         
 '//set minute
 If xMin = "T" Then
-xArt = xTimeArr(2)
-Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
+Token = xTimeArr(2)
+Call xlAppScript_lex.getChar(Token): If Token = "*/ERR" Then GoTo ErrEnd
 If Len(xTimeArr(2)) < 2 Then
 xTimeArr(2) = "0" & xTimeArr(2): xMin = xTimeArr(2)
 Else: xMin = xTimeArr(2)
@@ -1205,8 +1205,8 @@ End If
         
 '//set hour
 If xHr = "T" Then
-xArt = xTimeArr(3)
-Call xlAppScript_lex.getChar(xArt): If xArt = "*/ERR" Then GoTo ErrMsg
+Token = xTimeArr(3)
+Call xlAppScript_lex.getChar(Token): If Token = "*/ERR" Then GoTo ErrEnd
 If Len(xTimeArr(3)) < 2 Then
 xTimeArr(3) = "0" & xTimeArr(3): xHr = xTimeArr(3)
 Else: xHr = xTimeArr(3)
@@ -1218,21 +1218,21 @@ End If
     Application.Wait Now + TimeValue(AppWait)
 Else
     '//00:00:00 format
-    If InStr(1, xArt, ":") Then
-    xArtArr = Split(xArt, ":")
-    AppWait = TimeSerial(xArtArr(0), xArtArr(1), xArtArr(2))
+    If InStr(1, Token, ":") Then
+    TokenArr = Split(Token, ":")
+    AppWait = TimeSerial(TokenArr(0), TokenArr(1), TokenArr(2))
     Application.Wait Now + TimeValue(AppWait)
         Else
-            GoTo ErrMsg
+            GoTo ErrEnd
                 End If
                     End If
 Exit Function
 
 '//delayevent() = Delay script (actions allowed)
-ElseIf InStr(1, xArt, "delayevent(", vbTextCompare) Then
-xArt = Replace(xArt, "delayevent(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
-For TX = 0 To xArt * 360: T = 1: Call basWasteTime(T): Next
+ElseIf InStr(1, Token, "delayevent(", vbTextCompare) Then
+Token = Replace(Token, "delayevent(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
+For TX = 0 To Token * 360: T = 1: Call basWasteTime(T): Next
 Exit Function
 '//#
 '//
@@ -1241,18 +1241,18 @@ Exit Function
 '//         INPUT-HOST ARTICLES
 '/\_____________________________________
 
-ElseIf InStr(1, xArt, "input(", vbTextCompare) Then
+ElseIf InStr(1, Token, "input(", vbTextCompare) Then
 
-   xArt = Replace(xArt, "input(", vbNullString, , , vbTextCompare)
-   Call modArtP(xArt)
+   Token = Replace(Token, "input(", vbNullString, , , vbTextCompare)
+   Call modArtParens(Token)
    
-   xArtArr = Split(xArt, "="): xArt = xArtArr(0)
-   xArtArr = Split(xArtArr(1), ",")
+   TokenArr = Split(Token, "="): Token = TokenArr(0)
+   TokenArr = Split(TokenArr(1), ",")
     
-   If UBound(xArtArr) = 1 Then xVar = InputBox(xArtArr(0), xArtArr(1))
-   If UBound(xArtArr) = 2 Then xVar = InputBox(xArtArr(0), xArtArr(1), xArtArr(2))
+   If UBound(TokenArr) = 1 Then xVar = InputBox(TokenArr(0), TokenArr(1))
+   If UBound(TokenArr) = 2 Then xVar = InputBox(TokenArr(0), TokenArr(1), TokenArr(2))
 
-   xArt = appEnv & ",#!" & xArt & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+   Token = appEnv & "[,]" & Token & "=" & xVar & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
    
 Exit Function
 '//#
@@ -1263,58 +1263,58 @@ Exit Function
 '/\_____________________________________
 '//
 '//echo() = Output string w/ Command Prompt
-ElseIf InStr(1, xArt, "echo(", vbTextCompare) Then
+ElseIf InStr(1, Token, "echo(", vbTextCompare) Then
 
-    If InStr(1, xArt, "o(0)", vbTextCompare) Then S = 1: xArt = Replace(xArt, "echo(0)", vbNullString): GoTo setEcho
-    If InStr(1, xArt, "o(1)", vbTextCompare) Then S = 2: xArt = Replace(xArt, "echo(1)", vbNullString): GoTo setEcho
-    If InStr(1, xArt, "o(2)", vbTextCompare) Then S = 3: xArt = Replace(xArt, "echo(2)", vbNullString): GoTo setEcho
-    If InStr(1, xArt, "o(3)", vbTextCompare) Then S = 4: xArt = Replace(xArt, "echo(3)", vbNullString): GoTo setEcho
-    If InStr(1, xArt, "o(4)", vbTextCompare) Then S = 5: xArt = Replace(xArt, "echo(4)", vbNullString): GoTo setEcho
-    If InStr(1, xArt, "o(5)", vbTextCompare) Then S = 6: xArt = Replace(xArt, "echo(5)", vbNullString): GoTo setEcho
-    If InStr(1, xArt, "o(6)", vbTextCompare) Then S = 7: xArt = Replace(xArt, "echo(6)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(0)", vbTextCompare) Then S = 1: Token = Replace(Token, "echo(0)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(1)", vbTextCompare) Then S = 2: Token = Replace(Token, "echo(1)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(2)", vbTextCompare) Then S = 3: Token = Replace(Token, "echo(2)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(3)", vbTextCompare) Then S = 4: Token = Replace(Token, "echo(3)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(4)", vbTextCompare) Then S = 5: Token = Replace(Token, "echo(4)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(5)", vbTextCompare) Then S = 6: Token = Replace(Token, "echo(5)", vbNullString): GoTo setEcho
+    If InStr(1, Token, "o(6)", vbTextCompare) Then S = 7: Token = Replace(Token, "echo(6)", vbNullString): GoTo setEcho
     
-    xArt = Replace(xArt, "echo(", vbNullString, , , vbTextCompare)
+    Token = Replace(Token, "echo(", vbNullString, , , vbTextCompare)
     
 setEcho:
-Call modArtP(xArt)
+Call modArtParens(Token)
   
-   sysShell = Shell("cmd.exe /k echo " & xArt, S)
+   sysShell = Shell("cmd.exe /k echo " & Token, S)
    sysShell = vbNullString
    Exit Function
    
 '//Output w/ default message box
-ElseIf InStr(1, xArt, "host(", vbTextCompare) Then
+ElseIf InStr(1, Token, "host(", vbTextCompare) Then
 
-   xArt = Replace(xArt, "host(", vbNullString, , , vbTextCompare)
-   Call modArtP(xArt): Call modArtQ(xArt)
-   If Right(xArt, 1) = ")" Then xArt = Left(xArt, Len(xArt) - 1)
-   MsgBox (xArt)
+   Token = Replace(Token, "host(", vbNullString, , , vbTextCompare)
+   Call modArtParens(Token): Call modArtQuotes(Token)
+   If Right(Token, 1) = ")" Then Token = Left(Token, Len(Token) - 1)
+   MsgBox (Token)
    Exit Function
    
    
 '//Output w/ VBA message box
-ElseIf InStr(1, xArt, "msg(", vbTextCompare) Then
+ElseIf InStr(1, Token, "msg(", vbTextCompare) Then
 
-   xArt = Replace(xArt, "msg(", vbNullString, , , vbTextCompare)
-    Call modArtP(xArt)
+   Token = Replace(Token, "msg(", vbNullString, , , vbTextCompare)
+    Call modArtParens(Token)
    
-   If InStr(1, xArt, "=") Then '//check for variable
-   xArtArr = Split(xArt, "=")
-   xArt = xArtArr(0)
-   If UBound(xArtArr) = 1 Then xArtArr = Split(xArtArr(1), ","): _
-   xArtArr(0) = Trim(xArtArr(0))
+   If InStr(1, Token, "=") Then '//check for variable
+   TokenArr = Split(Token, "=")
+   Token = TokenArr(0)
+   If UBound(TokenArr) = 1 Then TokenArr = Split(TokenArr(1), ","): _
+   TokenArr(0) = Trim(TokenArr(0))
    
-   If UBound(xArtArr) = 0 Then xVar = MsgBox(xArtArr(0)): GoTo EndMsg
-   If UBound(xArtArr) = 1 Then xArtArr(1) = Trim(xArtArr(1)): xVar = MsgBox(xArtArr(0), xArtArr(1)): GoTo EndMsg
-   If UBound(xArtArr) = 2 Then xArtArr(1) = Trim(xArtArr(1)): xArtArr(2) = Trim(xArtArr(2)): xVar = MsgBox(xArtArr(0), xArtArr(1), xArtArr(2)): GoTo EndMsg
+   If UBound(TokenArr) = 0 Then xVar = MsgBox(TokenArr(0)): GoTo EndMsg
+   If UBound(TokenArr) = 1 Then TokenArr(1) = Trim(TokenArr(1)): xVar = MsgBox(TokenArr(0), TokenArr(1)): GoTo EndMsg
+   If UBound(TokenArr) = 2 Then TokenArr(1) = Trim(TokenArr(1)): TokenArr(2) = Trim(TokenArr(2)): xVar = MsgBox(TokenArr(0), TokenArr(1), TokenArr(2)): GoTo EndMsg
    
 EndMsg:
-   xArt = appEnv & ",#!" & xArt & "=" & xVar & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+   Token = appEnv & "[,]" & Token & "=" & xVar & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
    Exit Function
    
    End If
    
-   MsgBox (xArt) '//no arguments
+   MsgBox (Token) '//no arguments
    Exit Function
 '//#
 '//
@@ -1323,9 +1323,9 @@ EndMsg:
 '//      KEYSTROKE ARTICLES
 '/\_____________________________________
 '//
-    ElseIf InStr(1, xArt, "key(", vbTextCompare) Then
+    ElseIf InStr(1, Token, "key(", vbTextCompare) Then
     
-    If InStr(1, xArt, ").clr", vbTextCompare) Then
+    If InStr(1, Token, ").clr", vbTextCompare) Then
     Dim oKey, oTemp As Object
     Set oFSO = CreateObject("Scripting.FileSystemObject")
     Set oTemp = oFSO.GetFolder(drv & envHome & "\.z7\utility\temp")
@@ -1333,28 +1333,28 @@ EndMsg:
     Exit Function
     End If
     
-    If InStr(1, xArt, "app.k", vbTextCompare) = False Then '//check for application key (key w/ VBA)
+    If InStr(1, Token, "app.k", vbTextCompare) = False Then '//check for application key (key w/ VBA)
     
     Dim sysKey0 As String: Dim sysKey1 As String: Dim sysKey2 As String
     Dim sysKey3 As String: Dim sysKey4 As String: Dim sysKey5 As String:
     Dim sysKey6 As String
     
-    If InStr(1, xArt, "y(0)", vbTextCompare) Then K = 1: xArt = Replace(xArt, "key(0)", vbNullString): GoTo setKey
-    If InStr(1, xArt, "y(1)", vbTextCompare) Then K = 2: xArt = Replace(xArt, "key(1)", vbNullString): GoTo setKey
-    If InStr(1, xArt, "y(2)", vbTextCompare) Then K = 3: xArt = Replace(xArt, "key(2)", vbNullString): GoTo setKey
-    If InStr(1, xArt, "y(3)", vbTextCompare) Then K = 4: xArt = Replace(xArt, "key(3)", vbNullString): GoTo setKey
-    If InStr(1, xArt, "y(4)", vbTextCompare) Then K = 5: xArt = Replace(xArt, "key(4)", vbNullString): GoTo setKey
-    If InStr(1, xArt, "y(5)", vbTextCompare) Then K = 6: xArt = Replace(xArt, "key(5)", vbNullString): GoTo setKey
-    If InStr(1, xArt, "y(6)", vbTextCompare) Then K = 7: xArt = Replace(xArt, "key(6)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(0)", vbTextCompare) Then K = 1: Token = Replace(Token, "key(0)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(1)", vbTextCompare) Then K = 2: Token = Replace(Token, "key(1)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(2)", vbTextCompare) Then K = 3: Token = Replace(Token, "key(2)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(3)", vbTextCompare) Then K = 4: Token = Replace(Token, "key(3)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(4)", vbTextCompare) Then K = 5: Token = Replace(Token, "key(4)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(5)", vbTextCompare) Then K = 6: Token = Replace(Token, "key(5)", vbNullString): GoTo setKey
+    If InStr(1, Token, "y(6)", vbTextCompare) Then K = 7: Token = Replace(Token, "key(6)", vbNullString): GoTo setKey
     
 setKey:
-    xArt = Replace(xArt, "key", vbNullString, , , vbTextCompare)
-    Call modArtP(xArt)
-    xArt = Right(xArt, Len(xArt) - 1) '//remove leading quotes
-    xArt = Left(xArt, Len(xArt) - 1) '//remove ending quotes
+    Token = Replace(Token, "key", vbNullString, , , vbTextCompare)
+    Call modArtParens(Token)
+    Token = Right(Token, Len(Token) - 1) '//remove leading quotes
+    Token = Left(Token, Len(Token) - 1) '//remove ending quotes
     
     
-    If xArt = vbNullString Then Exit Function
+    If Token = vbNullString Then Exit Function
   
     '//this is to help avoid file & variable collisions
     If K = 1 Then sysKey0 = drv & envHome & "\.z7\utility\temp\key0.vbs": Open sysKey0 For Output As #K: GoTo shKey
@@ -1372,7 +1372,7 @@ shKey:
     Print #K, "On Error Resume Next"
     Print #K, "Dim wShell"
     Print #K, "Set wShell = wscript.CreateObject(" & """" & "wscript.Shell""" & ")"
-    Print #K, "wShell.SendKeys " & """" & xArt & """"
+    Print #K, "wShell.SendKeys " & """" & Token & """"
     Print #K, "Set wShell = Nothing"
     Print #K, "wscript.Quit"
     Close #K
@@ -1389,12 +1389,12 @@ shKey:
     Else
     
     '//Key using VBA...
-    xArt = Replace(xArt, "app.", vbNullString)
+    Token = Replace(Token, "app.", vbNullString)
     
-    xArt = Replace(xArt, "key", vbNullString, , , vbTextCompare)
-    Call modArtP(xArt)
+    Token = Replace(Token, "key", vbNullString, , , vbTextCompare)
+    Call modArtParens(Token)
     
-    Application.SendKeys (xArt)
+    Application.SendKeys (Token)
     Exit Function
     
     End If
@@ -1406,23 +1406,23 @@ shKey:
 '/\_____________________________________
 '//
 '//click() = Assign mouse click events
-ElseIf InStr(1, xArt, "click(", vbTextCompare) Then
+ElseIf InStr(1, Token, "click(", vbTextCompare) Then
 
-xArt = Replace(xArt, "click(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "click(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
 '//switches
-If InStr(1, xArt, "-double", vbTextCompare) Then xArt = Replace(xArt, "-double", vbNullString, , , vbTextCompare): S = 1: GoTo setClick
-If InStr(1, xArt, "-leftdown", vbTextCompare) Then xArt = Replace(xArt, "-leftdown", vbNullString, , , vbTextCompare): S = 2: GoTo setClick
-If InStr(1, xArt, "-leftup", vbTextCompare) Then xArt = Replace(xArt, "-leftup", vbNullString, , , vbTextCompare): S = 3: GoTo setClick
-If InStr(1, xArt, "-rightdown", vbTextCompare) Then xArt = Replace(xArt, "-rightdown", vbNullString, , , vbTextCompare): S = 4: GoTo setClick
-If InStr(1, xArt, "-rightup", vbTextCompare) Then xArt = Replace(xArt, "-rightup", vbNullString, , , vbTextCompare): S = 5: GoTo setClick
+If InStr(1, Token, "-double", vbTextCompare) Then Token = Replace(Token, "-double", vbNullString, , , vbTextCompare): S = 1: GoTo setClick
+If InStr(1, Token, "-leftdown", vbTextCompare) Then Token = Replace(Token, "-leftdown", vbNullString, , , vbTextCompare): S = 2: GoTo setClick
+If InStr(1, Token, "-leftup", vbTextCompare) Then Token = Replace(Token, "-leftup", vbNullString, , , vbTextCompare): S = 3: GoTo setClick
+If InStr(1, Token, "-rightdown", vbTextCompare) Then Token = Replace(Token, "-rightdown", vbNullString, , , vbTextCompare): S = 4: GoTo setClick
+If InStr(1, Token, "-rightup", vbTextCompare) Then Token = Replace(Token, "-rightup", vbNullString, , , vbTextCompare): S = 5: GoTo setClick
 
 setClick:
-If InStr(1, xArt, ",") Then
-xArt = Trim(xArt)
-xArtArr = Split(xArt, ",") '//arguments
-xPos = xArtArr(0) & "," & xArtArr(1)
+If InStr(1, Token, ",") Then
+Token = Trim(Token)
+TokenArr = Split(Token, ",") '//arguments
+xPos = TokenArr(0) & "," & TokenArr(1)
 Call basClick(S, xPos): Exit Function
 End If
 
@@ -1437,208 +1437,208 @@ Exit Function
 '/\_____________________________________
 '//
 '//conv32() = Convert decimal to binary bit string (32-bit signed/unsigned integers)
-ElseIf InStr(1, xArt, "conv32(", vbTextCompare) Then
+ElseIf InStr(1, Token, "conv32(", vbTextCompare) Then
 
-xArt = Replace(xArt, "conv32(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt)
+Token = Replace(Token, "conv32(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token)
 
 '//switches
-If InStr(1, xArt, "-8bit", vbTextCompare) Then xArt = Replace(xArt, "-8bit", vbNullString, , , vbTextCompare): S = 1: GoTo setConv32
-If InStr(1, xArt, "-16bit", vbTextCompare) Then xArt = Replace(xArt, "-16bit", vbNullString, , , vbTextCompare): S = 0: GoTo setConv32
-If InStr(1, xArt, "-32bit", vbTextCompare) Then xArt = Replace(xArt, "-32bit", vbNullString, , , vbTextCompare): S = 2: GoTo setConv32
+If InStr(1, Token, "-8bit", vbTextCompare) Then Token = Replace(Token, "-8bit", vbNullString, , , vbTextCompare): S = 1: GoTo setConv32
+If InStr(1, Token, "-16bit", vbTextCompare) Then Token = Replace(Token, "-16bit", vbNullString, , , vbTextCompare): S = 0: GoTo setConv32
+If InStr(1, Token, "-32bit", vbTextCompare) Then Token = Replace(Token, "-32bit", vbNullString, , , vbTextCompare): S = 2: GoTo setConv32
 
 setConv32:
 
-xVarArr = Split(xArt, "=") '//find variable
+xVarArr = Split(Token, "=") '//find variable
 xRtnBits = S
 
-X = xVarArr(1): Call basDecimalToBinary32(X, xRtnBits, xBitStr): xArt = xBitStr
-xArt = xVarArr(0) & "=" & xArt
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+X = xVarArr(1): Call basDecimalToBinary32(X, xRtnBits, xBitStr): Token = xBitStr
+Token = xVarArr(0) & "=" & Token
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 
 '//Convert char/string...
-ElseIf InStr(1, xArt, "conv(", vbTextCompare) Then
+ElseIf InStr(1, Token, "conv(", vbTextCompare) Then
 
-xArt = Replace(xArt, "conv(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "conv(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
 '//switches
-If InStr(1, xArt, "-upper", vbTextCompare) Then S = vbUpperCase: GoTo setConv
-If InStr(1, xArt, "-lower", vbTextCompare) Then S = vbLowerCase: GoTo setConv
-If InStr(1, xArt, "-proper", vbTextCompare) Then S = vbProperCase: GoTo setConv
-If InStr(1, xArt, "-unicode", vbTextCompare) Then S = vbUnicode: GoTo setConv
+If InStr(1, Token, "-upper", vbTextCompare) Then S = vbUpperCase: GoTo setConv
+If InStr(1, Token, "-lower", vbTextCompare) Then S = vbLowerCase: GoTo setConv
+If InStr(1, Token, "-proper", vbTextCompare) Then S = vbProperCase: GoTo setConv
+If InStr(1, Token, "-unicode", vbTextCompare) Then S = vbUnicode: GoTo setConv
 
 setConv:
-xArtArr = Split(xArt, ",")
-xVarArr = Split(xArtArr(0), "=") '//find variable
+TokenArr = Split(Token, ",")
+xVarArr = Split(TokenArr(0), "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
-xArt = xArtArr(1): Call modArtQ(xArt): xArtArr(1) = LTrim(xArt)
+Token = TokenArr(1): Call modArtQuotes(Token): TokenArr(1) = LTrim(Token)
 
-If UBound(xArtArr) = 1 Then xArt = StrConv(xArtArr(1), S): xArt = xVarArr(0) & "=" & xArt: _
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If UBound(TokenArr) = 1 Then Token = StrConv(TokenArr(1), S): Token = xVarArr(0) & "=" & Token: _
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//hash() = Hash text strings
-ElseIf InStr(1, xArt, "hash(", vbTextCompare) Then
+ElseIf InStr(1, Token, "hash(", vbTextCompare) Then
 
-xArt = Replace(xArt, "hash(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt)
+Token = Replace(Token, "hash(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token)
 
 '//switches
-If InStr(1, xArt, "-binary1", vbTextCompare) Then xArt = Replace(xArt, "-binary1", vbNullString, , , vbTextCompare): S = 1: GoTo setHash
+If InStr(1, Token, "-binary1", vbTextCompare) Then Token = Replace(Token, "-binary1", vbNullString, , , vbTextCompare): S = 1: GoTo setHash
 
 setHash:
-xVarArr = Split(xArt, "=") '//find variable
-xVarArr(1) = Trim(xVarArr(1)): xArt = xVarArr(1): Call modArtQ(xArt)
+xVarArr = Split(Token, "=") '//find variable
+xVarArr(1) = Trim(xVarArr(1)): Token = xVarArr(1): Call modArtQuotes(Token)
 
 '//hash(-binary1)
 If S = 1 Then
-X = xArt: Call basBinaryHash1(X, xVerify, xHash): xArt = xHash
-xArt = xVarArr(0) & "=" & xArt
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+X = Token: Call basBinaryHash1(X, xVerify, xHash): Token = xHash
+Token = xVarArr(0) & "=" & Token
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 End If
 
 '//repl() = Replace character/string
-ElseIf InStr(1, xArt, "repl(", vbTextCompare) Then
-xArt = Replace(xArt, "repl(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+ElseIf InStr(1, Token, "repl(", vbTextCompare) Then
+Token = Replace(Token, "repl(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-xArtArr = Split(xArt, ",")
-xVarArr = Split(xArtArr(0), "=") '//find variable
+TokenArr = Split(Token, ",")
+xVarArr = Split(TokenArr(0), "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
-xArt = xArtArr(1): Call modArtQ(xArt): xArtArr(1) = LTrim(xArt)
-xArt = xArtArr(2): Call modArtQ(xArt): xArtArr(2) = LTrim(xArt)
+Token = TokenArr(1): Call modArtQuotes(Token): TokenArr(1) = LTrim(Token)
+Token = TokenArr(2): Call modArtQuotes(Token): TokenArr(2) = LTrim(Token)
 
-If UBound(xArtArr) = 2 Then xArt = Replace(xArtArr(0), xArtArr(1), xArtArr(2), , , vbBinaryCompare): _
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If UBound(TokenArr) = 2 Then Token = Replace(TokenArr(0), TokenArr(1), TokenArr(2), , , vbBinaryCompare): _
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 
-If UBound(xArtArr) = 3 Then xArt = Replace(xArtArr(0), xArtArr(1), xArtArr(2), , , xArtArr(3)): _
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If UBound(TokenArr) = 3 Then Token = Replace(TokenArr(0), TokenArr(1), TokenArr(2), , , TokenArr(3)): _
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//ptrim() = Trim starting & ending parentheses of string
-ElseIf InStr(1, xArt, "ptrim(", vbTextCompare) Then
+ElseIf InStr(1, Token, "ptrim(", vbTextCompare) Then
 
-If InStr(1, xArt, "lptrim", vbTextCompare) Then GoTo rmvLParen
-If InStr(1, xArt, "rptrim", vbTextCompare) Then GoTo rmvRParen
+If InStr(1, Token, "lptrim", vbTextCompare) Then GoTo rmvLParen
+If InStr(1, Token, "rptrim", vbTextCompare) Then GoTo rmvRParen
 
-xArt = Replace(xArt, "ptrim(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+Token = Replace(Token, "ptrim(", vbNullString, , , vbTextCompare)
+Call modArtQuotes(Token)
 
-xVarArr = Split(xArt, "=") '//find variable
+xVarArr = Split(Token, "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
 
 If Left(xVarArr(1), 1) = "(" Then xVarArr(1) = Right(xVarArr(1), Len(xVarArr(1)) - 1):
-If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1):
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If Right(xVarArr(1), 1) = ")" Then Token = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1):
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//lptrim() = Trim char/string by starting left facing parentheses
 rmvLParen:
 
-xArt = Replace(xArt, "lptrim(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+Token = Replace(Token, "lptrim(", vbNullString, , , vbTextCompare)
+Call modArtQuotes(Token)
 
-xVarArr = Split(xArt, "=") '//find variable
+xVarArr = Split(Token, "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
 
-If Left(xVarArr(1), 1) = "(" Then xArt = xVarArr(0) & "=" & Right(xVarArr(1), Len(xVarArr(1)) - 1):
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If Left(xVarArr(1), 1) = "(" Then Token = xVarArr(0) & "=" & Right(xVarArr(1), Len(xVarArr(1)) - 1):
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//rptrim() = Trim char/string by ending right facing parentheses
 rmvRParen:
 
-xArt = Replace(xArt, "rptrim(", vbNullString, , , vbTextCompare)
-Call modArtQ(xArt)
+Token = Replace(Token, "rptrim(", vbNullString, , , vbTextCompare)
+Call modArtQuotes(Token)
 
-xVarArr = Split(xArt, "=") '//find variable
+xVarArr = Split(Token, "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
 
-If Right(xVarArr(1), 1) = ")" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1): _
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If Right(xVarArr(1), 1) = ")" Then Token = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1): _
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//qtrim() = Trim char/string by quotations
-ElseIf InStr(1, xArt, "qtrim(", vbTextCompare) Then
+ElseIf InStr(1, Token, "qtrim(", vbTextCompare) Then
 
-xArt = Replace(xArt, "qtrim(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt)
+Token = Replace(Token, "qtrim(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token)
 
-xVarArr = Split(xArt, "=") '//find variable
+xVarArr = Split(Token, "=") '//find variable
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
 
 If Left(xVarArr(1), 1) = """" Then xVarArr(1) = Right(xVarArr(1), Len(xVarArr(1)) - 1):
-If Right(xVarArr(1), 1) = """" Then xArt = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1):
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If Right(xVarArr(1), 1) = """" Then Token = xVarArr(0) & "=" & Left(xVarArr(1), Len(xVarArr(1)) - 1):
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//xtrim() = Trim starting & ending string by chosen character
-ElseIf InStr(1, xArt, "xtrim(", vbTextCompare) Then
+ElseIf InStr(1, Token, "xtrim(", vbTextCompare) Then
 
-xArt = Replace(xArt, "xtrim(", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "xtrim(", vbNullString, , , vbTextCompare)
 
-xArtArr = Split(xArt, ",")
-xVarArr = Split(xArtArr(0), "=") '//find variable
-If UBound(xArtArr) > 1 Then xArtArr(1) = xArtArr(UBound(xArtArr))
+TokenArr = Split(Token, ",")
+xVarArr = Split(TokenArr(0), "=") '//find variable
+If UBound(TokenArr) > 1 Then TokenArr(1) = TokenArr(UBound(TokenArr))
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
-xArt = xArtArr(1): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(1) = LTrim(xArt)
+Token = TokenArr(1): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(1) = LTrim(Token)
 
-If Left(xVarArr(1), 1) = xArtArr(1) Then xVarArr(1) = Right(xVarArr(1), Len(xVarArr(1)) - 1): xArt = xVarArr(0) & "=" & xVarArr(1):
-If Right(xVarArr(1), 1) = xArtArr(1) Then xVarArr(1) = Left(xVarArr(1), Len(xVarArr(1)) - 1): xArt = xVarArr(0) & "=" & xVarArr(1):
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If Left(xVarArr(1), 1) = TokenArr(1) Then xVarArr(1) = Right(xVarArr(1), Len(xVarArr(1)) - 1): Token = xVarArr(0) & "=" & xVarArr(1):
+If Right(xVarArr(1), 1) = TokenArr(1) Then xVarArr(1) = Left(xVarArr(1), Len(xVarArr(1)) - 1): Token = xVarArr(0) & "=" & xVarArr(1):
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 
 '//ins() = Find character/string within a string
-ElseIf InStr(1, xArt, "ins(", vbTextCompare) Then
-xArt = Replace(xArt, "ins(", vbNullString, , , vbTextCompare)
-xArt = Replace(xArt, """", vbNullString)
-xArt = Replace(xArt, ")", vbNullString)
+ElseIf InStr(1, Token, "ins(", vbTextCompare) Then
+Token = Replace(Token, "ins(", vbNullString, , , vbTextCompare)
+Token = Replace(Token, """", vbNullString)
+Token = Replace(Token, ")", vbNullString)
 
-xArtArr = Split(xArt, ",")
-xVarArr = Split(xArtArr(0), "=")
+TokenArr = Split(Token, ",")
+xVarArr = Split(TokenArr(0), "=")
 If UBound(xVarArr) > 1 Then For X = 2 To UBound(xVarArr): xVarArr(1) = xVarArr(1) & "=" & xVarArr(X): Next
 If Left(xVarArr(1), 1) = " " Then xVarArr(1) = Right(xVarArr(1), Len(xVarArr(1)) - 1) '//find variable
 '//
-If UBound(xArtArr) = 2 Then
-If Left(xArtArr(1), 1) = " " Then xArtArr(1) = Right(xArtArr(1), Len(xArtArr(1)) - 1)
-If Left(xArtArr(2), 1) = " " Then xArtArr(2) = Right(xArtArr(2), Len(xArtArr(2)) - 1)
+If UBound(TokenArr) = 2 Then
+If Left(TokenArr(1), 1) = " " Then TokenArr(1) = Right(TokenArr(1), Len(TokenArr(1)) - 1)
+If Left(TokenArr(2), 1) = " " Then TokenArr(2) = Right(TokenArr(2), Len(TokenArr(2)) - 1)
 
-If InStr(xVarArr(1), xArtArr(1), xArtArr(2), vbBinaryCompare) Then
-xArt = appEnv & ",#!" & xVarArr(0) & "=" & "TRUE" & ",#!" & X & ",#!" & 1
+If InStr(xVarArr(1), TokenArr(1), TokenArr(2), vbBinaryCompare) Then
+Token = appEnv & "[,]" & xVarArr(0) & "=" & "TRUE" & "[,]" & X & "[,]" & 1
     Else
-        xArt = appEnv & ",#!" & xVarArr(0) & "=" & "FALSE" & ",#!" & X & ",#!" & 1
+        Token = appEnv & "[,]" & xVarArr(0) & "=" & "FALSE" & "[,]" & X & "[,]" & 1
             End If
-                Call kinExpand(xArt): Exit Function
+                Call xlasExpand(Token, appEnv, appBlk): Exit Function
                     End If
                     
 '//
-If UBound(xArtArr) = 3 Then
-If Left(xArtArr(1), 1) = " " Then xArtArr(1) = Right(xArtArr(1), Len(xArtArr(1)) - 1)
-If Left(xArtArr(2), 1) = " " Then xArtArr(2) = Right(xArtArr(2), Len(xArtArr(2)) - 1)
-If Left(xArtArr(3), 1) = " " Then xArtArr(3) = Right(xArtArr(3), Len(xArtArr(3)) - 1)
-CX = xArtArr(3): Call basCompare(CX)
-If InStr(xVarArr(1), xArtArr(1), xArtArr(2), CX) Then
-xArt = appEnv & ",#!" & xVarArr(0) & "=" & "TRUE" & ",#!" & X & ",#!" & 1
+If UBound(TokenArr) = 3 Then
+If Left(TokenArr(1), 1) = " " Then TokenArr(1) = Right(TokenArr(1), Len(TokenArr(1)) - 1)
+If Left(TokenArr(2), 1) = " " Then TokenArr(2) = Right(TokenArr(2), Len(TokenArr(2)) - 1)
+If Left(TokenArr(3), 1) = " " Then TokenArr(3) = Right(TokenArr(3), Len(TokenArr(3)) - 1)
+CX = TokenArr(3): Call basCompare(CX)
+If InStr(xVarArr(1), TokenArr(1), TokenArr(2), CX) Then
+Token = appEnv & "[,]" & xVarArr(0) & "=" & "TRUE" & "[,]" & X & "[,]" & 1
     Else
-        xArt = appEnv & ",#!" & xVarArr(0) & "=" & "FALSE" & ",#!" & X & ",#!" & 1
+        Token = appEnv & "[,]" & xVarArr(0) & "=" & "FALSE" & "[,]" & X & "[,]" & 1
                 End If
-                   Call kinExpand(xArt): Exit Function
+                   Call xlasExpand(Token, appEnv, appBlk): Exit Function
                         End If
 Exit Function
    
 '//revstr() = Reverse string characters
-ElseIf InStr(1, xArt, "revstr(", vbTextCompare) Then
+ElseIf InStr(1, Token, "revstr(", vbTextCompare) Then
 
-xArt = Replace(xArt, "revstr(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "revstr(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-xArtArr = Split(xArt, "=") '//find variable
+TokenArr = Split(Token, "=") '//find variable
 
-xArtArr(1) = StrReverse(xArtArr(1))
-xArt = xArtArr(0) & "=" & xArtArr(1)
+TokenArr(1) = StrReverse(TokenArr(1))
+Token = TokenArr(0) & "=" & TokenArr(1)
 
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 '//#
 '//
@@ -1648,205 +1648,205 @@ Exit Function
 '/\_____________________________________
 '//
 '//sh() = Quick shell
-ElseIf InStr(1, xArt, "sh(", vbTextCompare) Then
+ElseIf InStr(1, Token, "sh(", vbTextCompare) Then
 
-If InStr(1, xArt, "h(0)", vbTextCompare) Then P = 0: xArt = Replace(xArt, "sh(0)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(1)", vbTextCompare) Then P = 1: xArt = Replace(xArt, "sh(1)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(2)", vbTextCompare) Then P = 2: xArt = Replace(xArt, "sh(2)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(3)", vbTextCompare) Then P = 3: xArt = Replace(xArt, "sh(3)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(4)", vbTextCompare) Then P = 4: xArt = Replace(xArt, "sh(4)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(5)", vbTextCompare) Then P = 5: xArt = Replace(xArt, "sh(5)", vbNullString, , , vbTextCompare): GoTo setSh
-If InStr(1, xArt, "h(6)", vbTextCompare) Then P = 6: xArt = Replace(xArt, "sh(6)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(0)", vbTextCompare) Then P = 0: Token = Replace(Token, "sh(0)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(1)", vbTextCompare) Then P = 1: Token = Replace(Token, "sh(1)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(2)", vbTextCompare) Then P = 2: Token = Replace(Token, "sh(2)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(3)", vbTextCompare) Then P = 3: Token = Replace(Token, "sh(3)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(4)", vbTextCompare) Then P = 4: Token = Replace(Token, "sh(4)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(5)", vbTextCompare) Then P = 5: Token = Replace(Token, "sh(5)", vbNullString, , , vbTextCompare): GoTo setSh
+If InStr(1, Token, "h(6)", vbTextCompare) Then P = 6: Token = Replace(Token, "sh(6)", vbNullString, , , vbTextCompare): GoTo setSh
 
 setSh:
-   xArt = Replace(xArt, "sh(", vbNullString, , , vbTextCompare)
-   Call modArtP(xArt): Call modArtQ(xArt)
+   Token = Replace(Token, "sh(", vbNullString, , , vbTextCompare)
+   Call modArtParens(Token): Call modArtQuotes(Token)
     
-   FX = xArt
+   FX = Token
    Call basWebFilter(FX) '//check for web filter switches
-   If FX <> vbNullString Then xArt = FX
+   If FX <> vbNullString Then Token = FX
    
-   xArt = "start " & xArt
+   Token = "start " & Token
     
-   sysShell = Shell("cmd.exe /s /c" & xArt, P)
+   sysShell = Shell("cmd.exe /s /c" & Token, P)
    sysShell = vbNullString
    Exit Function
 
 '//shell32() = System shell
-ElseIf InStr(1, xArt, "shell32(", vbTextCompare) Then
+ElseIf InStr(1, Token, "shell32(", vbTextCompare) Then
 
-xArt = Replace(xArt, "shell32(", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "shell32(", vbNullString, , , vbTextCompare)
 
 '//parameters
-If InStr(1, xArt, ".execute", vbTextCompare) Then
-P = 1: xArt = Replace(xArt, ".execute", vbNullString, , , vbTextCompare)
+If InStr(1, Token, ".execute", vbTextCompare) Then
+P = 1: Token = Replace(Token, ".execute", vbNullString, , , vbTextCompare)
 '//switches
-If InStr(1, xArt, "-hidden", vbTextCompare) Then xArt = Replace(xArt, "-hidden", vbNullString, , , vbTextCompare): S = 0: GoTo GetSh32
-If InStr(1, xArt, "-normal", vbTextCompare) Then xArt = Replace(xArt, "-normal", vbNullString, , , vbTextCompare): S = 1: GoTo GetSh32
-If InStr(1, xArt, "-minimized", vbTextCompare) Then xArt = Replace(xArt, "-minimized", vbNullString, , , vbTextCompare): S = 2: GoTo GetSh32
-If InStr(1, xArt, "-maximized", vbTextCompare) Then xArt = Replace(xArt, "-maximized", vbNullString, , , vbTextCompare): S = 3: GoTo GetSh32
+If InStr(1, Token, "-hidden", vbTextCompare) Then Token = Replace(Token, "-hidden", vbNullString, , , vbTextCompare): S = 0: GoTo GetSh32
+If InStr(1, Token, "-normal", vbTextCompare) Then Token = Replace(Token, "-normal", vbNullString, , , vbTextCompare): S = 1: GoTo GetSh32
+If InStr(1, Token, "-minimized", vbTextCompare) Then Token = Replace(Token, "-minimized", vbNullString, , , vbTextCompare): S = 2: GoTo GetSh32
+If InStr(1, Token, "-maximized", vbTextCompare) Then Token = Replace(Token, "-maximized", vbNullString, , , vbTextCompare): S = 3: GoTo GetSh32
 '//parameters
-ElseIf InStr(1, xArt, ".namespace", vbTextCompare) Then
-P = 2: xArt = Replace(xArt, ".namespace", vbNullString, , , vbTextCompare)
+ElseIf InStr(1, Token, ".namespace", vbTextCompare) Then
+P = 2: Token = Replace(Token, ".namespace", vbNullString, , , vbTextCompare)
 '//switches
-If InStr(1, xArt, "-date", vbTextCompare) Then xArt = Replace(xArt, "-date", vbNullString, , , vbTextCompare): S = 1: GoTo GetSh32
-If InStr(1, xArt, "-name", vbTextCompare) Then xArt = Replace(xArt, "-name", vbNullString, , , vbTextCompare): S = 2: GoTo GetSh32
-If InStr(1, xArt, "-path", vbTextCompare) Then xArt = Replace(xArt, "-path", vbNullString, , , vbTextCompare): S = 3: GoTo GetSh32
-If InStr(1, xArt, "-size", vbTextCompare) Then xArt = Replace(xArt, "-size", vbNullString, , , vbTextCompare): S = 4: GoTo GetSh32
-If InStr(1, xArt, "-type", vbTextCompare) Then xArt = Replace(xArt, "-type", vbNullString, , , vbTextCompare): S = 5: GoTo GetSh32
+If InStr(1, Token, "-date", vbTextCompare) Then Token = Replace(Token, "-date", vbNullString, , , vbTextCompare): S = 1: GoTo GetSh32
+If InStr(1, Token, "-name", vbTextCompare) Then Token = Replace(Token, "-name", vbNullString, , , vbTextCompare): S = 2: GoTo GetSh32
+If InStr(1, Token, "-path", vbTextCompare) Then Token = Replace(Token, "-path", vbNullString, , , vbTextCompare): S = 3: GoTo GetSh32
+If InStr(1, Token, "-size", vbTextCompare) Then Token = Replace(Token, "-size", vbNullString, , , vbTextCompare): S = 4: GoTo GetSh32
+If InStr(1, Token, "-type", vbTextCompare) Then Token = Replace(Token, "-type", vbNullString, , , vbTextCompare): S = 5: GoTo GetSh32
 '//parameters
-ElseIf InStr(1, xArt, ".information", vbTextCompare) Then
-P = 3: xArt = Replace(xArt, ".information", vbNullString, , , vbTextCompare)
+ElseIf InStr(1, Token, ".information", vbTextCompare) Then
+P = 3: Token = Replace(Token, ".information", vbNullString, , , vbTextCompare)
 GoTo GetSh32
 End If
 
 GetSh32:
 Set oShell = CreateObject("Shell.Application")
 
-xArtArr = Split(xArt, "=") '//find variable
+TokenArr = Split(Token, "=") '//find variable
 
-xArt = xArtArr(1): Call modArtP(xArt): xArt = Trim(xArt)
+Token = TokenArr(1): Call modArtParens(Token): Token = Trim(Token)
 
 '//execute
 If P = 1 Then
-If InStr(1, xArt, ",") Then
-xArtArrH = Split(xArt, ",")
-If UBound(xArtArrH) >= 0 Then xArt = Trim(xArtArrH(0))
-If UBound(xArtArrH) >= 1 Then xArg = Trim(xArtArrH(1))
-If UBound(xArtArrH) >= 2 Then xDir = Trim(xArtArrH(2))
-If UBound(xArtArrH) >= 3 Then xVar = Trim(xArtArrH(3))
-If UBound(xArtArrH) >= 4 Then S = Trim(xArtArrH(4))
+If InStr(1, Token, ",") Then
+TokenArrH = Split(Token, ",")
+If UBound(TokenArrH) >= 0 Then Token = Trim(TokenArrH(0))
+If UBound(TokenArrH) >= 1 Then xArg = Trim(TokenArrH(1))
+If UBound(TokenArrH) >= 2 Then xDir = Trim(TokenArrH(2))
+If UBound(TokenArrH) >= 3 Then xVar = Trim(TokenArrH(3))
+If UBound(TokenArrH) >= 4 Then S = Trim(TokenArrH(4))
 End If
 
-oShell.ShellExecute xArt, xArg, xDir, xVar, S
+oShell.ShellExecute Token, xArg, xDir, xVar, S
 
 Set oShell = Nothing
 
-xArt = xArtArr(0) & "=" & xArt
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Token = TokenArr(0) & "=" & Token
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 Exit Function
 
 '//namespace
 ElseIf P = 2 Then
-FX = xArt: Call basShell32Namespace(FX)
+FX = Token: Call basShell32Namespace(FX)
 If FX <> "*/PATH" Then
 Set oShellItem = oShell.Namespace(((CInt(FX))))
     Else
-        Set oShellItem = oShell.Namespace((xArt))
+        Set oShellItem = oShell.Namespace((Token))
             End If
 
-If S = 1 Then xArt = oShellItem.Self.ModifyDate: GoTo SetSh32
-If S = 2 Then xArt = oShellItem.Self.Name: GoTo SetSh32
-If S = 3 Then xArt = oShellItem.Self.Path: GoTo SetSh32
-If S = 4 Then xArt = oShellItem.Self.Size: GoTo SetSh32
-If S = 5 Then xArt = oShellItem.Self.Type: GoTo SetSh32
+If S = 1 Then Token = oShellItem.Self.ModifyDate: GoTo SetSh32
+If S = 2 Then Token = oShellItem.Self.name: GoTo SetSh32
+If S = 3 Then Token = oShellItem.Self.Path: GoTo SetSh32
+If S = 4 Then Token = oShellItem.Self.Size: GoTo SetSh32
+If S = 5 Then Token = oShellItem.Self.Type: GoTo SetSh32
 
 Set oShell = Nothing: Set oShellItem = Nothing
 
 SetSh32:
-xArt = xArtArr(0) & "=" & xArt
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+Token = TokenArr(0) & "=" & Token
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 Exit Function
 
 '//system information
 ElseIf P = 3 Then
-FX = xArt: Call basShell32GetSysInfo(FX)
+FX = Token: Call basShell32GetSysInfo(FX)
 If FX <> "*/ERR" Then
 
-xArt = oShell.GetSystemInformation(FX)
+Token = oShell.GetSystemInformation(FX)
 
 Set oShell = Nothing
 
-xArt = xArtArr(0) & "=" & xArt
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+Token = TokenArr(0) & "=" & Token
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 End If
 Exit Function
         End If
 
 '//no parameter...
-oShell.ShellExecute xArt
-xArt = xArtArr(0) & "=" & xArt
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt)
+oShell.ShellExecute Token
+Token = TokenArr(0) & "=" & Token
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk)
 Exit Function
 
 '//pc() = PC file system tasks
-ElseIf InStr(1, xArt, "pc(", vbTextCompare) Then
+ElseIf InStr(1, Token, "pc(", vbTextCompare) Then
 
-xArt = Replace(xArt, "pc", vbNullString, , , vbTextCompare)
+Token = Replace(Token, "pc", vbNullString, , , vbTextCompare)
 
 '//parameters
-If InStr(1, xArt, ".exist", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo SetPC
-If InStr(1, xArt, ".del", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo SetPC
-If InStr(1, xArt, ".open", vbTextCompare) Then P = 3: xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare): GoTo SetPC
-If InStr(1, xArt, ".stop", vbTextCompare) Then P = 4: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, Token, ".exist", vbTextCompare) Then P = 1: Token = Replace(Token, ".exist", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, Token, ".del", vbTextCompare) Then P = 2: Token = Replace(Token, ".del", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, Token, ".open", vbTextCompare) Then P = 3: Token = Replace(Token, ".open", vbNullString, , , vbTextCompare): GoTo SetPC
+If InStr(1, Token, ".stop", vbTextCompare) Then P = 4: Token = Replace(Token, ".stop", vbNullString, , , vbTextCompare): GoTo SetPC
 
 SetPC:
 '//switches
-If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = 1
-If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = 2
+If InStr(1, Token, "-file", vbTextCompare) Then Token = Replace(Token, "-file", vbNullString, , , vbTextCompare): S = 1
+If InStr(1, Token, "-fldr", vbTextCompare) Then Token = Replace(Token, "-fldr", vbNullString, , , vbTextCompare): S = 2
 
-Call modArtP(xArt): Call modArtQ(xArt): xArt = Trim(xArt)
+Call modArtParens(Token): Call modArtQuotes(Token): Token = Trim(Token)
 
 '//file exists...
-If S = 1 And P = 1 Then If Dir(xArt) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
+If S = 1 And P = 1 Then If Dir(Token) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
 '//directory exists...
-If S = 2 And P = 1 Then If Dir(xArt, vbDirectory) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
+If S = 2 And P = 1 Then If Dir(Token, vbDirectory) <> "" Then MsgBox "TRUE": Exit Function Else MsgBox ("FALSE"): Exit Function
 '//delete file...
-If S = 1 And P = 2 Then Kill (xArt): Exit Function
+If S = 1 And P = 2 Then Kill (Token): Exit Function
 '//delete empty directory...
-If S = 2 And P = 2 Then RmDir (xArt): Exit Function
+If S = 2 And P = 2 Then RmDir (Token): Exit Function
 '//open...
-If P = 3 Then xArt = "start " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 3 Then Token = "start " & Token: sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString: Exit Function
 '//stop (taskkill)
-If P = 4 Then xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 4 Then Token = "taskkill /f /im " & Token: sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString: Exit Function
 
 '//no excerpt provided
-MsgBox (xArt)
+MsgBox (Token)
 Exit Function
 
 '//pc. = PC system control
-ElseIf InStr(1, xArt, "pc.", vbTextCompare) Then
+ElseIf InStr(1, Token, "pc.", vbTextCompare) Then
 
 '//parameters
-If InStr(1, xArt, ".copy&", vbTextCompare) Then P = 1
-If InStr(1, xArt, ".copy&!", vbTextCompare) Then P = 2: GoTo setPCdot
-If InStr(1, xArt, ".shutdown", vbTextCompare) Then P = 3: GoTo setPCdot
-If InStr(1, xArt, ".off", vbTextCompare) Then P = 4: GoTo setPCdot
-If InStr(1, xArt, ".rest", vbTextCompare) Then P = 5: GoTo setPCdot
-If InStr(1, xArt, ".reboot", vbTextCompare) Then P = 6: GoTo setPCdot
-If InStr(1, xArt, ".clr", vbTextCompare) Then P = 7: GoTo setPCdot
+If InStr(1, Token, ".copy&", vbTextCompare) Then P = 1
+If InStr(1, Token, ".copy&!", vbTextCompare) Then P = 2: GoTo setPCdot
+If InStr(1, Token, ".shutdown", vbTextCompare) Then P = 3: GoTo setPCdot
+If InStr(1, Token, ".off", vbTextCompare) Then P = 4: GoTo setPCdot
+If InStr(1, Token, ".rest", vbTextCompare) Then P = 5: GoTo setPCdot
+If InStr(1, Token, ".reboot", vbTextCompare) Then P = 6: GoTo setPCdot
+If InStr(1, Token, ".clr", vbTextCompare) Then P = 7: GoTo setPCdot
 
 setPCdot:
-xArt = Replace(xArt, "pc.", vbNullString, , , vbTextCompare)
-Call modArtP(xArt)
+Token = Replace(Token, "pc.", vbNullString, , , vbTextCompare)
+Call modArtParens(Token)
 '//article switches
-If InStr(1, xArt, "-e", vbTextCompare) Then xArt = Replace(xArt, "-e", vbNullString, , , vbTextCompare): P = P & "1" '//check for switch(s)
-If InStr(1, xArt, "-t", vbTextCompare) Then '//check for timer switch
+If InStr(1, Token, "-e", vbTextCompare) Then Token = Replace(Token, "-e", vbNullString, , , vbTextCompare): P = P & "1" '//check for switch(s)
+If InStr(1, Token, "-t", vbTextCompare) Then '//check for timer switch
 Dim xT As String
-xArtArr = Split(xArt, "-t")
-xT = "/t " & xArtArr(1)
+TokenArr = Split(Token, "-t")
+xT = "/t " & TokenArr(1)
 End If
 
 '//Copy & paste a file
-If P = 1 Then xArt = Replace(xArt, "copy&", vbNullString, , , vbTextCompare): xArtArr = Split(xArt, ","): _
-xArt = "copy /y " & xArtArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 1 Then Token = Replace(Token, "copy&", vbNullString, , , vbTextCompare): TokenArr = Split(Token, ","): _
+Token = "copy /y " & TokenArr(0) & " " & TokenArr(1): sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Copy, paste then delete copied file
-If P = 2 Then xArt = Replace(xArt, "copy&!", vbNullString, , , vbTextCompare): xArtArr = Split(xArt, ","): _
-xArt = "copy /y " & xArtArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: If Dir(xArtArr(0)) <> "" Then Kill (xArtArr(0)): Exit Function
+If P = 2 Then Token = Replace(Token, "copy&!", vbNullString, , , vbTextCompare): TokenArr = Split(Token, ","): _
+Token = "copy /y " & TokenArr(0) & " " & TokenArr(1): sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: If Dir(TokenArr(0)) <> "" Then Kill (TokenArr(0)): Exit Function
 '//Shutdown pc
-If P = 3 Then xArt = "shutdown /s " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 3 Then Token = "shutdown /s " & xT: sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Shutdown pc, on next boot auto-sign in if enabled. Restart apps.
-If P = 31 Then xArt = "shutdown /sg " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 31 Then Token = "shutdown /sg " & xT: sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Logoff pc
-If P = 4 Then xArt = "shutdown /l ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 4 Then Token = "shutdown /l ": sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Hibernate pc
-If P = 5 Then xArt = "shutdown /h ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 5 Then Token = "shutdown /h ": sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Restart pc
-If P = 6 Then xArt = "shutdown /r " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 6 Then Token = "shutdown /r " & xT: sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Restart pc, on next boot auto-sign in if enabled. Restart apps.
-If P = 61 Then xArt = "shutdown /g " & xT: sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 61 Then Token = "shutdown /g " & xT: sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//Clear logoff queue
-If P = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, vbNormalFocus): sysShell = vbNullString: Exit Function
+If P = 7 Then Token = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & Token, vbNormalFocus): sysShell = vbNullString: Exit Function
 '//#
 '//
 '/\_____________________________________
@@ -1855,33 +1855,33 @@ If P = 7 Then xArt = "shutdown /a ": sysShell = Shell("cmd.exe /s /c " & xArt, v
 '/\_____________________________________
 '//
 '//q() = File system query
-ElseIf InStr(1, xArt, "q(", vbTextCompare) Then
+ElseIf InStr(1, Token, "q(", vbTextCompare) Then
 
 '//parameters
-If InStr(1, xArt, ".exist", vbTextCompare) Then P = 1: xArt = Replace(xArt, ".exist", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".del", vbTextCompare) Then P = 2: xArt = Replace(xArt, ".del", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".move", vbTextCompare) Then P = 3: xArt = Replace(xArt, ".move", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".name", vbTextCompare) Then P = 4: xArt = Replace(xArt, ".name", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".open", vbTextCompare) Then P = 5: xArt = Replace(xArt, ".open", vbNullString, , , vbTextCompare): GoTo setQ
-If InStr(1, xArt, ".stop", vbTextCompare) Then P = 6: xArt = Replace(xArt, ".stop", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, Token, ".exist", vbTextCompare) Then P = 1: Token = Replace(Token, ".exist", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, Token, ".del", vbTextCompare) Then P = 2: Token = Replace(Token, ".del", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, Token, ".move", vbTextCompare) Then P = 3: Token = Replace(Token, ".move", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, Token, ".name", vbTextCompare) Then P = 4: Token = Replace(Token, ".name", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, Token, ".open", vbTextCompare) Then P = 5: Token = Replace(Token, ".open", vbNullString, , , vbTextCompare): GoTo setQ
+If InStr(1, Token, ".stop", vbTextCompare) Then P = 6: Token = Replace(Token, ".stop", vbNullString, , , vbTextCompare): GoTo setQ
 If P = 0 Then Exit Function
 
 setQ:
 '//switches
-If InStr(1, xArt, "-loose", vbTextCompare) Then xArt = Replace(xArt, "-loose", vbNullString, , , vbTextCompare): S = 1
-If InStr(1, xArt, "-strict", vbTextCompare) Then xArt = Replace(xArt, "-strict", vbNullString, , , vbTextCompare): S = 2
-If InStr(1, xArt, "-file", vbTextCompare) Then xArt = Replace(xArt, "-file", vbNullString, , , vbTextCompare): S = S & 3
-If InStr(1, xArt, "-fldr", vbTextCompare) Then xArt = Replace(xArt, "-fldr", vbNullString, , , vbTextCompare): S = S & 4
+If InStr(1, Token, "-loose", vbTextCompare) Then Token = Replace(Token, "-loose", vbNullString, , , vbTextCompare): S = 1
+If InStr(1, Token, "-strict", vbTextCompare) Then Token = Replace(Token, "-strict", vbNullString, , , vbTextCompare): S = 2
+If InStr(1, Token, "-file", vbTextCompare) Then Token = Replace(Token, "-file", vbNullString, , , vbTextCompare): S = S & 3
+If InStr(1, Token, "-fldr", vbTextCompare) Then Token = Replace(Token, "-fldr", vbNullString, , , vbTextCompare): S = S & 4
 
-xArtArr = Split(xArt, "q(", , vbTextCompare)
-If InStr(1, xArtArr(1), ",") Then xArtArr = Split(xArtArr(1), ","): _
-xArt = xArtArr(0): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(0) = Trim(xArt): xArt = xArtArr(0): _
-xArt = xArtArr(1): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(1) = Trim(xArt): xArt = xArtArr(0) Else: _
-xArt = xArtArr(1): Call modArtP(xArt): Call modArtQ(xArt): xArtArr(1) = Trim(xArt): xArt = xArtArr(1)
+TokenArr = Split(Token, "q(", , vbTextCompare)
+If InStr(1, TokenArr(1), ",") Then TokenArr = Split(TokenArr(1), ","): _
+Token = TokenArr(0): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(0) = Trim(Token): Token = TokenArr(0): _
+Token = TokenArr(1): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(1) = Trim(Token): Token = TokenArr(0) Else: _
+Token = TokenArr(1): Call modArtParens(Token): Call modArtQuotes(Token): TokenArr(1) = Trim(Token): Token = TokenArr(1)
 Set oFSO = CreateObject("Scripting.FileSystemObject")
 Set oDrv = oFSO.GetFolder("C:\") '//set drive (default is C:)
 For Each oSubFldr In oDrv.SubFolders
-If InStr(1, xArt, oSubFldr.Name, vbTextCompare) Then xSubFldr = oSubFldr.Name: GoTo hQ '//check for folder match in drive
+If InStr(1, Token, oSubFldr.name, vbTextCompare) Then xSubFldr = oSubFldr.name: GoTo hQ '//check for folder match in drive
 Next
 
 hQ:
@@ -1889,9 +1889,9 @@ Set oFSO = Nothing
 Set oDrv = Nothing
 Set oSubFldr = Nothing
 
-Call modArtP(xArt): Call modArtQ(xArt)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-QX = xArt
+QX = Token
 Call basQuery(QX, S)
 xQueryArr = Split(QX, ",")
 
@@ -1900,13 +1900,13 @@ If P = 1 Then If xQueryArr(1) = 0 Then MsgBox ("TRUE" & vbNewLine & vbNewLine & 
 '//delete...
 If P = 2 Then Kill (xQueryArr(0)): Exit Function
 '//move...
-If P = 3 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): xArt = "move " & xQueryArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 3 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): Token = "move " & xQueryArr(0) & " " & TokenArr(1): sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString: Exit Function
 '//name...
-If P = 4 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): xArt = "ren " & xQueryArr(0) & " " & xArtArr(1): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 4 Then xQueryArr(0) = Replace(xQueryArr(0), " ", """" & " " & """"): Token = "ren " & xQueryArr(0) & " " & TokenArr(1): sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString: Exit Function
 '//open...
-If P = 5 Then xArt = "start " & xQueryArr(0): sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 5 Then Token = "start " & xQueryArr(0): sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString: Exit Function
 '//stop (taskkill)
-If P = 6 Then xArtArr = Split(xArt, "\"): xArt = xArtArr(UBound(xArtArr)): xArt = "taskkill /f /im " & xArt: sysShell = Shell("cmd.exe /s /c" & xArt, 0): sysShell = vbNullString: Exit Function
+If P = 6 Then TokenArr = Split(Token, "\"): Token = TokenArr(UBound(TokenArr)): Token = "taskkill /f /im " & Token: sysShell = Shell("cmd.exe /s /c" & Token, 0): sysShell = vbNullString: Exit Function
 Exit Function
 '//#
 '//
@@ -1915,64 +1915,64 @@ Exit Function
 '//         UTILITY ARTICLES
 '/\_____________________________________
 '//
-ElseIf InStr(1, xArt, "incr(", vbTextCompare) Then
-xArt = Replace(xArt, "incr(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt)
-If InStr(1, xArt, "+") Then P = 1: xArt = Replace(xArt, "+", vbNullString)
-If InStr(1, xArt, "-") Then P = 2: xArt = Replace(xArt, "-", vbNullString)
-If InStr(1, xArt, "=") Then
-xArtArr = Split(xArt, "=") '//find variable
-xArtArr(0) = Trim(xArtArr(0)): xArtArr(1) = Trim(xArtArr(1))
+ElseIf InStr(1, Token, "incr(", vbTextCompare) Then
+Token = Replace(Token, "incr(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token)
+If InStr(1, Token, "+") Then P = 1: Token = Replace(Token, "+", vbNullString)
+If InStr(1, Token, "-") Then P = 2: Token = Replace(Token, "-", vbNullString)
+If InStr(1, Token, "=") Then
+TokenArr = Split(Token, "=") '//find variable
+TokenArr(0) = Trim(TokenArr(0)): TokenArr(1) = Trim(TokenArr(1))
 
-If P = 1 Then xArtArr(1) = CLng(xArtArr(1)) + CLng(xArtArr(1))
-If P = 2 Then xArtArr(1) = -(CLng(xArtArr(1))) + -(CLng(xArtArr(1)))
+If P = 1 Then TokenArr(1) = CLng(TokenArr(1)) + CLng(TokenArr(1))
+If P = 2 Then TokenArr(1) = -(CLng(TokenArr(1))) + -(CLng(TokenArr(1)))
 
-xArt = xArtArr(0) & "=" & xArtArr(1)
+Token = TokenArr(0) & "=" & TokenArr(1)
 
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 End If
 
-If P = 1 Then xArt = xArt + xArt
-If P = 2 Then xArt = xArt - xArt
+If P = 1 Then Token = Token + Token
+If P = 2 Then Token = Token - Token
 
 Exit Function
 
 '//rnd() = Get a random number
-ElseIf InStr(1, xArt, "rnd(", vbTextCompare) Then
-xArt = Replace(xArt, "rnd(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+ElseIf InStr(1, Token, "rnd(", vbTextCompare) Then
+Token = Replace(Token, "rnd(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-If InStr(1, xArt, ":") Then
+If InStr(1, Token, ":") Then
 
-xArtArr = Split(xArt, "=") '//find variable
-xArtArr(0) = Trim(xArtArr(0)): xArtArr(1) = Trim(xArtArr(1))
+TokenArr = Split(Token, "=") '//find variable
+TokenArr(0) = Trim(TokenArr(0)): TokenArr(1) = Trim(TokenArr(1))
 
 Randomize
-xTempArr = Split(xArtArr(1), ":")
+xTempArr = Split(TokenArr(1), ":")
 
-xArtArr(1) = CLng((xTempArr(1) * Rnd) + xTempArr(0))
+TokenArr(1) = CLng((xTempArr(1) * Rnd) + xTempArr(0))
 
-xArt = xArtArr(0) & "=" & xArtArr(1)
+Token = TokenArr(0) & "=" & TokenArr(1)
 
-If UBound(xArtArr) = 1 Then xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+If UBound(TokenArr) = 1 Then Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 End If
 
 Exit Function
 
 '//sum() = Perform basic mathematics
-ElseIf InStr(1, xArt, "sum(", vbTextCompare) Then
+ElseIf InStr(1, Token, "sum(", vbTextCompare) Then
 
-xArt = Replace(xArt, "sum(", vbNullString, , , vbTextCompare)
-Call modArtP(xArt): Call modArtQ(xArt)
+Token = Replace(Token, "sum(", vbNullString, , , vbTextCompare)
+Call modArtParens(Token): Call modArtQuotes(Token)
 
-xArtArr = Split(xArt, "=") '//find variable
+TokenArr = Split(Token, "=") '//find variable
 
-Workbooks(appEnv).Worksheets(appBlk).Range("xlasBlkAddr138").Value2 = "=SUM(" & xArtArr(1) & ")"
-xArtArr(1) = Workbooks(appEnv).Worksheets(appBlk).Range("xlasBlkAddr138").Value2
+Workbooks(appEnv).Worksheets(appBlk).Range("xlasBlkAddr138").Value2 = "=SUM(" & TokenArr(1) & ")"
+TokenArr(1) = Workbooks(appEnv).Worksheets(appBlk).Range("xlasBlkAddr138").Value2
 
-xArt = xArtArr(0) & "=" & xArtArr(1)
+Token = TokenArr(0) & "=" & TokenArr(1)
 
-xArt = appEnv & ",#!" & xArt & ",#!" & X & ",#!" & 1: Call kinExpand(xArt): Exit Function
+Token = appEnv & "[,]" & Token & "[,]" & X & "[,]" & 1: Call xlasExpand(Token, appEnv, appBlk): Exit Function
 Exit Function
 '//#
 '//
@@ -1982,34 +1982,34 @@ Exit Function
 '/\_____________________________________
 '//
 '//me() = Output current window number (WinForm)
-ElseIf InStr(1, xArt, "me(", vbTextCompare) Then
-xArt = Replace(xArt, "me(", vbNullString, , , vbTextCompare)
+ElseIf InStr(1, Token, "me(", vbTextCompare) Then
+Token = Replace(Token, "me(", vbNullString, , , vbTextCompare)
 
 '//modifiers
-If InStr(1, xArt, "get.", vbTextCompare) Then M = 1: xArt = Replace(xArt, "get.", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "post.", vbTextCompare) Then M = 2: xArt = Replace(xArt, "post.", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "set.", vbTextCompare) Then M = 3: xArt = Replace(xArt, "set.", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "get.", vbTextCompare) Then M = 1: Token = Replace(Token, "get.", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "post.", vbTextCompare) Then M = 2: Token = Replace(Token, "post.", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "set.", vbTextCompare) Then M = 3: Token = Replace(Token, "set.", vbNullString, , , vbTextCompare)
 
 '//switches
-If InStr(1, xArt, "-x", vbTextCompare) Then S = 1: xArt = Replace(xArt, "-x", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "-y", vbTextCompare) Then S = 2: xArt = Replace(xArt, "-y", vbNullString, , , vbTextCompare)
-If InStr(1, xArt, "-pos", vbTextCompare) Then S = 3: xArt = Replace(xArt, "-pos", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "-x", vbTextCompare) Then S = 1: Token = Replace(Token, "-x", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "-y", vbTextCompare) Then S = 2: Token = Replace(Token, "-y", vbNullString, , , vbTextCompare)
+If InStr(1, Token, "-pos", vbTextCompare) Then S = 3: Token = Replace(Token, "-pos", vbNullString, , , vbTextCompare)
 
-Call modArtP(xArt): xArt = Trim(xArt)
-If InStr(1, xArt, ",") Then xArtArr = Split(xArt, ",")
+Call modArtParens(Token): Token = Trim(Token)
+If InStr(1, Token, ",") Then TokenArr = Split(Token, ",")
 
 Select Case True
 Case M = 1 And S = 1: Call basGetWinFormPos(xWin, X, Y): MsgBox (X): Exit Function
 Case M = 1 And S = 2: Call basGetWinFormPos(xWin, X, Y): MsgBox (Y): Exit Function
 Case M = 1 And S = 3: Call basGetWinFormPos(xWin, X, Y): MsgBox (X & ", " & Y): Exit Function
 Case M = 1 And S = 0: Call basGetWinFormPos(xWin, X, Y): MsgBox (X & ", " & Y): Exit Function
-Case M = 2 And S = 1: X = xArt: Call basPostWinFormPos(xWin, X, Y): Exit Function
-Case M = 2 And S = 2: Y = xArt: Call basPostWinFormPos(xWin, X, Y): Exit Function
-Case M = 2 And S = 3: X = xArtArr(0): Y = xArtArr(1): Call basPostWinFormPos(xWin, X, Y): Exit Function
-Case M = 2 And S = 0: X = xArtArr(0): Y = xArtArr(1): Call basPostWinFormPos(xWin, X, Y): Exit Function
-Case M = 3 And S = 1: X = xArt: Call basSetWinFormPos(xWin, X, Y): Exit Function
-Case M = 3 And S = 2: Y = xArt: Call basSetWinFormPos(xWin, X, Y): Exit Function
-Case M = 3 And S = 3: X = xArtArr(0): Y = xArtArr(1): Call basSetWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 1: X = Token: Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 2: Y = Token: Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 3: X = TokenArr(0): Y = TokenArr(1): Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 2 And S = 0: X = TokenArr(0): Y = TokenArr(1): Call basPostWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 1: X = Token: Call basSetWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 2: Y = Token: Call basSetWinFormPos(xWin, X, Y): Exit Function
+Case M = 3 And S = 3: X = TokenArr(0): Y = TokenArr(1): Call basSetWinFormPos(xWin, X, Y): Exit Function
 Case M = 3 And S = 0: Call basSetWinFormPos(xWin, X, Y): Exit Function
 End Select
 '//no excerpt
@@ -2017,163 +2017,163 @@ MsgBox (Range("xlasWinForm").Value2)
 Exit Function
 
     '//winform() = Set window number
-        ElseIf InStr(1, xArt, "winform(", vbTextCompare) Then
+        ElseIf InStr(1, Token, "winform(", vbTextCompare) Then
         
     '//switches
-        If InStr(1, xArt, "-last", vbTextCompare) Then _
+        If InStr(1, Token, "-last", vbTextCompare) Then _
         Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = _
         Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormLast").Value2: Exit Function  '//set to last window
         
-        xArt = Replace(xArt, "winform(", vbNullString, , , vbTextCompare)
-        Call modArtP(xArt): Call modArtQ(xArt)
+        Token = Replace(Token, "winform(", vbNullString, , , vbTextCompare)
+        Call modArtParens(Token): Call modArtQuotes(Token)
         
-        Call xlAppScript_lex.getChar(xArt)
-        If xArt = "*/ERR" Then Exit Function
+        Call xlAppScript_lex.getChar(Token)
+        If Token = "*/ERR" Then Exit Function
         
-        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = xArt
+        Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinForm").Value2 = Token
         
         Exit Function
         
 End If '//end
         
-ErrMsg:
+ErrEnd:
 '//Article not found...
-If errLvl <> 0 Then xArt = xArt & "*/ERR"
-Workbooks(appEnv).Worksheets(appBlk).Range("xlasErrRef").Value = """" & xArt & """"
+If errLvl <> 0 Then Token = Token & "*/ERR"
+Workbooks(appEnv).Worksheets(appBlk).Range("xlasErrRef").Value = """" & Token & """"
 End Function
-Private Function libFlag$(xArt, errLvl As Byte)
+Private Function libFlag$(Token, errLvl As Byte)
 
 '/\_____________________________________
  '//
 '//         FLAGS
 '/\_____________________________________
 '//
-On Error GoTo ErrMsg
+On Error GoTo ErrEnd
 
 Call getEnvironment(appEnv, appBlk)
 
 '//Create runtime error
-If InStr(1, xArt, "--err", vbTextCompare) Then xArt = "*/ERR"
+If InStr(1, Token, "--err", vbTextCompare) Then Token = "*/ERR"
 
 '//Run script w/ environment errors enabled (default)
-If InStr(1, xArt, "--enableerr", vbTextCompare) Then
+If InStr(1, Token, "--enableerr", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasLibErrLvl") = 0
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/ environment errors disabled
-If InStr(1, xArt, "--disableerr", vbTextCompare) Then
+If InStr(1, Token, "--disableerr", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasLibErrLvl") = 1
 Range("xlasEnd").Value = 0
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/ animations/updates disabled (default)
-If InStr(1, xArt, "--disableupdates", vbTextCompare) Then
+If InStr(1, Token, "--disableupdates", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasUpdateEnable") = 0
 Call disableWbUpdates
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/ animations/updates enabled
-If InStr(1, xArt, "--enableupdates", vbTextCompare) Then
+If InStr(1, Token, "--enableupdates", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasUpdateEnable") = 1
 Call enableWbUpdates
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/ libraries statically disabled (default)
-If InStr(1, xArt, "--disablestatic", vbTextCompare) Then
+If InStr(1, Token, "--disablestatic", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasLocalStatic") = 0
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/ libraries statically enabled
-If InStr(1, xArt, "--enablestatic", vbTextCompare) Then
+If InStr(1, Token, "--enablestatic", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasLocalStatic") = 1
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/ clear runtime block addresses (default)
-If InStr(1, xArt, "--disablecontain", vbTextCompare) Then
+If InStr(1, Token, "--disablecontain", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasLocalContain") = 0
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/o clearing runtime block addresses
-If InStr(1, xArt, "--enablecontain", vbTextCompare) Then
+If InStr(1, Token, "--enablecontain", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasLocalContain") = 1
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w/o global control variables
-If InStr(1, xArt, "--disableglobal", vbTextCompare) Then
+If InStr(1, Token, "--disableglobal", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasGlobalControl") = 0
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 '//Run script w global control variables (default)
-If InStr(1, xArt, "--enableglobal", vbTextCompare) Then
+If InStr(1, Token, "--enableglobal", vbTextCompare) Then
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasGlobalControl").Value = 1
 errLvl = 0
-xArt = 1: Exit Function
+Token = 1: Exit Function
 End If
 
 Exit Function
 
-ErrMsg:
+ErrEnd:
 '//flag not found...
-xArt = "*/ERR"
+Token = "*/ERR"
 
 End Function
-Private Function libSwitch$(xArt, errLvl As Byte)
+Private Function libSwitch$(Token, errLvl As Byte)
 
 '/\_____________________________________
  '//
 '//         LIBRARY SWITCHES
 '/\_____________________________________
 '//
-Dim xArtH As String
+Dim ArtH As String
 Dim X As Integer
 
-On Error GoTo ErrMsg
+On Error GoTo ErrEnd
 
-xArtH = xArt
-xArtArr = Split(xArt, "--")
+ArtH = Token
+TokenArr = Split(Token, "--")
 
-For X = 0 To UBound(xArtArr)
-xArt = xArtArr(X): Call modArtP(xArt): Call modArtQ(xArt): Call modArtS(xArt): xArtArr(X) = xArt: xArt = xArtH
-If InStr(1, xArtArr(X), "date", vbTextCompare) Then xArt = Replace(xArt, "--date", Date, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "day", vbTextCompare) Then xArt = Replace(xArt, "--day", Day(Date), , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "present", vbTextCompare) Then xArt = Replace(xArt, "--present", Date & " " & Time, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "me", vbTextCompare) Then xArt = Replace(xArt, "--me", ActiveWorkbook.Name, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "month", vbTextCompare) Then xArt = Replace(xArt, "--month", Month(Date), , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "now", vbTextCompare) Then xArt = Replace(xArt, "--now", Time, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "null", vbTextCompare) Then xArt = Replace(xArt, "--null", vbNullString, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "lparen", vbTextCompare) Then xArt = Replace(xArt, "--lparen", "(", , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "rparen", vbTextCompare) Then xArt = Replace(xArt, "--rparen", ")", , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "quote", vbTextCompare) Then xArt = Replace(xArt, "--quote", """", , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "space", vbTextCompare) Then xArt = Replace(xArt, "--space", Space(0), , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "time", vbTextCompare) Then xArt = Replace(xArt, "--time", Time, , , vbTextCompare): GoTo NextStep
-If InStr(1, xArtArr(X), "year", vbTextCompare) Then xArt = Replace(xArt, "--year", Year(Date), , , vbTextCompare): GoTo NextStep
+For X = 0 To UBound(TokenArr)
+Token = TokenArr(X): Call modArtParens(Token): Call modArtQuotes(Token): Call modArtSpaces(Token): TokenArr(X) = Token: Token = ArtH
+If InStr(1, TokenArr(X), "date", vbTextCompare) Then Token = Replace(Token, "--date", Date, , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "day", vbTextCompare) Then Token = Replace(Token, "--day", Day(Date), , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "present", vbTextCompare) Then Token = Replace(Token, "--present", Date & " " & Time, , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "me", vbTextCompare) Then Token = Replace(Token, "--me", ActiveWorkbook.name, , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "month", vbTextCompare) Then Token = Replace(Token, "--month", Month(Date), , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "now", vbTextCompare) Then Token = Replace(Token, "--now", Time, , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "null", vbTextCompare) Then Token = Replace(Token, "--null", vbNullString, , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "lparen", vbTextCompare) Then Token = Replace(Token, "--lparen", "(", , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "rparen", vbTextCompare) Then Token = Replace(Token, "--rparen", ")", , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "quote", vbTextCompare) Then Token = Replace(Token, "--quote", """", , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "space", vbTextCompare) Then Token = Replace(Token, "--space", Space(0), , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "time", vbTextCompare) Then Token = Replace(Token, "--time", Time, , , vbTextCompare): GoTo NextStep
+If InStr(1, TokenArr(X), "year", vbTextCompare) Then Token = Replace(Token, "--year", Year(Date), , , vbTextCompare): GoTo NextStep
 NextStep:
-xArtH = xArt
+ArtH = Token
 Next
 
 Exit Function
 
-ErrMsg:
+ErrEnd:
 '//switch not found...
-xArt = "*/ERR"
+Token = "*/ERR"
 
 End Function
 Private Function basWasteTime(ByVal T As Byte) As Byte
@@ -2240,7 +2240,7 @@ Public Function basGetWinFormPos(ByVal xWin As Object, X, Y) As Integer
 '///########################\\\
 On Error Resume Next
 
-If xWin.Name = vbNullString Then Call getWindow(xWin)
+If xWin.name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then X = xWin.Left
 If Y = 0 Then Y = xWin.Top
 Set xWin = Nothing
@@ -2255,7 +2255,7 @@ Call getEnvironment(appEnv, appBlk)
 
 On Error Resume Next
 
-If xWin.Name = vbNullString Then Call getWindow(xWin)
+If xWin.name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then X = xWin.Left
 If Y = 0 Then Y = xWin.Top
 Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 = X
@@ -2272,7 +2272,7 @@ Call getEnvironment(appEnv, appBlk)
 
 On Error Resume Next
 
-If xWin.Name = vbNullString Then Call getWindow(xWin)
+If xWin.name = vbNullString Then Call getWindow(xWin)
 If X = 0 Then xWin.Left = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormX").Value2 Else xWin.Left = X
 If Y = 0 Then xWin.Top = Workbooks(appEnv).Worksheets(appBlk).Range("xlasWinFormY").Value2 Else xWin.Top = Y
 Set xWin = Nothing
@@ -2515,7 +2515,7 @@ Q_MATCH = 0
 xDrvArr = Split(QX, ":")
 xDrv = xDrvArr(0)
 '//check if drive exists
-On Error GoTo ErrMsg
+On Error GoTo ErrEnd
 Set oDir = oFSO.GetFolder(xDrv & ":\") '//will error if can't find
 
 '//breakdown base folder
@@ -2557,20 +2557,20 @@ qFldr:
 '//
 '//Query for folder...
 For Each oSubFldr In oDir.SubFolders
-QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
+QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
 If oFSO.FolderExists(QX) = True Then GoTo qFound
 
 '//loose match
-If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
+If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
 '//strict match
-If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
+If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
 Next
 
 Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase)
 
 '//search through local base drive directories
     For Each oSubFldr In oDir.SubFolders
-    QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
+    QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
     If Dir(QX) <> "" Then
     GoTo qFound
         Else: GoTo searchLocalFol
@@ -2583,16 +2583,16 @@ Set oLastDir = oDir
 For Each oSubFldr1 In oLastDir.SubFolders
 
 '//search through folders in local base drive directories
-Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.Name)
+Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.name)
 
                 For Each oSubFldr In oDir.SubFolders
                 QX = oSubFldr & "\" & xFind '//set query search to next folder
                 If oFSO.FolderExists(QX) = True Then GoTo qFound
                 
                 '//loose match
-                If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
+                If Q_MATCH = 1 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbTextCompare) Then QX = oSubFldr: GoTo qFound
                 '//strict match
-                If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.Name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
+                If Q_MATCH = 2 Then If oSubFldr <> Empty Then If InStr(1, oSubFldr.name, xFind, vbBinaryCompare) Then QX = oSubFldr: GoTo qFound
                 Next
                     Next
                     
@@ -2600,7 +2600,7 @@ Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.Name)
                         Else: GoTo qFound
                         
                         
-                                GoTo ErrMsg: '//nothing found
+                                GoTo ErrEnd: '//nothing found
                                 
                                                                 
 '/#########################\
@@ -2611,14 +2611,14 @@ Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.Name)
 qFile:
 
 For Each oSubFldr In oDir.SubFolders
-QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
+QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
 If oFSO.FileExists(QX) = True Then GoTo qFound
 
 '//loose match
 If Q_MATCH = 1 Then
 If oSubFldr <> Empty Then
     For Each oFile In oSubFldr.Files
-      If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
+      If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
             Next
                 End If
                     End If
@@ -2627,7 +2627,7 @@ If oSubFldr <> Empty Then
 If Q_MATCH = 2 Then
 If oSubFldr <> Empty Then
     For Each oFile In oSubFldr.Files
-      If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
+      If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
             Next
                 End If
                     End If
@@ -2637,7 +2637,7 @@ Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase)
 
 '//search through local base drive directories
     For Each oSubFldr In oDir.SubFolders
-    QX = xDrv & ":\" & xBase & "\" & oSubFldr.Name & "\" & xFind '//set query search to next folder
+    QX = xDrv & ":\" & xBase & "\" & oSubFldr.name & "\" & xFind '//set query search to next folder
     If Dir(QX) <> "" Then
     GoTo qFound
         Else: GoTo searchLocalFil
@@ -2650,7 +2650,7 @@ Set oLastDir = oDir
 For Each oSubFldr1 In oLastDir.SubFolders
 
 '//search through folders in local base drive directories
-Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.Name)
+Set oDir = oFSO.GetFolder(xDrv & ":\" & xBase & "\" & oSubFldr1.name)
 
 For Each oSubFldr In oDir.SubFolders
 QX = oSubFldr & "\" & xFind '//set query search to next folder
@@ -2660,7 +2660,7 @@ If oFSO.FileExists(QX) = True Then GoTo qFound
 If Q_MATCH = 1 Then
 If oSubFldr <> Empty Then
   For Each oFile In oSubFldr.Files
-    If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
+    If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbTextCompare) Then QX = oFile.Path: GoTo qFound
           Next
               End If
                   End If
@@ -2669,7 +2669,7 @@ If oSubFldr <> Empty Then
 If Q_MATCH = 2 Then
 If oSubFldr <> Empty Then
     For Each oFile In oSubFldr.Files
-    If oFile <> Empty Then If InStr(1, oFile.Name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
+    If oFile <> Empty Then If InStr(1, oFile.name, xFind, vbBinaryCompare) Then QX = oFile.Path: GoTo qFound
         Next
             End If
                 End If
@@ -2677,7 +2677,7 @@ If oSubFldr <> Empty Then
                         Next
                             Next
                     
-                        GoTo ErrMsg: '//nothing found
+                        GoTo ErrEnd: '//nothing found
                                
                                
 '//Found our query!
@@ -2689,7 +2689,7 @@ Exit Function
 End If
     End If
 
-ErrMsg:
+ErrEnd:
 Err.Clear
 Set fso = Nothing: Set oDir = Nothing: Set oLastDir = Nothing: Set SubFldr = Nothing: Set oSubFldr1 = Nothing
 QX = QX & "," & 1
@@ -3267,461 +3267,4 @@ Application.ScreenUpdating = True
 Application.Calculation = xlAutomatic
 
 End Function
-
-'//=========================================================================================================================
-'//
-'//         CHANGE LOG
-'/\_________________________________________________________________________________________________________________________
-'
-'
-' Version 1.1.4
-'
-' [ Date: 12/18/2022 ]
-'
-' (1): Added "hash()" article for hashing & verifying hashed text strings
-'
-' Article switches:
-'
-' -binary1 = create/verify using a basic DIY binary hashing algorithm (unsafe!)
-'
-'
-' [ Date: 12/16/2022 ]
-'
-' (1): Added "conv32()" article for converting 32-bit signed (-2,147,483,648 <-> 2,147,483,647) integer values to binary (2's complement).
-'
-' Article switches:
-'
-' -8bit = set return value as 8-bit binary
-' -16bit = set return value as 16-bit binary
-' -32bit = set return value as 32-bit binary
-'
-'
-' ***If no switch specified conversion will be returned as 16-bit binary
-'
-' (Keep in mind returning 32-bit will not print all points of precision to the worksheet!)
-'
-'
-' Version 1.1.3
-'
-' [ Date: 8/10/2022 ]
-'
-' (1): Added "shell32()" article for envoking shell32 API library functions
-'
-' Parameters:
-'
-' .execute = perform operation on file
-' .namespace = get folder information
-' .information = get system information
-'
-' (2): Changed "wastetime()" base article to "delayevent()"
-'
-' [ Date: 8/11/2022 ]
-'
-' (1): Added "-xlas" switch to "run()" article for parsing, & exectuing a .xlas script file
-'
-'
-'
-' Version 1.1.2
-'
-' [ Date: 7/26/2022 ]
-'
-' (1): Fixed issue w/ "lptrim()" & "rptrim()" articles triggering the "ptrim()" article b/c of similiarities in name
-'
-' (2): Changed "wb()" parameters...
-'
-'  wb().add --> wb().addsheet
-'  wb().addafter --> wb().addsheetafter
-'  wb().addbefore --> wb().addsheetbefore
-'  wb().new --> wb().newbook
-'  wb().nwin --> wb().newwin
-'
-'
-' [ Date: 6/28/2022 ]
-'
-' (1): Changes to various lexer functions were reflected
-'
-'
-' Version 1.1.1
-'
-' [ Date: 6/7/2022 ]
-'
-' (1): Added "sum()" article for performing mathematic operations
-'
-' Example(s):
-'
-' @x=sum(1+1); <-- Equals '2'
-' @x=sum(1*10); <-- Equals '10'
-' @x=sum(((1+1)/1)*5); <-- Equals '10'
-'
-' Version 1.1.0
-'
-' [ Date: 5/12/2022 ]
-'
-' (1): Associating names/syntax for xlAppScript parameters are now ".param" & modifiers "mod."
-'
-' Changes to variables/titling were made to reflect.
-'
-' (2): Added "get.", "post.", & "set." modifiers to "me()" article for retrieving, updating, & modifying X & Y coordinates for the currently
-' active WinForm.
-'
-' ---> "-x", "-y", & "-pos" switches for assigning arguments to a specific position or both using "-pos"
-'
-'
-' Version 1.0.9
-'
-' [ Date: 5/4/2022 ]
-'
-' (1): Added ".value2" parameter to "rng()", "sel()" & "cell()" articles
-'
-' This method is slightly more efficient than using ".value" for dealing w/ cell values (not including 'Date' cell types)
-'
-' (2): Adjusted parsing properties in "rng().value", "sel().value" & "cell().value" & ".value2" variations to accept a null
-' value for clearing a cell.
-'
-'
-' Version 1.0.8
-'
-' [ Date: 4/24/2022 ]
-'
-'      /``.
-'     []
-'   _[__]_
-'  [______]
-' [________] Happy Birthday André! :)
-'
-'
-'
-'
-' (1): Fixed "q().stop" article not parsing the application extracted to stop
-'
-'
-' [ Date: 4/23/2022 ]
-'
-' (1): added "--time" switch for getting the current time as a string
-'
-'
-'
-' [ Date: 4/21/2022 ]
-'
-'
-' (1): Added extended syntax functionality for "cell()", "rng()", & "sel()" article parameters
-'
-' These article parameters can now be typed like:
-'
-' cell(1,1).value @var; or cell(1,1).value(@var);
-'
-' rng(a1).bgcolor @var1 .fcolor @var2; or rng(a1).bgcolor(@var1).fcolor(@var2);
-'
-' (2): fixed issues w/ "rng().read" sequence not returning range values
-'
-' (3): Prefixed library functions w/ "bas"
-'
-' (4): Added "--enableerr" & "--disableerr" flags for setting the library error level
-'
-' (5): Added ".move" parameter for "q()" article to query & move files/folders
-'
-'
-'
-' Version: 1.0.7
-'
-'
-' [ Date: 4/18/2022 ]
-'
-' (1): Added "--enableglobal" & "--disableglobal" flags for triggering Global Control variables active/inactive
-'
-'
-' [ Date: 4/17/2022 ]
-'
-'
-' (1): Added "-loose" & "-strict" switch to "q()" article for finding binary or text string match to file/folder path provided if an
-' exact not found.
-'
-' (2): Added "-file" & "-fldr" switches to "q()" article for assiging query search as a file or folder
-'
-'
-' [ Date: 4/15/2022 ]
-'
-' (1): Added "click()" article for assigning mouse clicks/positioning
-'
-' Example(s):
-'
-' click(-double 500,500); <--- this will double click at positon 500,500 on the screen
-' click(-leftdown 500,500); <--- this will left click and hold at positon 500,500 on the screen
-'
-'
-' Version: 1.0.6
-'
-' [ Date: 4/3/2022 ]
-'
-' (1): Added "read()" article for capturing file text
-'
-' Article switches:
-'
-' -all = read all file text
-' -nlall = read all file text & seperate each line
-' -string = read first occurence of file text w/ this string only
-' -xstring = read all file text until first occurence of this string
-' -nlstring = read all file text until first occurence of this string & seperate each line
-' -line = read this line of file text only
-' -xline = read all file text until this line
-' -nlline = read all file text until this line & seperate each line
-'
-' ***Example:
-'
-' read(-all @filePath); <--- This will read all file text w/o seperating each line
-' read(-string @findStr, @filePath); <--- This will read all file text up until a string is found & return that line
-' read(-nlstring @findStr, @filePath); <--- This will read all file text up until a string is found & return everything up until then
-' w/ each line seperated
-' read(-line 5, @filePath); <--- This will read line 5 of the file text
-'
-'
-' [ Date: 4/2/2022 ]
-'
-' (1): Modified "msg()" article to return input selection value to a variable
-'
-' (2): Added "incr()" article to allow holding an incremented number based on an assigned value & operation.
-'
-' ***Example: @var = incr(+1); = 2 | @var = incr(-1) = -2 (These values will stay the same if looped through)
-'
-'
-'
-' [ Date: 4/1/2022 ]
-'
-' (1): Fixed issue w/ "rng().read" command causing an error
-'
-' (2): Made adjustments to "input()" article so its possible to return user input to a variable
-'
-' (3): Added ".sel" parameter to "rng()" & "cell()" articles
-'
-'
-'
-'
-' Version: 1.0.5
-'
-' [ Date: 3/17/2022 ]
-'
-' (1): Added "--enablecontain" & "--disablecontain" flags for setting "Local Contain" on/off
-' ***Local Contain allows previously used runtime memory addresses to retain their data
-'
-' [ Date: 3/13/2022 ]
-'
-' (1): Added "--enablestatic" & "--disablestatic" flags for setting "Local Static" on/off
-' ***Local Static allows libraries to stay locked to the current runtime environment session.
-'
-' [ Date: 3/11/2022 ]
-'
-' (1): Added base articles "build()", "printer()", & "name()" & respective enhanced
-' "app.build()", "app.printer()", & "app.name()" articles
-'
-' (2): Added "cell()" article for analyzing/modifying cells
-'
-'
-' [ Date: 3/9/2022 ]
-'
-' (1): Added "fil()" & "dir()" articles & reworked them to include modifiers "mk." & "del."
-'
-'
-' [ Date: 3/8/2022 ]
-'
-' (1): Added "rng().name" & "sel().name" articles for setting cell names
-' ***You can alternatively clear a cell name by leaving it blank
-'
-' (2): Added "wb().delname" article for deleting a specific cell name
-'
-' (3): Added "-me" switch to "wb()" article for expanding the workbook name at runtime
-'
-'
-'
-' Version: 1.0.4
-'
-'
-' [ Date: 3/2/2022 ]
-'
-' (1): Added "ptrim()" article to deal w/ removing the starting & ending parentheses of a string.
-'
-' (2): Added "wastetime()" article to halt the parser while still allowing for user input as oppossed to the "wait()"
-' article which halts the parser but also freezes the environment.
-'
-'***Even though the environment becomes frozen, the "wait()" article is more precise than the wastetime() article for time
-'
-' wastetime(100) = approx. 1 second | wastetime(1000) = approx. 10 seconds
-'
-' (3): Updated "winform()" article to include "-last" switch for setting the last WinForm as the current
-'
-'
-' [ Date: 3/1/2022 ]
-'
-' (1): Added "echo()" & "host()" articles.
-'
-' echo() = output string using cmd host | host() = output string using vba host (msgbox)
-'
-' ***echo() supports different window focuses by supplying a value from (0-6) ---> echo(2)(@strToShow); <--- maximized view
-'
-' (2): Added "conv()" & "xtrim()" articles.
-'
-' conv(@str, -upper); = convert char or string to a desired case (uppercase, lowercase, etc.)
-'
-' xtrim(@str, ":"); = remove first & last characters from string by a desired character
-'
-' (3): Added "lptrim", "rptrim()" & "qtrim()" articles (due to trim() article removing parentheses & quotations during parsing).
-'
-' lptrim(@str); = remove first & last left facing parentheses from a string
-'
-' rptrim(@str); = remove first & last right facing parentheses from a string
-'
-' qtrim(@str); = remove first & last quotes from a string
-'
-' (4): Added "strrev()" article to reverse strings
-'
-' strrev(@str); <--- string will be backwards
-'
-'
-' [ Date: 2/28/2022 ]
-'
-' (1): Updated library to utilize article cleaning function within lexer
-'
-' (2): Included additional updates made to lexer as well as addition of the "runtime block"
-'
-'
-'
-'
-' Version: 1.0.3
-'
-' [ Date: 2/26/2022 ]
-'
-' (1): Fixed issue w/ "wb().hd" & "wb().sh" articles not parsing w/ correct syntax
-'
-' [ Date: 2/24/2022 ]
-'
-' (1): Added "++e"  & "--e" switches for control over enabling/disabling workbook updates during runtime
-'
-'
-' [ Date: 2/23/2022 ]
-'
-' (1): Removed "colors.txt" file & instead created a function that essentially acts the same way where a color is searched
-' for within a list of color name/hex/rgb values.
-'
-'
-' [ Date: 2/10/2022 ]
-'
-' (1): Fixed an issue w/ key() article leaving leading & ending quotations on the supplied keystroke when parsed.
-'
-'
-' [ Date: 2/8/2022 ]
-'
-' (1): Changed "WINDOW FORM ARTICLES" labeling to "WINFORM ARTICLES"
-'
-' (2): Changed "form()" article to "winform()" for readability.
-'
-'
-' [ Date: 2/5/2022 ]
-'
-' (1): Added "form()" article to "xbas" library for manually setting an application Window
-'
-'
-' Version: 1.0.2
-'
-'
-' [ Date: 1/31/2022 ]
-'
-' (1) Fixed issue w/ key() article leaving "key" in output
-'
-'
-'
-' Version: 1.0.1
-'
-'
-' [ Date: 1/6/2022 ]
-'
-' (1) Added "ins()" article to find a char/string within another string/variable
-'
-' ***Will return "TRUE" or "FALSE"  to the assigned variable based on if the char/string searched for was found or not
-'
-' Syntax: @var = ins(@startPosition, @strToSearch, @strToFind, @compType)
-'
-' (2) Added "app.run(") or simply the "run()" article to allow for running a module within an opened workbook
-'
-' ***Currently only supports a single listed (,) argument
-'
-' Syntax: app.run(moduleName.subName, (arg)); also run(moduleName.subName, arg);
-'
-' (3) Added pc power articles as well as a copy-paste articles
-'
-' ***pc.shutdown & pc.reboot articles accept the "-e" switch for auto logging in & bringing up the
-' previous session on start-up, & "-t" for setting a timer before shutdown.
-'
-' pc.copy&() = copy & paste file or folder
-' pc.copy&!() = copy, paste, & delete copied file or folder
-' pc.shutdown() = shutdown pc
-' pc.off() = logoff
-' pc.rest() = set pc to rest mode
-' pc.reboot() = restart pc
-' pc.clr = clear shutdown queue
-'
-'
-'
-' [ Date: 1/5/2022 ]
-'
-' [ Edited: 5/4/2022 ]
-'
-' (1) Added "repl()" article to replace a value within a string
-'
-' Syntax: @var = repl(@strToReplace, @strToFind, @strToReplace, @compType)
-'
-' ***If using 3 arguments like: @var = repl(@strToReplace, @strToFind, @strToReplace) the default comparison method
-' will be binary.
-'
-'
-' (2) Added "dfil()" & "ddir()" articles to delete files/folders
-'
-' ***ddir() will only delete a directory if it's completely empty, so in that instance you could
-' use the del.dir() article instead to remove everything.
-'
-'
-'
-' [ Date: 1/4/2022 ]
-'
-' (1): Changed all replace & string check commands for articles to ignore case
-'
-' ***User can type sh( or SH(, q(, or Q(, etc. & that will be accepted as the same article
-'
-'
-' [ Date: 1/3/2022 ]
-'
-' (1): Added "q()" article which allows the user to query search either a file or folder (depending on the (.)extension.
-' W/ this command you can check for the existance, open, delete, or taskkill a file/folder.
-'
-' ***q() command is able to search through a total of 3 sets of directories starting from a local drive & base folder.
-'
-' User only needs to include the drive & base folder.
-'
-' Examples of drive & base folder:
-' C:\Users\ <----
-' C:\Windows\ <----
-'
-' Syntax: q(C:\Users\@fileToQuery).exists (this will prompt whether a file exists or not & it's location)
-'
-'
-' [ Date: 1/2/2022 ]
-'
-' (1): Added change log, license information & library requirements. Edited library description.
-'
-' (2): Adjusted "key()" article so it could be split into 7 locations & variables based on a numbered reference (0-6)
-' This helped stop collisions w/ VBA, & VBS when the VBA parser ran quicker than the variable was released from the previous run
-'
-' (You'd likely only come across this issue when trying to run consecutive key() articles w/o using a wait() offset in-between).
-'
-' ***Numbered references will also be attributed to a corresponding VBA shell mode (0-6) when ran
-'
-' (3): Shell mode can now be set for sh() article (shell modes (0-6) will correspond w/ the same VBA shell modes (0-6)).
-'
-' (4): When opening, activating, & "saving as" a workbook, the application environment will be linked to that workbook.
-' (This helped w/ navigating back to the original application environment when performing those actions due to the newly
-' opened, activated, or saved workbook now being the one activated)
-'
-' ***Linking is simply just relaying to the same cell (memory location), name ("xlasEnvironment"), & value (current runtime environment) to the currently
-' activated workbook.
-'
-
-
 
